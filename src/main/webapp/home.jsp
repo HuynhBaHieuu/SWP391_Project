@@ -15,5 +15,6 @@
     </head>
     <body>
         <%@ include file="../design/header.jsp" %>
+        <jsp:include page="/WEB-INF/jsp/partials/footer.jsp"/>
     </body>
 </html>

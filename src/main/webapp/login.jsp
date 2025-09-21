@@ -197,5 +197,6 @@
     });
   })();
 </script>
+<jsp:include page="/WEB-INF/jsp/partials/footer.jsp"/>
 </body>
 </html>
