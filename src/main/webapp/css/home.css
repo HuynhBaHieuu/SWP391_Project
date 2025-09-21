@@ -1,0 +1,167 @@
+body{
+    font-family: Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.43;
+    color: #222222;
+    background-color: #fff;
+    margin: 0;
+    font-synthesis: none;
+}
+.header{
+    position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;              /* chiếm toàn bộ chiều ngang */
+  z-index: 999;             /* nổi lên trên cùng */
+    background-color: #FBFBFB;
+    padding: 30px 0;
+    flex-wrap: wrap;
+    border-bottom: solid 1px lightgray;
+    box-shadow: 0 6px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+.header-top{
+    display: flex;
+    max-width: 1820px;
+    margin: 0 auto;
+    justify-content: space-between;
+    align-items:  center
+}
+.menu{
+    display: flex;
+    gap: 40px;
+}
+.menu a{
+    display: flex;
+    gap: 5px;
+    align-items:  center;
+    text-decoration: none;
+    color: #777777;
+    font-size: 17px;
+}
+.menu a img {
+  transition: transform 0.3s ease;
+}
+.menu a:hover img {
+  transform: scale(1.2); 
+}
+.menu a:hover span:last-child {
+  color: black;
+  font-weight: bold;
+}
+.menu a:hover {
+  box-shadow: 0px 3px rgba(0,0,0,1);
+}
+.profile{
+    display: flex;
+    gap: 15px;
+}
+.profile-host{
+    height: 40px;
+    border-radius: 20px;
+    border: #FBFBFB;
+    background-color: #FBFBFB;
+    font-weight: bold;
+}
+.profile-icon{
+    display: flex;
+    align-items: center;  
+    justify-content: center; 
+    height: 40px;
+    width: 40px;
+    border-radius: 20px;
+    border: lightgray;
+    background-color: lightgray;
+}
+.profile-host:hover{
+    background-color: lightgray;
+}
+.profile-icon:hover{
+    background-color: #999999;
+}
+
+.header-bottom {
+  display: flex;
+  align-items: center;
+  border-radius: 50px;
+  background: #fff;
+  box-shadow: 0 7px 13px rgba(0,0,0,0.15);
+  margin: 0 auto;
+  max-width: 800px;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  overflow: hidden; /* để hover nền bo góc không bị tràn */
+}
+
+.header-bottom > div {
+  position: relative;
+  padding: 0 20px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+}
+
+/* gạch phân cách giữa các ô */
+.header-bottom > div:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background: #ddd;
+}
+
+/* nội dung bên trong filter */
+.each-search-filter {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.search-filter {
+  font-weight: bold;
+}
+.search-filter-sub {
+  color: #777;
+}
+
+/* hiệu ứng hover */
+.header-bottom > div:hover {
+  background: #f2f2f2;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+/* nút tìm kiếm */
+.header-bottom button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  width: 50px;
+  border: none;
+  background: #ff385c;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-left: 63px;
+}
+.header-bottom button:hover {
+  background-color: #E41D5B;
+}
+/*Trạng thái header thu nhỏ khi cuộn xuống*/
+.header.shrink {
+  padding: 25px 0;          /* thu nhỏ lại */
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+.header.shrink img {
+  transition: width 0.3s ease;
+}
+/* Ẩn header-bottom khi cuộn xuống */
+.header.shrink .header-bottom {
+  display: none;
+}
