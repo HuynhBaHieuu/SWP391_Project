@@ -15,5 +15,11 @@
     </head>
     <body>
         <%@ include file="../design/header.jsp" %>
+        <main style="margin-top: 120px;">
+            <!-- Nội dung chính ở đây -->
+            <h1>Chào mừng đến với Go2BnB!</h1>
+            <p>Đây là trang chủ. Thêm nội dung ở đây...</p>
+        </main>
+        <%@ include file="../design/footer.jsp" %>
     </body>
 </html>

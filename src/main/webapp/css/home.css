@@ -8,7 +8,7 @@ body{
     font-synthesis: none;
 }
 .header{
-    position: fixed;
+/*    position: fixed;*/
   top: 0;
   left: 0;
   width: 100%;              /* chiếm toàn bộ chiều ngang */
