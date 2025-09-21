@@ -13,7 +13,7 @@
             <!--header top-->
             <div class="header-top">
                 <!-- logo -->
-                <a class="" aria-label="Trang chủ" href="index.html" style="">
+                <a class="" aria-label="Trang chủ" href="home.jsp" style="">
                 <img src="image/logo.jpg" alt="logo" width="100" style="display:block;">
                 </a>
 

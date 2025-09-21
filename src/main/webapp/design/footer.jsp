@@ -1,9 +1,9 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/footer.css"/>
 
 <footer class="ab-footer" role="contentinfo">
   <!-- Hàng tiêu đề giống ảnh -->
-  <div class="ab-footer__heading container">
+<!--  <div class="ab-footer__heading container">
     <h2>Nguồn cảm hứng cho những kỳ nghỉ sau này</h2>
     <div class="arrows" aria-hidden="true">
       <button class="arrow-btn" type="button" title="Trước">
@@ -13,7 +13,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
-  </div>
+  </div>-->
 
   <!-- Lưới 3 cột liên kết -->
   <div class="ab-footer__links container">
