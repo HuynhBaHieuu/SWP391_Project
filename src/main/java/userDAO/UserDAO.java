@@ -78,33 +78,6 @@ public class UserDAO {
     /**
      * Đăng ký tài khoản mới
      */
-//    public User createUser(String fullName, String email, String plainPassword, String phone, String role) throws SQLException {
-//        if (emailExists(email)) {
-//            throw new SQLIntegrityConstraintViolationException("Email đã tồn tại: " + email);
-//        }
-//
-//        String hash = PasswordUtil.hash(plainPassword);
-//        String sql
-//                = "INSERT INTO Users (FullName, Email, PasswordHash, PhoneNumber, Role, IsHost, IsAdmin, IsActive, CreatedAt)\n"
-//                + "VALUES (?, ?, ?, ?, ?, 0, 0, 1, GETDATE())";
-//
-//        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-//            ps.setString(1, fullName);
-//            ps.setString(2, email);
-//            ps.setString(3, hash);
-//            ps.setString(4, phone);
-//            ps.setString(5, role);
-//
-//            ps.executeUpdate();
-//
-//            try (ResultSet rs = ps.getGeneratedKeys()) {
-//                if (rs.next()) {
-//                    return findById(rs.getInt(1));
-//                }
-//            }
-//        }
-//        return findByEmail(email);
-//    }
     public User createUser(String fullName,
             String email,
             String plainPassword,
@@ -183,6 +156,63 @@ public class UserDAO {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? mapRow(rs) : null;
+            }
+        }
+    }
+    public void savePasswordResetToken(int userId, String token) throws SQLException {
+        String sql = "INSERT INTO PasswordResetTokens (UserID, Token, Expiration) "
+                + "VALUES (?, ?, DATEADD(HOUR, 1, GETDATE()))";  // Token hết hạn sau 1 giờ
+
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, token);
+            ps.executeUpdate();
+        }
+    }
+    public boolean validateResetToken(String token) throws SQLException {
+        String sql = "SELECT TokenID FROM PasswordResetTokens "
+                + "WHERE Token = ? AND Expiration > GETDATE()";
+
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, token);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();  // Nếu tìm thấy token hợp lệ thì trả về true
+            }
+        }
+    }
+    
+    public boolean resetPassword(String token, String newPassword) throws SQLException {
+        // Kiểm tra token hợp lệ
+        String sqlTokenValidation = "SELECT UserID FROM PasswordResetTokens WHERE Token = ? AND Expiration > GETDATE()";
+
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sqlTokenValidation)) {
+            ps.setString(1, token);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int userId = rs.getInt("UserID");
+
+                    // Hash mật khẩu mới trước khi lưu
+                    String hashedPassword = PasswordUtil.hash(newPassword);
+
+                    // Cập nhật mật khẩu mới trong bảng Users
+                    String sqlUpdatePassword = "UPDATE Users SET PasswordHash = ? WHERE UserID = ?";
+                    try (PreparedStatement psUpdate = con.prepareStatement(sqlUpdatePassword)) {
+                        psUpdate.setString(1, hashedPassword);
+                        psUpdate.setInt(2, userId);
+                        psUpdate.executeUpdate();
+                    }
+
+                    // Xóa token sau khi sử dụng để tránh lạm dụng
+                    String sqlDeleteToken = "DELETE FROM PasswordResetTokens WHERE Token = ?";
+                    try (PreparedStatement psDelete = con.prepareStatement(sqlDeleteToken)) {
+                        psDelete.setString(1, token);
+                        psDelete.executeUpdate();
+                    }
+
+                    return true;  // Cập nhật mật khẩu thành công
+                } else {
+                    return false;  // Token không hợp lệ hoặc đã hết hạn
+                }
             }
         }
     }

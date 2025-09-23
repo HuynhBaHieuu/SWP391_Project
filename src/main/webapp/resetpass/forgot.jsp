@@ -3,7 +3,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Đăng nhập</title>
+  <title>Quên mật khẩu</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
@@ -137,34 +137,25 @@
     <!-- RIGHT: form -->
     <div class="pane">
       <div class="tabs">
-        <a class="tab active" href="<%=request.getContextPath()%>/login">Đăng nhập</a>
+        <a class="tab" href="<%=request.getContextPath()%>/login">Đăng nhập</a>
         <a class="tab" href="<%=request.getContextPath()%>/register">Đăng Ký</a>
-        <a class="tab" href="<%=request.getContextPath()%>/forgot">Quên mật khẩu</a>
+        <a class="tab active" href="<%=request.getContextPath()%>/forgot">Quên mật khẩu</a>
       </div>
 
-      <h1>Chào mừng trở lại 👋</h1>
-      <p class="sub">Đăng nhập bằng email và mật khẩu, hoặc dùng Google.</p>
+      <h1>Quên mật khẩu?</h1>
+      <p class="sub">Nhập email của bạn để nhận hướng dẫn đặt lại mật khẩu.</p>
 
-      <% 
-         String error = (String) request.getAttribute("error");
-         if (error == null) { error = request.getParameter("err"); }
-         String msg = request.getParameter("msg");
-         if (msg != null && !msg.isEmpty()) { %>
-        <div class="error" style="background:#ecfeff; color:#155e75; border-color:#a5f3fc"><%= msg %></div>
-      <% } 
-         if (error != null && !error.isEmpty()) { %>
+      <% String error = (String) request.getAttribute("error");
+         if (error != null) { %>
         <div class="error"><%= error %></div>
       <% } %>
 
-      <form method="post" action="<%= request.getContextPath() %>/login" novalidate>
+      <form method="post" action="<%= request.getContextPath() %>/forgot" novalidate>
         <label for="email">Email</label>
         <input class="input" type="email" id="email" name="email" placeholder="you@example.com" required>
 
-        <label for="password">Mật khẩu</label>
-        <input class="input" type="password" id="password" name="password" placeholder="••••••••" required>
-
         <div style="height:10px"></div>
-        <button class="btn btn-primary" type="submit">Đăng nhập</button>
+        <button class="btn btn-primary" type="submit">Gửi yêu cầu reset mật khẩu</button>
 
         <div class="or">hoặc</div>
 
@@ -181,8 +172,7 @@
         </a>
 
         <div class="row-links">
-          <a href="<%=request.getContextPath()%>/register">Tạo tài khoản mới</a>
-          <a href="<%=request.getContextPath()%>/forgot">Quên mật khẩu?</a>
+          <a href="<%=request.getContextPath()%>/login">Đã nhớ mật khẩu? Đăng nhập</a>
         </div>
       </form>
     </div>
@@ -195,10 +185,9 @@
     const form = document.querySelector('form');
     form.addEventListener('submit', function (e) {
       const email = form.email.value.trim();
-      const pass = form.password.value.trim();
-      if (!email || !pass) {
+      if (!email) {
         e.preventDefault();
-        alert("Vui lòng nhập email và mật khẩu");
+        alert("Vui lòng nhập email");
       }
     });
   })();
