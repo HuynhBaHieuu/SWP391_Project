@@ -16,9 +16,9 @@ public class EmailUtil {
         // Hardcode Gmail SMTP settings cho dễ sử dụng
         final String smtpHost = "smtp.gmail.com";
         final String smtpPort = "587";
-        final String smtpUser = "huynhbahieu456@gmail.com";
-        final String smtpPass = "cjprjekjkhucinru"; // App Password
-        final String fromEmail = "huynhbahieu456@gmail.com";
+        final String smtpUser = "giabao310305@gmail.com";
+        final String smtpPass = "tyslhyzgeoapedrq"; // App Password
+        final String fromEmail = "giabao310305@gmail.com";
         //
 
         Properties props = new Properties();
