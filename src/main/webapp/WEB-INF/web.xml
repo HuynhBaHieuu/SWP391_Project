@@ -9,27 +9,6 @@
         </session-timeout>
     </session-config>
     <welcome-file-list>
-        <welcome-file>login.jsp</welcome-file>
+        <welcome-file>auth.html</welcome-file>
     </welcome-file-list>
-    
-    <!-- Servlet for ForgotPasswordController -->
-    <servlet>
-        <servlet-name>ForgotPasswordController</servlet-name>
-        <servlet-class>controller.ForgotPasswordController</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ForgotPasswordController</servlet-name>
-        <url-pattern>/forgot</url-pattern>
-    </servlet-mapping>
-
-    <!-- Servlet for ResetPasswordController -->
-    <servlet>
-        <servlet-name>ResetPasswordController</servlet-name>
-        <servlet-class>controller.ResetPasswordController</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ResetPasswordController</servlet-name>
-        <url-pattern>/reset</url-pattern>
-    </servlet-mapping>
-
 </web-app>

@@ -23,10 +23,10 @@
         <li><a href="#">Trung tâm trợ giúp</a></li>
         <li><a href="#">Yêu cầu trợ giúp về vấn đề an toàn</a></li>
         <li><a href="#">AirCover</a></li>
-        <li><a href="#">Chống phân biệt đối xử</a></li>
-        <li><a href="#">Hỗ trợ người khuyết tật</a></li>
-        <li><a href="#">Các tuỳ chọn huỷ</a></li>
-        <li><a href="#">Báo cáo lo ngại của khu dân cư</a></li>
+        <li><a href="<%=request.getContextPath()%>/Support/anti_discrimination.jsp">Chống phân biệt đối xử</a></li>
+        <li><a href="<%=request.getContextPath()%>/Support/support_for_people_with_disabilities.jsp">Hỗ trợ người khuyết tật</a></li>
+        <li><a href="<%=request.getContextPath()%>/Support/cancellation_options.jsp">Các tuỳ chọn huỷ</a></li>
+        <li><a href="<%=request.getContextPath()%>/Support/report_of_community_concerns.jsp">Báo cáo lo ngại của khu dân cư</a></li>
       </ul>
     </nav>
 
