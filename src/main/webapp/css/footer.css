@@ -28,7 +28,7 @@ main { flex: 1; } /* phần nội dung chính */
 /* Heading row */
 .ab-footer__heading{
   display:flex; align-items:center; justify-content:space-between;
-  padding:28px 0 8px;
+  padding:60px 0 20px;    /* tăng padding trên và dưới */
   border-bottom:1px solid var(--border);
 }
 .ab-footer__heading h2{
@@ -63,7 +63,8 @@ main { flex: 1; } /* phần nội dung chính */
 .ab-footer__bottom{ border-top:1px solid var(--border); }
 .ab-footer__bottom .bottom-inner{
   display:flex; justify-content:space-between; align-items:center;
-  padding:16px 0; gap:16px; flex-wrap:wrap;
+  padding:24px 0;         /* tăng padding trên và dưới */
+  gap:16px; flex-wrap:wrap;
 }
 .ab-footer__bottom .left,
 .ab-footer__bottom .right{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
