@@ -78,9 +78,8 @@
         </a>
       </div>
     </div>
-  </div>
 </footer>
 
 <script>
-  document.getElementById('ab-year').textContent = new Date().getFullYear();
+    document.getElementById('ab-year').textContent = new Date().getFullYear();
 </script>

@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 public class DBConnection {
     private static final String URL = "jdbc:sqlserver://localhost:1433;databaseName=G02BNB;encrypt=true;trustServerCertificate=true";
     private static final String USER = "sa";
-    private static final String PASS = "123";
+    private static final String PASS = "Huydoan@123";
 
     static {
         try {
