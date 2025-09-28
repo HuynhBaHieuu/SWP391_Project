@@ -66,16 +66,15 @@ public class LoginController extends HttpServlet {
 
             // Login success
             HttpSession session = request.getSession(true);
-            session.setAttribute("authUser", user);
+            session.setAttribute("user", user);
+            // Mặc định sau khi login, luôn vào chế độ Guest trên UI
+            session.setAttribute("mode", "Guest");
 
             // Redirect based on role (Guest/Host/Admin)
             String role = user.getRole();
             if ("Admin".equalsIgnoreCase(role)) {
                 response.sendRedirect(request.getContextPath() + "/admin/dashboard"); return;
-            } else if ("Host".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/host/dashboard"); return;
             } else {
-//                response.sendRedirect(request.getContextPath() + "/");
                 response.sendRedirect(request.getContextPath() + "/home.jsp"); return;
             }
         } catch (Exception e) {
