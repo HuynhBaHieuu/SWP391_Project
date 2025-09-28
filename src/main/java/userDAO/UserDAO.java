@@ -159,6 +159,7 @@ public class UserDAO {
             }
         }
     }
+
     public void savePasswordResetToken(int userId, String token) throws SQLException {
         String sql = "INSERT INTO PasswordResetTokens (UserID, Token, Expiration) "
                 + "VALUES (?, ?, DATEADD(HOUR, 1, GETDATE()))";  // Token hết hạn sau 1 giờ
@@ -169,6 +170,7 @@ public class UserDAO {
             ps.executeUpdate();
         }
     }
+
     public boolean validateResetToken(String token) throws SQLException {
         String sql = "SELECT TokenID FROM PasswordResetTokens "
                 + "WHERE Token = ? AND Expiration > GETDATE()";
@@ -180,7 +182,7 @@ public class UserDAO {
             }
         }
     }
-    
+
     public boolean resetPassword(String token, String newPassword) throws SQLException {
         // Kiểm tra token hợp lệ
         String sqlTokenValidation = "SELECT UserID FROM PasswordResetTokens WHERE Token = ? AND Expiration > GETDATE()";
@@ -214,6 +216,17 @@ public class UserDAO {
                     return false;  // Token không hợp lệ hoặc đã hết hạn
                 }
             }
+        }
+    }
+
+    public boolean upgradeToHost(int userId) {
+        String sql = "UPDATE Users SET IsHost=1, Role='Host' WHERE UserID=?";
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }
