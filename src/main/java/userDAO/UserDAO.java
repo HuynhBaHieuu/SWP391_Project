@@ -23,6 +23,7 @@ public class UserDAO {
         u.setEmail(rs.getString("Email"));
         u.setPasswordHash(rs.getString("PasswordHash"));
         u.setPhoneNumber(rs.getString("PhoneNumber"));
+        u.setProfileImage(rs.getString("ProfileImage"));
         u.setRole(rs.getString("Role"));
         u.setHost(rs.getBoolean("IsHost"));
         u.setAdmin(rs.getBoolean("IsAdmin"));
@@ -144,6 +145,61 @@ public class UserDAO {
                 throw new SQLIntegrityConstraintViolationException("Email đã tồn tại: " + email, ex);
             }
             throw ex; // ném lên cho controller hiển thị "SQL Error ..."
+        }
+    }
+    
+    public boolean updateUser(User user) throws SQLException {
+    String sql = "UPDATE Users SET FullName = ?, Email = ?, PhoneNumber = ?, Role = ?, "
+               + "IsHost = ?, IsAdmin = ?, IsActive = ?, PasswordHash = ? "
+               + "WHERE UserID = ?";
+    
+    try (Connection con = DBConnection.getConnection(); 
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        
+        ps.setString(1, user.getFullName());
+        ps.setString(2, user.getEmail());
+        
+        if (user.getPhoneNumber() == null || user.getPhoneNumber().trim().isEmpty()) {
+            ps.setNull(3, java.sql.Types.NVARCHAR);
+        } else {
+            ps.setString(3, user.getPhoneNumber());
+        }
+        
+        ps.setString(4, user.getRole());
+        ps.setBoolean(5, user.isHost());
+        ps.setBoolean(6, user.isAdmin());
+        ps.setBoolean(7, user.isActive());
+        ps.setString(8, user.getPasswordHash());
+        ps.setInt(9, user.getUserID());
+        
+        int rowsAffected = ps.executeUpdate();
+        return rowsAffected > 0;
+        
+    } catch (SQLException ex) {
+        int code = ex.getErrorCode();
+        if (code == 2627 || code == 2601) {
+            throw new SQLIntegrityConstraintViolationException("Email đã tồn tại: " + user.getEmail(), ex);
+        }
+        throw ex;
+    }
+}
+    
+    public boolean updateProfileImage(int userID, String profileImagePath) throws SQLException {
+        String sql = "UPDATE Users SET ProfileImage = ? WHERE UserID = ?";
+
+        try (Connection con = DBConnection.getConnection(); 
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            if (profileImagePath == null || profileImagePath.trim().isEmpty()) {
+                ps.setNull(1, java.sql.Types.NVARCHAR);
+            } else {
+                ps.setString(1, profileImagePath);
+            }
+
+            ps.setInt(2, userID);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
         }
     }
 
