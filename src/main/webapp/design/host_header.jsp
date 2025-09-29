@@ -3,7 +3,9 @@
 
 <div class="host-header">
     <div class="host-header-left">
-        <a class="brand" href="${pageContext.request.contextPath}/"><span class="logo">Go2BNB</span></a>
+        <a class="brand" href="${pageContext.request.contextPath}/home.jsp">
+            <img src="${pageContext.request.contextPath}/image/logo.png" alt="logo" width="150" style="display:block;">
+        </a>
     </div>
     <nav class="host-header-nav">
         <a href="${pageContext.request.contextPath}/host/today" class="nav-link ${param.active eq 'today' ? 'active' : ''}">Hôm nay</a>
