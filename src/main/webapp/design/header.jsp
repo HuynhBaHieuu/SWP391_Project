@@ -149,16 +149,13 @@
                     </button>
                     <div class="">
                         <%User currentUser = (User) session.getAttribute("user");%>
-                        <a aria-label="Hồ sơ người dùng"  
-                           class="profile-icon" 
+                        <a aria-label="Hồ sơ người dùng"  class="profile-icon" 
                            href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>">
-
                             <%-- Nếu người dùng đã login, hiển thị avatar, nếu chưa thì hiển thị avatar mặc định --%>
                             <img src="<%= (currentUser != null && currentUser.getProfileImage() != null)
                                     ? (request.getContextPath() + "/" + currentUser.getProfileImage())
                                     : "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg"%>" 
-                                 alt="Avatar" 
-                                 style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
+                                 alt="Avatar" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
                         </a>
                     </div>
                     <div class="">

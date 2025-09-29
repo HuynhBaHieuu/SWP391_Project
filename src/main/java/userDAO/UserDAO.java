@@ -149,9 +149,7 @@ public class UserDAO {
     }
     
     public boolean updateUser(User user) throws SQLException {
-    String sql = "UPDATE Users SET FullName = ?, Email = ?, PhoneNumber = ?, Role = ?, "
-               + "IsHost = ?, IsAdmin = ?, IsActive = ?, PasswordHash = ? "
-               + "WHERE UserID = ?";
+    String sql = "UPDATE Users SET FullName = ?, Email = ?, PhoneNumber = ?, IsActive = ?, PasswordHash = ? WHERE UserID = ?";
     
     try (Connection con = DBConnection.getConnection(); 
          PreparedStatement ps = con.prepareStatement(sql)) {
@@ -165,12 +163,9 @@ public class UserDAO {
             ps.setString(3, user.getPhoneNumber());
         }
         
-        ps.setString(4, user.getRole());
-        ps.setBoolean(5, user.isHost());
-        ps.setBoolean(6, user.isAdmin());
-        ps.setBoolean(7, user.isActive());
-        ps.setString(8, user.getPasswordHash());
-        ps.setInt(9, user.getUserID());
+        ps.setBoolean(4, user.isActive());
+        ps.setString(5, user.getPasswordHash());
+        ps.setInt(6, user.getUserID());
         
         int rowsAffected = ps.executeUpdate();
         return rowsAffected > 0;

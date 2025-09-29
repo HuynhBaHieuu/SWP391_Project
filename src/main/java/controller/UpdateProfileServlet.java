@@ -29,9 +29,6 @@ public class UpdateProfileServlet extends HttpServlet {
     
     private UserDAO userDAO = new UserDAO();
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -52,33 +49,26 @@ public class UpdateProfileServlet extends HttpServlet {
             return;
         }
         
-        try {
-            // Debug: In thông tin request
-            System.out.println("=== UpdateProfileServlet Debug ===");
-            System.out.println("Current User: " + (currentUser != null ? currentUser.getEmail() : "null"));
-            
+        try {           
             // Lấy thông tin từ form
             String fullName = request.getParameter("fullName");
             String email = request.getParameter("email");
             String phoneNumber = request.getParameter("phoneNumber");
-            String role = request.getParameter("role");
-            
-            System.out.println("Form data - fullName: " + fullName);
-            System.out.println("Form data - email: " + email);
-            System.out.println("Form data - phoneNumber: " + phoneNumber);
-            System.out.println("Form data - role: " + role);
-            boolean isHost = "Host".equals(role);
-            boolean isAdmin = "Admin".equals(role);
             boolean isActive = "on".equals(request.getParameter("isActive"));
-            
-            // Lấy thông tin mật khẩu
             String currentPassword = request.getParameter("currentPassword");
             String newPassword = request.getParameter("newPassword");
             String confirmPassword = request.getParameter("confirmPassword");
-            
+  
+            // Debug: In thông tin request
+            System.out.println("=== UpdateProfileServlet Debug ===");
+            System.out.println("Current User: " + (currentUser != null ? currentUser.getEmail() : "null"));
+            System.out.println("fullName: " + fullName);
+            System.out.println("email: " + email);
+            System.out.println("phoneNumber: " + phoneNumber);            
             System.out.println("currentPassword: " + currentPassword);
             System.out.println("newPassword: " + newPassword);
             System.out.println("confirmPassword: " + confirmPassword);
+            
             // Validation cơ bản
             if (fullName == null || fullName.trim().isEmpty()) {
                 jsonResponse.put("success", false);
@@ -87,14 +77,20 @@ public class UpdateProfileServlet extends HttpServlet {
                 return;
             }
             
-            if (email == null || email.trim().isEmpty() || !isValidEmail(email)) {
+            if (email == null || email.trim().isEmpty()) {
+                jsonResponse.put("success", false);
+                jsonResponse.put("message", "Email không được để trống.");
+                out.print(gson.toJson(jsonResponse));
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
                 jsonResponse.put("success", false);
                 jsonResponse.put("message", "Email không hợp lệ.");
                 out.print(gson.toJson(jsonResponse));
                 return;
             }
             
-            // Kiểm tra email trùng lặp (nếu thay đổi email)
             if (!email.equals(currentUser.getEmail()) && userDAO.emailExists(email)) {
                 jsonResponse.put("success", false);
                 jsonResponse.put("message", "Email này đã được sử dụng bởi tài khoản khác.");
@@ -165,12 +161,8 @@ public class UpdateProfileServlet extends HttpServlet {
             updatedUser.setFullName(fullName.trim());
             updatedUser.setEmail(email.trim().toLowerCase());
             updatedUser.setPhoneNumber(phoneNumber != null && !phoneNumber.trim().isEmpty() ? phoneNumber.trim() : null);
-            updatedUser.setRole(role);
-            updatedUser.setHost(isHost);
-            updatedUser.setAdmin(isAdmin);
             updatedUser.setActive(isActive);
             updatedUser.setPasswordHash(finalPasswordHash); // Sử dụng mật khẩu mới hoặc cũ
-            updatedUser.setCreatedAt(currentUser.getCreatedAt()); // Giữ nguyên ngày tạo
             
             // Gọi DAO để update
             boolean success = userDAO.updateUser(updatedUser);
@@ -198,21 +190,13 @@ public class UpdateProfileServlet extends HttpServlet {
             jsonResponse.put("success", false);
             jsonResponse.put("message", "Lỗi không xác định: " + e.getMessage());
         }
-        
         out.print(gson.toJson(jsonResponse));
     }
-    
     
     /**
      * Kiểm tra email hợp lệ
      */
     private boolean isValidEmail(String email) {
         return email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
-    }
-    
-
-    @Override
-    public String getServletInfo() {
-        return "Update Profile Servlet for handling profile updates";
     }
 }

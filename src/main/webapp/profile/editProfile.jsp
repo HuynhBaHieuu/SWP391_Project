@@ -74,14 +74,13 @@
         </div>
 
         <form id="editProfileForm" action="<%= request.getContextPath() %>/updateProfile" method="post" novalidate>
-
-            <!-- Personal Information -->
+            <!-- Thông tin cá nhân -->
             <div class="form-card">
                 <h4 class="section-title">
                     <i class="fas fa-user text-primary"></i> Thông tin cá nhân
                 </h4>
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-8 mb-3">
                         <label for="fullName" class="form-label">
                             Họ & tên <span class="required">*</span>
                         </label>
@@ -92,30 +91,21 @@
                         </div>
                     </div>
                     
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-8 mb-3">
                         <label for="email" class="form-label">
                             Email <span class="required">*</span>
                         </label>
                         <input type="email" class="form-control" id="email" name="email" 
                                value="<%= user.getEmail() %>" required>
                         <div class="invalid-feedback">
-                            Vui lòng nhập địa chỉ email hợp lệ.
+                            Vui lòng nhập địa chỉ email.
                         </div>
                     </div>
                     
-                    <div class="col-md-6 mb-3">
-                        <label for="phoneNumber" class="form-label">Số điện thoại</label>
+                    <div class="col-md-8 mb-3">
+                        <label for="phoneNumber" class="form-label">Số điện thoại (không bắt buộc)</label>
                         <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" 
-                               value="<%= user.getPhoneNumber() %>" placeholder="Enter your phone number">
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <label for="role" class="form-label">Vai trò</label>
-                        <select class="form-select" id="role" name="role">
-                            <option value="Guest" <%= "Guest".equals(user.getRole()) ? "selected" : "" %>>Guest</option>
-                            <option value="Host" <%= "Host".equals(user.getRole()) ? "selected" : "" %>>Host</option>
-                            <option value="Admin" <%= "Admin".equals(user.getRole()) ? "selected" : "" %>>Admin</option>
-                        </select>
+                               value="<%= user.getPhoneNumber()!=null ? user.getPhoneNumber() : "" %>" placeholder="Enter your phone number">
                     </div>
                 </div>
             </div>
@@ -142,17 +132,17 @@
                      <i class="fas fa-lock text-primary"></i> Thay đổi mật khẩu
                  </h4>
                  <div class="row">
-                     <div class="col-md-7 mb-3">
+                     <div class="col-md-8 mb-3">
                          <label for="currentPassword" class="form-label">Nhập mật khẩu hiện tại</label>
                          <input type="password" class="form-control" id="currentPassword" name="currentPassword" 
                                 placeholder="Enter current password">
                      </div>
-                     <div class="col-md-7 mb-3">
+                     <div class="col-md-8 mb-3">
                          <label for="newPassword" class="form-label">Nhập mật khẩu mới</label>
                          <input type="password" class="form-control" id="newPassword" name="newPassword" 
                                 placeholder="Enter new password">
                      </div>
-                     <div class="col-md-7 mb-3">
+                     <div class="col-md-8 mb-3">
                          <label for="confirmPassword" class="form-label">Xác nhận mật khẩu mới</label>
                          <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
                                 placeholder="Confirm new password">
@@ -203,7 +193,6 @@
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-
         // Form validation and submission
         document.getElementById('editProfileForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -212,40 +201,20 @@
             const saveButton = document.getElementById('saveButton');
             
             // Reset validation states
-            form.classList.remove('was-validated');
+            form.classList.remove('was-validated');           
             
-            // Validate required fields
-            const fullName = document.getElementById('fullName');
-            const email = document.getElementById('email');
             const currentPassword = document.getElementById('currentPassword');
             const newPassword = document.getElementById('newPassword');
             const confirmPassword = document.getElementById('confirmPassword');
             
             let isValid = true;
-            
-            if (!fullName.value.trim()) {
-                fullName.setCustomValidity('Full name is required');
-                fullName.reportValidity();
-                isValid = false;
-            } else {
-                fullName.setCustomValidity('');
-            }
-            
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email.value.trim() || !emailRegex.test(email.value)) {
-                email.setCustomValidity('Vui lòng nhập địa chỉ email hợp lệ');
-                email.reportValidity();
-                isValid = false;
-            } else {
-                email.setCustomValidity('');
-            }
-            
+                     
             // Validate password fields if any password field is filled
             const isChangingPassword = currentPassword.value.trim() || newPassword.value.trim() || confirmPassword.value.trim();
             
             if (isChangingPassword) {
                 if (!currentPassword.value.trim()) {
-                    currentPassword.setCustomValidity('Mật khẩu hiện tại là bắt buộc để thay đổi mật khẩu');
+                    currentPassword.setCustomValidity('Vui lòng nhập mật khẩu hiện tại');
                     currentPassword.reportValidity(); // Hiển thị thông báo ngay
                     isValid = false;
                 } else {
@@ -253,7 +222,7 @@
                 }
                 
                 if (!newPassword.value.trim()) {
-                    newPassword.setCustomValidity('Cần phải nhập mật khẩu mới');
+                    newPassword.setCustomValidity('Vui lòng nhập mật khẩu mới');
                     newPassword.reportValidity();
                     isValid = false;
                 } else if (newPassword.value.length < 6) {
@@ -289,7 +258,7 @@
             }
             
             // Show loading state
-            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
             saveButton.disabled = true;
             form.classList.add('loading');
             
@@ -308,7 +277,6 @@
                     const successToast = new bootstrap.Toast(document.getElementById('successToast'));
                     successToast.show();
                     
-                    // Redirect to profile page after a short delay
                     setTimeout(() => {
                         window.location.href = '<%= request.getContextPath() %>/profile';
                     }, 1500);
