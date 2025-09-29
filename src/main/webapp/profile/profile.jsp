@@ -140,7 +140,7 @@
         </div>
 
         <div class="row">
-            <!-- Contact Information -->
+            <!-- Thông tin liên lạc -->
             <div class="col-md-6">
                 <div class="info-card">
                     <h4 class="mb-3">
@@ -169,7 +169,7 @@
                 </div>
             </div>
 
-            <!-- Account Details -->
+            <!-- Thông tin chi tiết -->
             <div class="col-md-6">
                 <div class="info-card">
                     <h4 class="mb-3">
@@ -201,7 +201,7 @@
             </div>
         </div>
 
-        <!-- Permissions & Roles -->
+        <!-- Quyền & Vai trò -->
         <div class="info-card">
             <h4 class="mb-3"><i class="fas fa-users-cog text-primary"></i> Quyền & Vai trò </h4>
             <p class="text-muted">Thông tin vai trò được hiển thị ở tiêu đề hồ sơ phía trên.</p>
@@ -221,6 +221,7 @@
         </div>
     </div>
     </main>
+                            
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function uploadAvatar() {
@@ -249,6 +250,10 @@
                         const toast = new bootstrap.Toast(document.getElementById('avatarToast'));
                         toast.show();
                     }
+                    
+                    setTimeout(() => {
+                      location.reload();
+                     }, 5000);
                 })
                 .catch(error => {
                     console.error('Lỗi tải ảnh đại diện:', error);
