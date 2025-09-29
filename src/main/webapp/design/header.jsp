@@ -3,7 +3,7 @@
     Created on : Sep 20, 2025, 8:57:56 PM
     Author     : Administrator
 --%>
-
+<%@page import="model.User"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
@@ -101,7 +101,7 @@
             <div class="header-top">
                 <!-- logo -->
                 <a class="" aria-label="Trang chủ" href="home.jsp" style="">
-                    <img src="image/logo.jpg" alt="logo" width="100" style="display:block;">
+                    <img src="${pageContext.request.contextPath}/image/logo.png" alt="logo" width="150" style="display:block;">
                 </a>
 
                 <div class="menu" role="tablist">
@@ -148,12 +148,18 @@
                         </c:choose>
                     </button>
                     <div class="">
-                        <button aria-label="Chọn ngôn ngữ và loại tiền tệ" type="button" class="profile-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true" focusable="false" style="display: block; height: 16px; width: 16px; fill: currentcolor;">
-                            <path d="M8 .25a7.77 7.77 0 0 1 7.75 7.78 7.75 7.75 0 0 1-7.52 7.72h-.25A7.75 7.75 0 0 1 .25 8.24v-.25A7.75 7.75 0 0 1 8 .25zm1.95 8.5h-3.9c.15 2.9 1.17 5.34 1.88 5.5H8c.68 0 1.72-2.37 1.93-5.23zm4.26 0h-2.76c-.09 1.96-.53 3.78-1.18 5.08A6.26 6.26 0 0 0 14.17 9zm-9.67 0H1.8a6.26 6.26 0 0 0 3.94 5.08 12.59 12.59 0 0 1-1.16-4.7l-.03-.38zm1.2-6.58-.12.05a6.26 6.26 0 0 0-3.83 5.03h2.75c.09-1.83.48-3.54 1.06-4.81zm2.25-.42c-.7 0-1.78 2.51-1.94 5.5h3.9c-.15-2.9-1.18-5.34-1.89-5.5h-.07zm2.28.43.03.05a12.95 12.95 0 0 1 1.15 5.02h2.75a6.28 6.28 0 0 0-3.93-5.07z">
-                            </path>
-                            </svg>
-                        </button>
+                        <%User currentUser = (User) session.getAttribute("user");%>
+                        <a aria-label="Hồ sơ người dùng"  
+                           class="profile-icon" 
+                           href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>">
+
+                            <%-- Nếu người dùng đã login, hiển thị avatar, nếu chưa thì hiển thị avatar mặc định --%>
+                            <img src="<%= (currentUser != null && currentUser.getProfileImage() != null)
+                                    ? (request.getContextPath() + "/" + currentUser.getProfileImage())
+                                    : "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg"%>" 
+                                 alt="Avatar" 
+                                 style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
+                        </a>
                     </div>
                     <div class="">
                         <button aria-label="Menu điều hướng chính" type="button" class="profile-icon" onclick="toggleDropdown()">

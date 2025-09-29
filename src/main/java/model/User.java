@@ -9,6 +9,7 @@ public class User implements Serializable {
     private String email;
     private String passwordHash;
     private String phoneNumber;
+    private String profileImage;
     private String role; // Guest/Host/Admin
     private boolean isHost;
     private boolean isAdmin;
@@ -29,14 +30,23 @@ public class User implements Serializable {
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    
+    public String getProfileImage() {
+        return profileImage;
+    }
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
     public boolean isHost() { return isHost; }
+    public boolean getIsHost() { return isHost; }
     public void setHost(boolean host) { isHost = host; }
 
     public boolean isAdmin() { return isAdmin; }
+    public boolean getIsAdmin() { return isAdmin; }
     public void setAdmin(boolean admin) { isAdmin = admin; }
 
     public boolean isActive() { return isActive; }
