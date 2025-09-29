@@ -49,6 +49,29 @@
             <artifactId>gson</artifactId>
             <version>2.11.0</version>
         </dependency>
+        <!-- Apache HttpClient Fluent (used by controller.GoogleLogin) -->
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.2.1</version>
+        </dependency>
+        <!-- HttpClient 5 fluent API module (provides org.apache.hc.client5.http.fluent.Request/Form) -->
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5-fluent</artifactId>
+            <version>5.2.1</version>
+        </dependency>
+        <!-- Apache HttpClient 4.x for fluent API used in controller.GoogleLogin -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.core5</groupId>
+            <artifactId>httpcore5</artifactId>
+            <version>5.2.1</version>
+        </dependency>
         <!-- JSTL for JSP -->
         <dependency>
             <groupId>org.glassfish.web</groupId>
