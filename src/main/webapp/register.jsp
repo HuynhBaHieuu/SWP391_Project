@@ -96,10 +96,16 @@
           <div class="col">
             <label for="password">Mật khẩu</label>
             <input class="input" id="password" type="password" name="password" required placeholder="••••••••">
+            <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:#475569">
+              <input type="checkbox" id="togglePwd1"> Hiện mật khẩu
+            </label>
           </div>
           <div class="col">
             <label for="confirm">Nhập lại mật khẩu</label>
             <input class="input" id="confirm" type="password" name="confirm" required placeholder="••••••••">
+            <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:#475569">
+              <input type="checkbox" id="togglePwd2"> Hiện mật khẩu
+            </label>
           </div>
         </div>
 
@@ -119,6 +125,12 @@
 <script>
   (function(){
     const form = document.querySelector('form');
+    const pwd1 = document.getElementById('password');
+    const pwd2 = document.getElementById('confirm');
+    const t1 = document.getElementById('togglePwd1');
+    const t2 = document.getElementById('togglePwd2');
+    if (t1 && pwd1) t1.addEventListener('change', function(){ pwd1.type = this.checked ? 'text' : 'password'; });
+    if (t2 && pwd2) t2.addEventListener('change', function(){ pwd2.type = this.checked ? 'text' : 'password'; });
     form.addEventListener('submit', function(e){
       const pwd = form.password.value.trim();
       const cf  = form.confirm.value.trim();
