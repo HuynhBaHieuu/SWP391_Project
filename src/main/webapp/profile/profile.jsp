@@ -110,7 +110,7 @@
             <div class="row align-items-center">
                 <div class="col-md-3 text-center">
                     <div class="avatar-container">
-                        <img src="<%= user.getProfileImage() != null ? (request.getContextPath() + "/" + user.getProfileImage()) : "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg" %>" 
+                        <img src="<%= imagePath%>" 
                              alt="Profile Picture" class="profile-avatar" id="profileImage">
                         <div class="avatar-overlay" onclick="document.getElementById('avatarInput').click()">
                             <i class="fas fa-camera"></i>

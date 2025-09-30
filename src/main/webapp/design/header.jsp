@@ -6,6 +6,24 @@
 <%@page import="model.User"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%
+    User currentUser = (User) session.getAttribute("user");
+    String imagePath = null;
+
+    if (currentUser != null && currentUser.getProfileImage() != null) {
+        String profileImage = currentUser.getProfileImage();
+        if (profileImage.startsWith("http")) {
+            // Ảnh từ Google (đường dẫn tuyệt đối)
+            imagePath = profileImage;
+        } else {
+            // Ảnh từ thư mục trong server
+            imagePath = request.getContextPath() + "/" + profileImage;
+        }
+    } else {
+        // Ảnh mặc định
+        imagePath = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
+    }
+%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -148,14 +166,11 @@
                         </c:choose>
                     </button>
                     <div class="">
-                        <%User currentUser = (User) session.getAttribute("user");%>
                         <a aria-label="Hồ sơ người dùng"  class="profile-icon" 
                            href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>">
                             <%-- Nếu người dùng đã login, hiển thị avatar, nếu chưa thì hiển thị avatar mặc định --%>
-                            <img src="<%= (currentUser != null && currentUser.getProfileImage() != null)
-                                    ? (request.getContextPath() + "/" + currentUser.getProfileImage())
-                                    : "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg"%>" 
-                                 alt="Avatar" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
+                            <img src="<%= imagePath%>" alt="Avatar" 
+                                 style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
                         </a>
                     </div>
                     <div class="">
