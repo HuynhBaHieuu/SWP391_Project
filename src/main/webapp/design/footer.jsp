@@ -23,15 +23,15 @@
         <nav class="col" aria-label="Đón tiếp khách">
             <h3>Đón tiếp khách</h3>
             <ul>
-                <li><a href="#">Cho thuê nhà trên GO2BNB</a></li>
-                <li><a href="#">Đưa trải nghiệm của bạn lên GO2BNB</a></li>
-                <li><a href="#">Đưa dịch vụ của bạn lên GO2BNB</a></li>
-                <li><a href="#">AirCover cho host</a></li>
-                <li><a href="#">Tài nguyên về đón tiếp khách</a></li>
-                <li><a href="#">Diễn đàn cộng đồng</a></li>
-                <li><a href="#">Đón tiếp khách có trách nhiệm</a></li>
-                <li><a href="#">Tham gia khóa học miễn phí về công việc Đón tiếp khách</a></li>
-                <li><a href="#">Tìm host hỗ trợ</a></li>
+                <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/host_onboarding.jsp">Cho thuê nhà trên GO2BNB</a></li>
+                <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/experience_upload.jsp">Đưa trải nghiệm của bạn lên GO2BNB</a></li>
+                <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/service_upload.jsp">Đưa dịch vụ của bạn lên GO2BNB</a></li>
+                <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/aircover.jsp">AirCover cho host</a></li>
+                <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/hosting_resources.jsp">Tài nguyên về đón tiếp khách</a></li>
+                <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/community_forum.jsp">Diễn đàn cộng đồng</a></li>
+                <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/responsible_hosting.jsp">Đón tiếp khách có trách nhiệm</a></li>
+                <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/hosting_course.jsp">Tham gia khóa học miễn phí về công việc Đón tiếp khách</a></li>
+                <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/host_support.jsp">Tìm host hỗ trợ</a></li>
             </ul>
         </nav>
 
