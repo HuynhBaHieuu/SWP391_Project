@@ -1,9 +1,3 @@
-<%-- 
-    Document   : transaction_protection
-    Created on : Sep 25, 2025, 9:56:08 PM
-    Author     : phung
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>  
 <!DOCTYPE html>
 <html lang="vi">
@@ -63,6 +57,7 @@
                 font-size: 24px;
             }
 
+            /* Protection Information Section */
             .protection-info {
                 padding: 50px;
                 display: grid;
@@ -77,6 +72,7 @@
             .protection-info h2 {
                 font-size: 28px;
                 color: #333;
+                font-weight: bold;
             }
 
             .protection-info p {
@@ -84,6 +80,16 @@
                 color: #555;
             }
 
+            /* Adding Hover Effects on Info Cards */
+            .protection-info div {
+                transition: transform 0.3s ease;
+            }
+
+            .protection-info div:hover {
+                transform: scale(1.05);
+            }
+
+            /* Footer */
             .footer {
                 background-color: #333;
                 color: white;
@@ -94,12 +100,33 @@
             .protection-info img {
                 width: 100%;
                 border-radius: 10px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             }
 
             @media (max-width: 768px) {
                 .protection-info {
                     grid-template-columns: 1fr;
                 }
+            }
+
+            /* Custom Styles for Additional Data */
+            .protection-info .key-feature {
+                padding: 30px;
+                background-color: #e9f7fa;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                text-align: center;
+            }
+
+            .protection-info .key-feature h3 {
+                font-size: 22px;
+                color: #00796b;
+                margin-bottom: 12px;
+            }
+
+            .protection-info .key-feature p {
+                font-size: 16px;
+                color: #555;
             }
         </style>
     </head>
@@ -109,7 +136,7 @@
         <section class="hero">
             <a class="brand" href="<%=request.getContextPath()%>/home.jsp">
                 <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="currentColor" d="M12 3c2.8 3.8 5.8 8.4 6.7 10.7a4.7 4.7 0 1 1-8.7 3.6l2-3.4a1.9 1.9 0 1 0-3.3 0l2 3.4A4.7 4.7 0 1 1 5.3 13.7C6.2 11.4 9.2 6.8 12 3Z"/>
+                    <path fill="currentColor" d="M12 3c2.8 3.8 5.8 8.4 6.7 10.7a4.7 4.7 0 1 1-8.7 3.6l2-3.4a1.9 1.9 0 1 0-3.3 0l2 3.4A4.7 4.7 0 1 1 5.3 13.7C6.2 11.4 9.2 6.8 12 3Z"/>
                 </svg>
                 <strong>Go2BNB</strong>
             </a>
@@ -130,8 +157,19 @@
             </div>
         </section>
 
+        <!-- Key Features Section -->
+        <section class="protection-info">
+            <div class="key-feature">
+                <h3>Bảo vệ dữ liệu cá nhân</h3>
+                <p>Chúng tôi sử dụng mã hóa dữ liệu mạnh mẽ để bảo vệ thông tin cá nhân của bạn khỏi các mối đe dọa từ bên ngoài.</p>
+            </div>
+            <div class="key-feature">
+                <h3>Phát hiện giao dịch gian lận</h3>
+                <p>Hệ thống của Go2BNB liên tục theo dõi và phát hiện các giao dịch bất thường để bảo vệ bạn khỏi các hành vi gian lận.</p>
+            </div>
+        </section>
+
         <%@ include file="../design/footer.jsp" %>
 
     </body>
 </html>
-
