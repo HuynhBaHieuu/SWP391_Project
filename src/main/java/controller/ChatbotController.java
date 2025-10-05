@@ -151,8 +151,14 @@ public class ChatbotController extends HttpServlet {
             System.out.println("→ Routing to: getGeneralRecommendations");
             return getGeneralRecommendations(userMessage);
         } else {
-            System.out.println("→ Routing to: getGeneralRecommendations");
-            return getGeneralRecommendations(userMessage);
+            // Kiểm tra xem có phải câu hỏi không được nhận diện không
+            if (isUnrecognizedQuestion(userMessage)) {
+                System.out.println("→ Unrecognized question, routing to: getAdminSuggestion");
+                return getAdminSuggestion();
+            } else {
+                System.out.println("→ Routing to: getGeneralRecommendations");
+                return getGeneralRecommendations(userMessage);
+            }
         }
     }
     
@@ -495,5 +501,98 @@ public class ChatbotController extends HttpServlet {
             System.err.println("Simple test error: " + e.getMessage());
             return "❌ **Test thất bại:** Lỗi chung - " + e.getMessage();
         }
+    }
+    
+    /**
+     * Kiểm tra xem câu hỏi có phải là câu hỏi không được nhận diện không
+     */
+    private boolean isUnrecognizedQuestion(String userMessage) {
+        String lowerMessage = userMessage.toLowerCase();
+        
+        // Danh sách các từ khóa đã được lập trình sẵn
+        String[] recognizedKeywords = {
+            "giá", "price", "cost", "giá phòng", "price room", "so sánh giá", "phòng giá bao nhiêu",
+            "địa điểm", "location", "where", "phòng ở đâu", "room where", "địa điểm nào có nhiều phòng", "phòng ở quận nào",
+            "tiện ích", "amenities", "facilities", "phòng có tiện ích gì", "phòng có wifi", "phòng có điều hòa", "tiện ích phòng",
+            "đặt", "book", "reserve", "làm sao đặt phòng", "cách đặt phòng", "đặt phòng như thế nào",
+            "phòng", "room", "accommodation", "tìm phòng", "find room", "tôi muốn tìm phòng", "tìm phòng giá rẻ", "phòng gần trung tâm", "tôi cần tư vấn phòng",
+            "giúp tôi", "hướng dẫn", "tôi cần hỗ trợ", "test", "kiểm tra", "simple", "đơn giản"
+        };
+        
+        // Kiểm tra xem có từ khóa nào khớp không
+        for (String keyword : recognizedKeywords) {
+            if (lowerMessage.contains(keyword)) {
+                return false; // Câu hỏi đã được nhận diện
+            }
+        }
+        
+        // Nếu câu hỏi quá ngắn (dưới 3 ký tự) thì không coi là câu hỏi không nhận diện
+        if (userMessage.trim().length() < 3) {
+            return false;
+        }
+        
+        return true; // Câu hỏi không được nhận diện
+    }
+    
+    /**
+     * Lấy thông tin admin để đề xuất cho người dùng
+     */
+    private String getAdminSuggestion() {
+        try (Connection conn = DBConnection.getConnection()) {
+            System.out.println("=== GETTING ADMIN INFO ===");
+            
+            // Tìm admin đầu tiên trong database
+            String sql = "SELECT TOP 1 FullName, PhoneNumber FROM Users WHERE IsAdmin = 1 AND IsActive = 1";
+            
+            try (PreparedStatement stmt = conn.prepareStatement(sql);
+                 ResultSet rs = stmt.executeQuery()) {
+                
+                if (rs.next()) {
+                    String adminName = rs.getString("FullName");
+                    String adminPhone = rs.getString("PhoneNumber");
+                    
+                    System.out.println("Found admin: " + adminName + " - " + adminPhone);
+                    
+                    return String.format("🤖 **Xin lỗi, tôi chưa hiểu rõ câu hỏi của bạn.**\n\n" +
+                                       "📞 **Để được hỗ trợ tốt nhất, bạn có thể liên hệ trực tiếp với admin:**\n\n" +
+                                       "👤 **Tên:** %s\n" +
+                                       "📱 **Số điện thoại:** %s\n\n" +
+                                       "💡 **Gợi ý:** Bạn có thể hỏi về:\n" +
+                                       "• Tìm phòng trọ\n" +
+                                       "• Thông tin giá phòng\n" +
+                                       "• Địa điểm phổ biến\n" +
+                                       "• Tiện ích phòng\n" +
+                                       "• Cách đặt phòng",
+                                       adminName != null ? adminName : "Admin", 
+                                       adminPhone != null ? adminPhone : "Chưa cập nhật");
+                } else {
+                    // Nếu không tìm thấy admin trong database, trả về thông tin admin mặc định
+                    return getDefaultAdminSuggestion();
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting admin info: " + e.getMessage());
+            return getDefaultAdminSuggestion();
+        } catch (Exception e) {
+            System.err.println("General error getting admin info: " + e.getMessage());
+            return getDefaultAdminSuggestion();
+        }
+    }
+    
+    /**
+     * Trả về thông tin admin mặc định khi không tìm thấy trong database
+     */
+    private String getDefaultAdminSuggestion() {
+        return "🤖 **Xin lỗi, tôi chưa hiểu rõ câu hỏi của bạn.**\n\n" +
+               "📞 **Để được hỗ trợ tốt nhất, bạn có thể liên hệ trực tiếp với admin:**\n\n" +
+               "👤 **Tên:** Admin Go2BNB\n" +
+               "📱 **Số điện thoại:** 0123-456-789\n\n" +
+               "💡 **Gợi ý:** Bạn có thể hỏi về:\n" +
+               "• Tìm phòng trọ\n" +
+               "• Thông tin giá phòng\n" +
+               "• Địa điểm phổ biến\n" +
+               "• Tiện ích phòng\n" +
+               "• Cách đặt phòng";
     }
 }
