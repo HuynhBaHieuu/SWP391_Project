@@ -112,7 +112,7 @@ public class UserDAO {
         final String sql
                 = "INSERT INTO Users (FullName, Email, PasswordHash, PhoneNumber, Role, IsHost, IsAdmin, IsActive, CreatedAt) "
                 + "OUTPUT INSERTED.UserID "
-                + "VALUES (?, ?, ?, ?, ?, 0, 0, 1, GETDATE())";
+                + "VALUES (?, ?, ?, ?, ?, 0, 0, 0, GETDATE())";
 
         try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -149,9 +149,7 @@ public class UserDAO {
     }
     
     public boolean updateUser(User user) throws SQLException {
-    String sql = "UPDATE Users SET FullName = ?, Email = ?, PhoneNumber = ?, Role = ?, "
-               + "IsHost = ?, IsAdmin = ?, IsActive = ?, PasswordHash = ? "
-               + "WHERE UserID = ?";
+    String sql = "UPDATE Users SET FullName = ?, Email = ?, PhoneNumber = ?, IsActive = ?, PasswordHash = ? WHERE UserID = ?";
     
     try (Connection con = DBConnection.getConnection(); 
          PreparedStatement ps = con.prepareStatement(sql)) {
@@ -165,12 +163,9 @@ public class UserDAO {
             ps.setString(3, user.getPhoneNumber());
         }
         
-        ps.setString(4, user.getRole());
-        ps.setBoolean(5, user.isHost());
-        ps.setBoolean(6, user.isAdmin());
-        ps.setBoolean(7, user.isActive());
-        ps.setString(8, user.getPasswordHash());
-        ps.setInt(9, user.getUserID());
+        ps.setBoolean(4, user.isActive());
+        ps.setString(5, user.getPasswordHash());
+        ps.setInt(6, user.getUserID());
         
         int rowsAffected = ps.executeUpdate();
         return rowsAffected > 0;
@@ -225,6 +220,52 @@ public class UserDAO {
             ps.setString(2, token);
             ps.executeUpdate();
         }
+    }
+
+    // Email verification token
+    public void saveEmailVerificationToken(int userId, String token) throws SQLException {
+        String sql = "INSERT INTO EmailVerificationTokens (UserID, Token, Expiration) "
+                + "VALUES (?, ?, DATEADD(DAY, 1, GETDATE()))"; // Token hết hạn sau 24 giờ
+
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, token);
+            ps.executeUpdate();
+        }
+    }
+
+    public boolean verifyEmailByToken(String token) throws SQLException {
+        String findSql = "SELECT UserID FROM EmailVerificationTokens WHERE Token = ? AND Expiration > GETDATE()";
+
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(findSql)) {
+            ps.setString(1, token);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int userId = rs.getInt("UserID");
+
+                    // Activate user and cleanup token in a small transaction scope
+                    con.setAutoCommit(false);
+                    try {
+                        try (PreparedStatement ps1 = con.prepareStatement("UPDATE Users SET IsActive=1 WHERE UserID=?")) {
+                            ps1.setInt(1, userId);
+                            ps1.executeUpdate();
+                        }
+                        try (PreparedStatement ps2 = con.prepareStatement("DELETE FROM EmailVerificationTokens WHERE Token=?")) {
+                            ps2.setString(1, token);
+                            ps2.executeUpdate();
+                        }
+                        con.commit();
+                        return true;
+                    } catch (SQLException ex) {
+                        con.rollback();
+                        throw ex;
+                    } finally {
+                        con.setAutoCommit(true);
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public boolean validateResetToken(String token) throws SQLException {

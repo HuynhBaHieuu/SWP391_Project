@@ -38,9 +38,6 @@ public class UploadAvatarServlet extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
     private static final String UPLOAD_DIR = "uploads/avatars";
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -123,7 +120,7 @@ public class UploadAvatarServlet extends HttpServlet {
                 return null;
             }
             
-            // Tạo tên file unique
+            // Tạo tên file unique ngẫu nhiên
             String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
             
             // Tạo thư mục upload nếu chưa có
@@ -157,11 +154,6 @@ public class UploadAvatarServlet extends HttpServlet {
             }
         }
         return false;
-    }
-
-    @Override
-    public String getServletInfo() {
-        return "Upload Avatar Servlet for handling avatar image uploads";
     }
 }
 

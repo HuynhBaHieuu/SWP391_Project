@@ -151,6 +151,9 @@
                 }
             }
         </style>
+        <link rel="stylesheet" href="css/chatbot.css"/>
+        <!-- Linking Google fonts for icons -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
     </head>
     <body>
         <%@ include file="design/header.jsp" %>
@@ -193,9 +196,6 @@
                 </c:otherwise>
             </c:choose>
         </main>
-
-        <%@ include file="design/footer.jsp" %>
-
         <script>
             document.addEventListener("DOMContentLoaded", () => {
                 document.querySelectorAll('.fade-in').forEach((el, i) => {
@@ -203,5 +203,22 @@
                 });
             });
         </script>
+        <%@ include file="../design/footer.jsp" %>
+        <jsp:include page="chatbot/chatbot.jsp" />
+        
+        <!-- Linking Emoji Mart script for emoji picker -->
+        <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+
+        <!-- Linking for file upload functionality -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.all.min.js"></script>
+        
+        <!-- Test script -->
+        <script>
+            console.log("=== TEST SCRIPT LOADED ===");
+            console.log("Page loaded successfully");
+        </script>
+        
+        <!-- Linking custom script -->
+        <script src="chatbot/script.js"></script>
     </body>
 </html>

@@ -16,16 +16,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * Servlet để hiển thị profile người dùng
+ * Servlet để chuyển hướng sang trang profile.jsp với phiên người dùng với dữ liệu mới nhất từ database
  */
 @WebServlet(name = "ProfileServlet", urlPatterns = {"/profile"})
 public class ProfileServlet extends HttpServlet {
     
     private UserDAO userDAO = new UserDAO();
 
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -50,17 +47,8 @@ public class ProfileServlet extends HttpServlet {
                 return;
             }
             
-            // Debug: In thông tin user để kiểm tra
-            System.out.println("=== USER DEBUG INFO ===");
-            System.out.println("User ID: " + user.getUserID());
-            System.out.println("Role: " + user.getRole());
-            System.out.println("IsHost: " + user.isHost());
-            System.out.println("IsAdmin: " + user.isAdmin());
-            System.out.println("=======================");
-            
             // Cập nhật session với thông tin mới
             session.setAttribute("user", user);
-            request.setAttribute("user", user);
             
             // Forward đến profile.jsp
             request.getRequestDispatcher("profile/profile.jsp").forward(request, response);
@@ -72,17 +60,9 @@ public class ProfileServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         doGet(request, response);
-    }
-
-    @Override
-    public String getServletInfo() {
-        return "Profile Servlet for displaying user profile information";
     }
 }

@@ -162,6 +162,9 @@
 
         <label for="password">Mật khẩu</label>
         <input class="input" type="password" id="password" name="password" placeholder="••••••••" required>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:#475569">
+          <input type="checkbox" id="togglePwd"> Hiện mật khẩu
+        </label>
 
         <div style="height:10px"></div>
         <button class="btn btn-primary" type="submit">Đăng nhập</button>
@@ -193,6 +196,13 @@
 <script>
   (function () {
     const form = document.querySelector('form');
+    const pwd = document.getElementById('password');
+    const toggle = document.getElementById('togglePwd');
+    if (toggle && pwd) {
+      toggle.addEventListener('change', function(){
+        pwd.type = this.checked ? 'text' : 'password';
+      });
+    }
     form.addEventListener('submit', function (e) {
       const email = form.email.value.trim();
       const pass = form.password.value.trim();
