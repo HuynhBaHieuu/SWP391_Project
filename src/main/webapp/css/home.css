@@ -100,10 +100,21 @@ body{
   height: 70px;
   display: flex;
   align-items: center;
+  flex: 1;
+}
+
+.search-field {
+  position: relative;
+  padding: 0 20px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  flex: 1;
 }
 
 /* gạch phân cách giữa các ô */
-.header-bottom > div:not(:last-child)::after {
+.header-bottom > div:not(:last-child)::after,
+.search-field:not(:last-child)::after {
   content: "";
   position: absolute;
   right: 0;
@@ -129,7 +140,8 @@ body{
 }
 
 /* hiệu ứng hover */
-.header-bottom > div:hover {
+.header-bottom > div:hover,
+.search-field:hover {
   background: #f2f2f2;
   border-radius: 50px;
   cursor: pointer;
@@ -137,7 +149,7 @@ body{
 }
 
 /* nút tìm kiếm */
-.header-bottom button {
+.search-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -148,9 +160,10 @@ body{
   color: white;
   border-radius: 50%;
   cursor: pointer;
-  margin-left: 63px;
+  margin-left: 10px;
 }
-.header-bottom button:hover {
+
+.search-button:hover {
   background-color: #E41D5B;
 }
 /*Trạng thái header thu nhỏ khi cuộn xuống*/
@@ -164,4 +177,208 @@ body{
 /* Ẩn header-bottom khi cuộn xuống */
 .header.shrink .header-bottom {
   display: none;
+}
+
+/* Responsive design cho thanh tìm kiếm */
+@media (max-width: 768px) {
+  .header-bottom {
+    flex-direction: column;
+    max-width: 100%;
+    margin: 10px;
+  }
+  
+  .search-field {
+    width: 100% !important;
+    margin-bottom: 10px;
+  }
+  
+  .search-button {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+}
+
+/* ===== CSS cho trang home ===== */
+/* Body và layout chung */
+body {
+    font-family: Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
+    margin: 0;
+    background-color: #fff;
+    color: #222;
+}
+
+main {
+    max-width: 100%;
+    padding: 0 10%;
+}
+
+h1 {
+    font-size: 30px;
+    margin-bottom: 25px;
+    text-align: center;
+    font-weight: 700;
+}
+
+/* Grid layout cho listings */
+.listing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 35px;
+    justify-content: center;
+}
+
+/* Card styling */
+.listing-card {
+    width: 100%;
+    max-width: 320px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.listing-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.listing-image {
+    width: 100%;
+    height: 230px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+    background-color: #f3f3f3;
+}
+
+.listing-card:hover .listing-image {
+    transform: scale(1.08);
+    filter: brightness(0.85);
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.listing-card:hover .overlay {
+    opacity: 1;
+}
+
+.view-btn {
+    background: #ff385c;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.view-btn:hover {
+    background: #e31c5f;
+    transform: scale(1.05);
+}
+
+.listing-body {
+    padding: 16px 20px 22px;
+}
+
+.listing-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 6px;
+}
+
+.listing-city {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.listing-price {
+    font-weight: bold;
+    color: #ff385c;
+    font-size: 17px;
+}
+
+.empty-result {
+    text-align: center;
+    color: #777;
+    font-size: 18px;
+    margin-top: 40px;
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive cho trang home */
+@media (max-width: 992px) {
+    .listing-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    .listing-image {
+        height: 200px;
+    }
+}
+
+/* ===== CSS cho form tìm kiếm ===== */
+.search-form {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    width: 100%;
+    padding-top: 3px;
+    font-size: 14px;
+    color: #555;
+    font-family: inherit;
+    background: transparent;
+}
+
+.search-input::placeholder {
+    color: #999;
+}
+
+.search-input:focus {
+    outline: none;
+}
+
+/* Responsive cho form tìm kiếm */
+@media (max-width: 768px) {
+    .search-form {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .search-field {
+        width: 100% !important;
+    }
 }

@@ -35,8 +35,8 @@ public class CharacterEncodingFilter implements Filter {
         String requestURI = httpRequest.getRequestURI();
         String contextPath = httpRequest.getContextPath();
         
-        // Skip encoding filter for static resources
-        if (isStaticResource(requestURI)) {
+        // Skip encoding filter for static resources and JSP compilation
+        if (isStaticResource(requestURI) || isJSPCompilation(requestURI)) {
             chain.doFilter(request, response);
             return;
         }
@@ -54,7 +54,7 @@ public class CharacterEncodingFilter implements Filter {
         // Set content type with charset for text responses
         if (response.getContentType() == null || 
             (response.getContentType().startsWith("text/") && !response.getContentType().contains("charset"))) {
-            response.setContentType(response.getContentType() + "; charset=" + this.encoding);
+            response.setContentType("text/html; charset=" + this.encoding);
         }
         
         chain.doFilter(request, response);
@@ -79,7 +79,17 @@ public class CharacterEncodingFilter implements Filter {
                requestURI.contains("/image/") ||
                requestURI.contains("/images/") ||
                requestURI.contains("/static/") ||
-               requestURI.contains("/assets/");
+               requestURI.contains("/assets/") ||
+               requestURI.contains("/WEB-INF/") ||
+               requestURI.contains("/META-INF/");
+    }
+    
+    private boolean isJSPCompilation(String requestURI) {
+        // Skip encoding filter for JSP compilation requests
+        return requestURI.contains("/org.apache.jsp.") ||
+               requestURI.contains("_jsp") ||
+               requestURI.contains("jsp_servlet") ||
+               requestURI.contains("jsp_java");
     }
     
     @Override

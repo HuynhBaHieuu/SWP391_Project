@@ -21,16 +21,25 @@ public class SearchListingController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
+        String checkin = request.getParameter("checkin");
+        String checkout = request.getParameter("checkout");
+        String guests = request.getParameter("guests");
 
         List<Listing> listings;
         if (keyword == null || keyword.trim().isEmpty()) {
-            listings = listingDAO.getAllListings();
+            // Nếu không có keyword, redirect về trang chủ
+            response.sendRedirect(request.getContextPath() + "/home");
+            return;
         } else {
+            // Tìm kiếm với keyword
             listings = listingDAO.searchListings(keyword.trim());
         }
 
         request.setAttribute("listings", listings);
         request.setAttribute("keyword", keyword);
+        request.setAttribute("checkin", checkin);
+        request.setAttribute("checkout", checkout);
+        request.setAttribute("guests", guests);
         request.getRequestDispatcher("home.jsp").forward(request, response);
     }
 }

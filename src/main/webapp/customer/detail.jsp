@@ -1,4 +1,3 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="listingDAO.ListingDAO, listingDAO.ListingImageDAO, model.Listing" %>
 <%
     String idParam = request.getParameter("id");

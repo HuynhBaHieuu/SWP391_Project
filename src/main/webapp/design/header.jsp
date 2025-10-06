@@ -204,64 +204,46 @@
 
             <!--header bottom-->
             <div class="header-bottom"> 
-                <div class="">
-                    <div class="each-search-filter" style="width: 220px;">
-                        <div class="search-filter">
-                            Địa điểm
-                        </div>
-                        <div>
-                            <div class="search-filter-sub">
-                                Tìm kiếm điểm đến
-                            </div>                                                
+                <form action="${pageContext.request.contextPath}/search" method="get" class="search-form">
+                    <div class="search-field" style="width: 220px;">
+                        <div class="each-search-filter">
+                            <div class="search-filter">
+                                Địa điểm
+                            </div>
+                            <input type="text" name="keyword" placeholder="Tìm kiếm điểm đến" class="search-input">
                         </div>
                     </div>
-                </div>
-                <div class="" role="button" tabindex="0" aria-expanded="false" style="width: 144px;">
-                    <div class="each-search-filter">
-                        <div class="search-filter">
-                            Nhận phòng
-                        </div>
-                        <div>
-                            <div class="search-filter-sub">
-                                Thêm ngày
-                            </div>                                                       
-                        </div>                                                   
-                    </div>                                                
-                </div>
-                <div class="" role="button" tabindex="0" aria-expanded="false" style="width: 120px;">
-                    <div class="each-search-filter">
-                        <div class="search-filter">
-                            Trả phòng
-                        </div>
-                        <div>
-                            <div class="search-filter-sub">
-                                Thêm ngày
-                            </div>                                                       
-                        </div>                                                
-                    </div>                                               
-                </div>
-                <div class="" role="button" tabindex="0" aria-expanded="false" style="width: 280px;">
-                    <div class="each-search-filter">
-                        <div class="search-filter">
-                            Khách
-                        </div>
-                        <div>
-                            <div class="search-filter-sub">
-                                Thêm khách
-                            </div>                                                           
-                        </div>                                                        
-                    </div>   
-                    <button class="" type="button" data-testid="structured-search-input-search-button" aria-label="Tìm kiếm">
-                        <div class="" data-icon="true" data-testid="little-search-icon" style="border-radius: 50px; transform: none; transform-origin: 50% 50% 0px;">
-                            <div style="transform: none; transform-origin: 50% 50% 0px;">
-                                <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="presentation" focusable="false" style="display: block; fill: none; height: 16px; width: 16px; stroke: currentcolor; stroke-width: 4; overflow: visible;">
-                                <path d="m20.666 20.666 10 10"></path>
-                                <path d="m24.0002 12.6668c0 6.2593-5.0741 11.3334-11.3334 11.3334-6.2592 0-11.3333-5.0741-11.3333-11.3334 0-6.2592 5.0741-11.3333 11.3333-11.3333 6.2593 0 11.3334 5.0741 11.3334 11.3333z" fill="none"></path>
-                                </svg>
+                    <div class="search-field" style="width: 144px;">
+                        <div class="each-search-filter">
+                            <div class="search-filter">
+                                Nhận phòng
                             </div>
+                            <input type="date" name="checkin" class="search-input">
                         </div>
-                    </button>
-                </div>                                                 
+                    </div>
+                    <div class="search-field" style="width: 120px;">
+                        <div class="each-search-filter">
+                            <div class="search-filter">
+                                Trả phòng
+                            </div>
+                            <input type="date" name="checkout" class="search-input">
+                        </div>
+                    </div>
+                    <div class="search-field" style="width: 280px;">
+                        <div class="each-search-filter">
+                            <div class="search-filter">
+                                Khách
+                            </div>
+                            <input type="number" name="guests" min="1" max="20" placeholder="Thêm khách" class="search-input">
+                        </div>
+                        <button class="search-button" type="submit" aria-label="Tìm kiếm">
+                            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="presentation" focusable="false" style="display: block; fill: none; height: 16px; width: 16px; stroke: currentcolor; stroke-width: 4; overflow: visible;">
+                            <path d="m20.666 20.666 10 10"></path>
+                            <path d="m24.0002 12.6668c0 6.2593-5.0741 11.3334-11.3334 11.3334-6.2592 0-11.3333-5.0741-11.3333-11.3334 0-6.2592 5.0741-11.3333 11.3333-11.3333 6.2593 0 11.3334 5.0741 11.3334 11.3333z" fill="none"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
             </div>                                                
         </div>
     </header>
