@@ -51,7 +51,7 @@ public class LoginController extends HttpServlet {
             }
 
             boolean ok;
-            // Nếu PasswordHash là BCrypt thì verify, ngược lại so sánh thường (cho giai đoạn đầu dev)
+            // If PasswordHash is BCrypt -> verify, else fallback to plain (for early dev)
             if (PasswordUtil.looksLikeBCrypt(user.getPasswordHash())) {
                 ok = PasswordUtil.check(password, user.getPasswordHash());
             } else {
@@ -64,21 +64,19 @@ public class LoginController extends HttpServlet {
                 return;
             }
 
-            // ✅ Đăng nhập thành công
+            // Login success
             HttpSession session = request.getSession(true);
             session.setAttribute("user", user);
             // Mặc định sau khi login, luôn vào chế độ Guest trên UI
             session.setAttribute("mode", "Guest");
 
-            // ✅ Điều hướng theo vai trò
+            // Redirect based on role (Guest/Host/Admin)
             String role = user.getRole();
             if ("Admin".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard"); return;
             } else {
-                // ✅ Sau khi login thành công → load danh sách qua servlet /search
-                response.sendRedirect(request.getContextPath() + "/search");
+                response.sendRedirect(request.getContextPath() + "/home.jsp"); return;
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Có lỗi hệ thống. Vui lòng thử lại sau.");
