@@ -15,6 +15,7 @@ public class Listing {
     private int maxGuests;
     private Date createdAt;
     private String status;
+    private String firstImage;
 
     public int getListingID() {
         return listingID;
@@ -95,4 +96,13 @@ public class Listing {
     public void setStatus(String status) {
         this.status = status;
     }
+    
+    
+    public String getFirstImage() {
+    return firstImage;
+}
+
+public void setFirstImage(String firstImage) {
+    this.firstImage = firstImage;
+}
 }

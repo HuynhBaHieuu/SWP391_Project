@@ -14,7 +14,8 @@ public class ListingService implements IListingService {
     }
 
     @Override
-    public Integer createListing(int hostId, String title, String description, String address, String city, BigDecimal pricePerNight, int maxGuests) throws SQLException {
+    public Integer createListing(int hostId, String title, String description,
+                                 String address, String city, BigDecimal pricePerNight, int maxGuests) throws SQLException {
         return listingDAO.createListing(hostId, title, description, address, city, pricePerNight, maxGuests);
     }
 
@@ -34,7 +35,18 @@ public class ListingService implements IListingService {
     }
 
     @Override
-    public boolean updateListing(int listingId, String title, String description, String address, String city, BigDecimal pricePerNight, int maxGuests, String status) throws SQLException {
+    public boolean updateListing(int listingId, String title, String description,
+                                 String address, String city, BigDecimal pricePerNight, int maxGuests, String status) throws SQLException {
         return listingDAO.updateListing(listingId, title, description, address, city, pricePerNight, maxGuests, status);
+    }
+
+    // ✅ Thêm mới: lấy toàn bộ danh sách nhà
+    public List<Listing> getAllListings() throws SQLException {
+        return listingDAO.getAllListings();
+    }
+
+    // ✅ Thêm mới: tìm kiếm nhà theo từ khóa (Title, City, Address, Description)
+    public List<Listing> searchListings(String keyword) throws SQLException {
+        return listingDAO.searchListings(keyword);
     }
 }

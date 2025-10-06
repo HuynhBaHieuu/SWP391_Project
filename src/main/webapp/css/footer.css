@@ -1,88 +1,174 @@
-html, body { height: 100%; margin: 0; }
-body { min-height: 100dvh; display: flex; flex-direction: column; }
-main { flex: 1; } /* phần nội dung chính */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+body {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+main {
+    flex: 1;
+} /* phần nội dung chính */
 
 :root{
-  --text:#222;
-  --muted:#717171;
-  --border:#e5e5e5;
-  --link:#222;
-  --link-hover:#000;
+    --text:#222;
+    --muted:#717171;
+    --border:#e5e5e5;
+    --link:#222;
+    --link-hover:#000;
 }
 
 /* Footer wrapper */
 .ab-footer{
-  position: relative;
-  background:#fff;
-  color:var(--text);
-  border-top:1px solid var(--border);
-  margin-top: clamp(24px, 6vh, 64px);      /* tạo khoảng cách với nội dung phía trên */
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-  box-shadow: inset 0 1px 0 rgba(0,0,0,.04); /* nhẹ nhàng tách khỏi phần trên */
-  isolation:isolate; /* tránh z-index lạ từ header */
+    position: relative;
+    background:#fff;
+    color:var(--text);
+    border-top:1px solid var(--border);
+    margin-top: clamp(24px, 6vh, 64px);      /* tạo khoảng cách với nội dung phía trên */
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    box-shadow: inset 0 1px 0 rgba(0,0,0,.04); /* nhẹ nhàng tách khỏi phần trên */
+    isolation:isolate; /* tránh z-index lạ từ header */
 }
 
 /* CHỈ áp dụng container bên trong footer để không ảnh hưởng nơi khác */
-.ab-footer .container{ max-width:1180px; margin:auto; padding:0 24px; }
+.ab-footer .container{
+    max-width:1180px;
+    margin:auto;
+    padding:0 24px;
+}
 
 /* Heading row */
 .ab-footer__heading{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:60px 0 20px;    /* tăng padding trên và dưới */
-  border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:60px 0 20px;    /* tăng padding trên và dưới */
+    border-bottom:1px solid var(--border);
 }
 .ab-footer__heading h2{
-  font-size:28px; font-weight:700; margin:0;
+    font-size:28px;
+    font-weight:700;
+    margin:0;
 }
-.arrows{ display:flex; gap:8px; }
+.arrows{
+    display:flex;
+    gap:8px;
+}
 .arrow-btn{
-  width:34px; height:34px; border-radius:999px; border:1px solid var(--border);
-  background:#fff; color:#000; display:grid; place-items:center; cursor:pointer;
-  transition: background .15s ease;
+    width:34px;
+    height:34px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:#fff;
+    color:#000;
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+    transition: background .15s ease;
 }
-.arrow-btn:hover{ background:#f7f7f7; }
+.arrow-btn:hover{
+    background:#f7f7f7;
+}
 
 /* Link columns */
 .ab-footer__links{
-  display:grid; gap:24px; padding:24px 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+    display:grid;
+    gap:24px;
+    padding:24px 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .ab-footer__links .col h3{
-  font-size:16px; font-weight:700; margin:0 0 10px;
+    font-size:16px;
+    font-weight:700;
+    margin:0 0 10px;
 }
 .ab-footer__links ul{
-  list-style:none; padding:0; margin:0; display:grid; gap:10px;
+    list-style:none;
+    padding:0;
+    margin:0;
+    display:grid;
+    gap:10px;
 }
 .ab-footer__links a{
-  color:var(--link); text-decoration:none; font-size:14px; line-height:1.5;
+    color:var(--link);
+    text-decoration:none;
+    font-size:14px;
+    line-height:1.5;
 }
-.ab-footer__links a:hover{ text-decoration:underline; color:var(--link-hover); }
-.ab-footer__links li{ color:var(--muted); }
+.ab-footer__links a:hover{
+    text-decoration:underline;
+    color:var(--link-hover);
+}
+.ab-footer__links li{
+    color:var(--muted);
+}
 
 /* Bottom bar */
-.ab-footer__bottom{ border-top:1px solid var(--border); }
+.ab-footer__bottom{
+    border-top:1px solid var(--border);
+}
 .ab-footer__bottom .bottom-inner{
-  display:flex; justify-content:space-between; align-items:center;
-  padding:24px 0;         /* tăng padding trên và dưới */
-  gap:16px; flex-wrap:wrap;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:24px 0;         /* tăng padding trên và dưới */
+    gap:16px;
+    flex-wrap:wrap;
 }
 .ab-footer__bottom .left,
-.ab-footer__bottom .right{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.ab-footer__bottom .left a, .inline-btn{
-  color:var(--link); text-decoration:none; font-size:14px;
+.ab-footer__bottom .right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
 }
-.ab-footer__bottom .left a:hover, .inline-btn:hover{ text-decoration:underline; }
-.dot{ color:var(--muted); }
-.inline-btn{ display:inline-flex; align-items:center; gap:6px; padding:6px 8px; border-radius:8px; }
-.social{ display:inline-grid; place-items:center; width:32px; height:32px; border-radius:999px; color:#222; text-decoration:none; }
-.social:hover{ background:#f2f2f2; }
+.ab-footer__bottom .left a, .inline-btn{
+    color:var(--link);
+    text-decoration:none;
+    font-size:14px;
+}
+.ab-footer__bottom .left a:hover, .inline-btn:hover{
+    text-decoration:underline;
+}
+.dot{
+    color:var(--muted);
+}
+.inline-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 8px;
+    border-radius:8px;
+}
+.social{
+    display:inline-grid;
+    place-items:center;
+    width:32px;
+    height:32px;
+    border-radius:999px;
+    color:#222;
+    text-decoration:none;
+}
+.social:hover{
+    background:#f2f2f2;
+}
 
 /* Responsive */
 @media (max-width: 900px){
-  .ab-footer__links{ grid-template-columns:1fr 1fr; }
+    .ab-footer__links{
+        grid-template-columns:1fr 1fr;
+    }
 }
 @media (max-width: 640px){
-  .ab-footer__links{ grid-template-columns:1fr; }
-  .ab-footer__heading{ padding:20px 0 8px; }
-  .ab-footer__bottom .bottom-inner{ flex-direction:column; align-items:flex-start; }
+    .ab-footer__links{
+        grid-template-columns:1fr;
+    }
+    .ab-footer__heading{
+        padding:20px 0 8px;
+    }
+    .ab-footer__bottom .bottom-inner{
+        flex-direction:column;
+        align-items:flex-start;
+    }
 }
