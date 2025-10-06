@@ -17,4 +17,10 @@ public interface IListingService {
 
     boolean updateListing(int listingId, String title, String description,
                           String address, String city, BigDecimal pricePerNight, int maxGuests, String status) throws SQLException;
+
+    // ✅ Thêm mới: lấy tất cả danh sách nhà
+    List<Listing> getAllListings() throws SQLException;
+
+    // ✅ Thêm mới: tìm kiếm nhà theo từ khóa (Title, City, Address, Description)
+    List<Listing> searchListings(String keyword) throws SQLException;
 }

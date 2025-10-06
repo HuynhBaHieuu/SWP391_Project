@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee 
-                             https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                             https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+
+    <!-- Session timeout -->
     <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
+        <session-timeout>30</session-timeout>
     </session-config>
+
+    <!-- Trang mặc định -->
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>
+        <welcome-file>search</welcome-file>
     </welcome-file-list>
-    <!-- Servlet for ForgotPasswordController -->
+    
+
+    <!-- Forgot Password -->
     <servlet>
         <servlet-name>ForgotPasswordController</servlet-name>
         <servlet-class>controller.ForgotPasswordController</servlet-class>
@@ -20,7 +26,8 @@
         <servlet-name>ForgotPasswordController</servlet-name>
         <url-pattern>/forgot</url-pattern>
     </servlet-mapping>
-    <!-- Servlet for ResetPasswordController -->
+
+    <!-- Reset Password -->
     <servlet>
         <servlet-name>ResetPasswordController</servlet-name>
         <servlet-class>controller.ResetPasswordController</servlet-class>
@@ -29,7 +36,6 @@
         <servlet-name>ResetPasswordController</servlet-name>
         <url-pattern>/reset</url-pattern>
     </servlet-mapping>
-    
     <!-- Character Encoding Filter -->
     <filter>
         <filter-name>CharacterEncodingFilter</filter-name>
