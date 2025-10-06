@@ -1,4 +1,12 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Footer</title>
+</head>
+<body>
+
 <link rel="stylesheet" href="<%= request.getContextPath()%>/css/footer.css"/>
 <link rel="icon" type="image/jpg" href="image/logo.jpg">
 
@@ -15,7 +23,7 @@
                 <li><a href="<%=request.getContextPath()%>/Support/transaction_protection.jsp">Bảo vệ giao dịch</a></li>
                 <li><a href="<%=request.getContextPath()%>/Support/anti_discrimination.jsp">Chống phân biệt đối xử</a></li>
                 <li><a href="<%=request.getContextPath()%>/Support/support_for_people_with_disabilities.jsp">Hỗ trợ người khuyết tật</a></li>
-                <li><a href="<%=request.getContextPath()%>/Support/cancellation_options.jsp">Các tuỳ chọn huỷ</a></li>
+                <li><a href="<%=request.getContextPath()%>/Support/cancellation_options.jsp">Các tùy chọn hủy</a></li>
                 <li><a href="<%=request.getContextPath()%>/Support/report_of_community_concerns.jsp">Báo cáo lo ngại của khu dân cư</a></li>
             </ul>
         </nav>
@@ -30,7 +38,7 @@
                 <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/hosting_resources.jsp">Tài nguyên về đón tiếp khách</a></li>
                 <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/community_forum.jsp">Diễn đàn cộng đồng</a></li>
                 <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/responsible_hosting.jsp">Đón tiếp khách có trách nhiệm</a></li>
-                <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/hosting_course.jsp">Tham gia khóa học miễn phí về công việc Đón tiếp khách</a></li>
+                <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/hosting_course.jsp">Tham gia khóa học miễn phí về công việc đón tiếp khách</a></li>
                 <li><a href="<%=request.getContextPath()%>/go2bnb_footer/hosting/host_support.jsp">Tìm host hỗ trợ</a></li>
             </ul>
         </nav>

@@ -1,17 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee 
-                             https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                             https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+
+    <!-- Session timeout -->
     <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
+        <session-timeout>30</session-timeout>
     </session-config>
+    
+    <!-- JSP Configuration for UTF-8 -->
+    <jsp-config>
+        <jsp-property-group>
+            <url-pattern>*.jsp</url-pattern>
+            <page-encoding>UTF-8</page-encoding>
+        </jsp-property-group>
+    </jsp-config>
+    
+    <!-- Default encoding for all servlets -->
+    <servlet>
+        <servlet-name>default</servlet-name>
+        <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
+        <init-param>
+            <param-name>debug</param-name>
+            <param-value>0</param-value>
+        </init-param>
+        <init-param>
+            <param-name>listings</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>fileEncoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </servlet>
+
+    <!-- Trang mặc định -->
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>
+        <welcome-file>home</welcome-file>
     </welcome-file-list>
-    <!-- Servlet for ForgotPasswordController -->
+    
+
+    <!-- Forgot Password -->
     <servlet>
         <servlet-name>ForgotPasswordController</servlet-name>
         <servlet-class>controller.ForgotPasswordController</servlet-class>
@@ -20,7 +52,8 @@
         <servlet-name>ForgotPasswordController</servlet-name>
         <url-pattern>/forgot</url-pattern>
     </servlet-mapping>
-    <!-- Servlet for ResetPasswordController -->
+
+    <!-- Reset Password -->
     <servlet>
         <servlet-name>ResetPasswordController</servlet-name>
         <servlet-class>controller.ResetPasswordController</servlet-class>
@@ -29,7 +62,6 @@
         <servlet-name>ResetPasswordController</servlet-name>
         <url-pattern>/reset</url-pattern>
     </servlet-mapping>
-    
     <!-- Character Encoding Filter -->
     <filter>
         <filter-name>CharacterEncodingFilter</filter-name>
@@ -45,11 +77,11 @@
     </filter>
     <filter-mapping>
         <filter-name>CharacterEncodingFilter</filter-name>
-        <url-pattern>*.jsp</url-pattern>
+        <url-pattern>/login</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>CharacterEncodingFilter</filter-name>
-        <url-pattern>/chatbot-api</url-pattern>
+        <url-pattern>/register</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>CharacterEncodingFilter</filter-name>
@@ -58,5 +90,53 @@
     <filter-mapping>
         <filter-name>CharacterEncodingFilter</filter-name>
         <url-pattern>/reset</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/chatbot-api</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/home</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/search</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/profile</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/logout</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/verify</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/uploadAvatar</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/updateProfile</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/removeAvatar</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/oauth2/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/host/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/admin/*</url-pattern>
     </filter-mapping>
 </web-app>

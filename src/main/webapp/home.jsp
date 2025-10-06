@@ -1,14 +1,10 @@
-<%-- 
-    Document   : home
-    Created on : Sep 20, 2025, 9:21:38 PM
-    Author     : Administrator
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*, model.Listing" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
     <head>
-        <title>GO2BNB</title>
+        <title>GO2BNB - Trang chủ</title>
         <link rel="icon" type="image/jpg" href="image/logo.jpg">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" href="css/home.css"/>
@@ -17,12 +13,53 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
     </head>
     <body>
-        <%@ include file="../design/header.jsp" %>
-        <main style="margin-top: 120px;">
-            <!-- Nội dung chính ở đây -->
-            <h1>Chào mừng đến với Go2BnB!</h1>
-            <p>Đây là trang chủ. Thêm nội dung ở đây...</p>
+        <%@ include file="design/header.jsp" %>
+
+        <main>
+            <h1>
+                <c:choose>
+                    <c:when test="${not empty keyword}">
+                        Kết quả tìm kiếm cho "<c:out value="${keyword}"/>"
+                    </c:when>
+                    <c:otherwise>
+                        Các nơi lưu trú nổi bật
+                    </c:otherwise>
+                </c:choose>
+            </h1>
+
+            <c:choose>
+                <c:when test="${not empty listings}">
+                    <div class="listing-grid">
+                        <c:forEach var="item" items="${listings}">
+                            <div class="listing-card fade-in">
+                                <div class="image-container">
+                                    <img class="listing-image" src="${item.firstImage}" alt="Ảnh nhà" />
+                                    <div class="overlay">
+                                        <a href="${pageContext.request.contextPath}/customer/detail.jsp?id=${item.listingID}" class="view-btn">Xem chi tiết</a>
+                                    </div>
+                                </div>
+
+                                <div class="listing-body">
+                                    <div class="listing-title"><c:out value="${item.title}" /></div>
+                                    <div class="listing-city"><c:out value="${item.city}" /></div>
+                                    <div class="listing-price">₫<c:out value="${item.pricePerNight}" /> / đêm</div>
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="empty-result">Không tìm thấy kết quả nào.</div>
+                </c:otherwise>
+            </c:choose>
         </main>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll('.fade-in').forEach((el, i) => {
+                    setTimeout(() => el.classList.add('visible'), i * 100);
+                });
+            });
+        </script>
         <%@ include file="../design/footer.jsp" %>
         <jsp:include page="chatbot/chatbot.jsp" />
         
