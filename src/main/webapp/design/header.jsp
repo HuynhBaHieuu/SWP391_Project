@@ -118,7 +118,7 @@
             <!--header top-->
             <div class="header-top">
                 <!-- logo -->
-                <a class="" aria-label="Trang chủ" href="home.jsp" style="">
+                <a class="" aria-label="Trang chủ" href="<%= (currentUser != null) ? (request.getContextPath() + "/home") : (request.getContextPath() + "/login.jsp")%>" style="">
                     <img src="${pageContext.request.contextPath}/image/logo.png" alt="logo" width="150" style="display:block;">
                 </a>
 
@@ -185,10 +185,10 @@
                         <!-- Dropdown menu -->
                         <div id="dropdown-menu" style="display: none; position: absolute; background-color: white; border: 1px solid #ddd; border-radius: 8px; padding: 10px;">
                             <!-- Đổi id trùng lặp thành class để tránh lỗi DOM -->
-                            <a href="#" class="menu-item user-profile">Danh sách yêu thích</a>
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/WishlistServlet") : (request.getContextPath() + "/login.jsp")%>" class="menu-item user-profile">Danh sách yêu thích</a>
                             <a href="#" class="menu-item user-profile">Chuyến đi</a>
                             <a href="#" class="menu-item user-profile">Tin nhắn</a>
-                            <a href="#" class="menu-item user-profile">Hồ sơ</a>
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>" class="menu-item user-profile">Hồ sơ</a>
                             <a href="#" class="menu-item user-profile">Thông báo</a>
                             <a href="#" class="menu-item user-profile">Cài đặt tài khoản</a>
                             <a href="#" class="menu-item user-profile">Ngôn ngữ và loại tiền tệ</a>

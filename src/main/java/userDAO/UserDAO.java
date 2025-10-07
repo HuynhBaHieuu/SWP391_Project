@@ -10,6 +10,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import model.Listing;
 
 public class UserDAO {
 
@@ -322,6 +325,85 @@ public class UserDAO {
             ps.setInt(1, userId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // Thêm sản phẩm vào Wishlist
+    public boolean addToWishlist(int guestId, int listingId) {
+        String sql = "INSERT INTO Wishlist(GuestID, ListingID) VALUES (?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, guestId);
+            ps.setInt(2, listingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            // UNIQUE constraint nếu đã tồn tại sẽ throw
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Lấy danh sách sản phẩm yêu thích theo GuestID
+    public List<Listing> getWishlistByUser(int guestId) {
+        List<Listing> list = new ArrayList<>();
+
+        String sql = "SELECT l.* FROM Wishlist w " +
+                     "JOIN Listings l ON w.ListingID = l.ListingID " +
+                     "WHERE w.GuestID = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, guestId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Listing l = new Listing();
+
+                l.setListingID(rs.getInt("ListingID"));
+                l.setHostID(rs.getInt("HostID"));
+                l.setTitle(rs.getString("Title"));
+                l.setDescription(rs.getString("Description"));
+                l.setAddress(rs.getString("Address"));
+                l.setCity(rs.getString("City"));
+                l.setPricePerNight(rs.getBigDecimal("PricePerNight"));
+                l.setMaxGuests(rs.getInt("MaxGuests"));
+                l.setCreatedAt(rs.getDate("CreatedAt"));
+                l.setStatus(rs.getString("Status"));
+                list.add(l);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
+     public List<Integer> getAllListingIDByUser(int userId) {
+        List<Integer> wishlist = new ArrayList<>();
+        String sql = "SELECT ListingID FROM Wishlist WHERE GuestID=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                wishlist.add(rs.getInt("ListingID"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return wishlist;
+    }
+    
+    public boolean removeFromWishlist(int guestId, int listingId) {
+        String sql = "DELETE FROM Wishlist WHERE GuestID=? AND ListingID=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, guestId);
+            ps.setInt(2, listingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            // UNIQUE constraint nếu đã tồn tại sẽ throw
             e.printStackTrace();
             return false;
         }
