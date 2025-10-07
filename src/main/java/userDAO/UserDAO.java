@@ -9,7 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Statement;
+import java.util.List;
 
 public class UserDAO {
 
@@ -324,6 +324,149 @@ public class UserDAO {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    /**
+     * Đếm tổng số người dùng theo tiêu chí tìm kiếm
+     */
+    public static int countAll(String q, String status, String role) throws SQLException {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Users WHERE 1=1");
+        
+        if (q != null && !q.trim().isEmpty()) {
+            sql.append(" AND (FullName LIKE ? OR Email LIKE ?)");
+        }
+        
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND IsActive = ?");
+        }
+        
+        if (role != null && !role.trim().isEmpty()) {
+            sql.append(" AND Role = ?");
+        }
+        
+        try (Connection con = DBConnection.getConnection(); 
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            
+            int paramIndex = 1;
+            
+            if (q != null && !q.trim().isEmpty()) {
+                String searchPattern = "%" + q.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            
+            if (status != null && !status.trim().isEmpty()) {
+                boolean isActive = "active".equalsIgnoreCase(status.trim());
+                ps.setBoolean(paramIndex++, isActive);
+            }
+            
+            if (role != null && !role.trim().isEmpty()) {
+                ps.setString(paramIndex++, role.trim());
+            }
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+
+    /**
+     * Lấy danh sách người dùng theo phân trang và tiêu chí tìm kiếm
+     */
+    public static List<User> findAll(String q, String status, String role, int page, int size) throws SQLException {
+        List<User> users = new java.util.ArrayList<>();
+        
+        StringBuilder sql = new StringBuilder("SELECT * FROM Users WHERE 1=1");
+        
+        if (q != null && !q.trim().isEmpty()) {
+            sql.append(" AND (FullName LIKE ? OR Email LIKE ?)");
+        }
+        
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND IsActive = ?");
+        }
+        
+        if (role != null && !role.trim().isEmpty()) {
+            sql.append(" AND Role = ?");
+        }
+        
+        sql.append(" ORDER BY CreatedAt DESC");
+        sql.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        
+        try (Connection con = DBConnection.getConnection(); 
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            
+            int paramIndex = 1;
+            
+            if (q != null && !q.trim().isEmpty()) {
+                String searchPattern = "%" + q.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            
+            if (status != null && !status.trim().isEmpty()) {
+                boolean isActive = "active".equalsIgnoreCase(status.trim());
+                ps.setBoolean(paramIndex++, isActive);
+            }
+            
+            if (role != null && !role.trim().isEmpty()) {
+                ps.setString(paramIndex++, role.trim());
+            }
+            
+            // Phân trang
+            int offset = (page - 1) * size;
+            ps.setInt(paramIndex++, offset);
+            ps.setInt(paramIndex++, size);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                UserDAO dao = new UserDAO();
+                while (rs.next()) {
+                    users.add(dao.mapRow(rs));
+                }
+            }
+        }
+        
+        return users;
+    }
+
+    /**
+     * Cập nhật trạng thái người dùng
+     */
+    public static boolean updateStatus(int userId, String status) throws SQLException {
+        boolean isActive = "active".equalsIgnoreCase(status.trim());
+        String sql = "UPDATE Users SET IsActive = ? WHERE UserID = ?";
+        
+        try (Connection con = DBConnection.getConnection(); 
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setBoolean(1, isActive);
+            ps.setInt(2, userId);
+            
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Cập nhật vai trò người dùng
+     */
+    public static boolean updateRole(int userId, String role) throws SQLException {
+        // Validate role
+        if (!role.equals("Guest") && !role.equals("Host") && !role.equals("Admin")) {
+            throw new IllegalArgumentException("Vai trò không hợp lệ: " + role);
+        }
+        
+        String sql = "UPDATE Users SET Role = ?, IsHost = ?, IsAdmin = ? WHERE UserID = ?";
+        
+        try (Connection con = DBConnection.getConnection(); 
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setString(1, role);
+            ps.setBoolean(2, "Host".equals(role));
+            ps.setBoolean(3, "Admin".equals(role));
+            ps.setInt(4, userId);
+            
+            return ps.executeUpdate() > 0;
         }
     }
 }

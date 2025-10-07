@@ -173,4 +173,125 @@ public class ListingDAO {
         }
         return listings;
     }
+
+    // ====== ADMIN METHODS ======
+    
+    // Count all listings with search and status filter
+    public int countAll(String search, String status) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Listings WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND (Title LIKE ? OR Description LIKE ? OR City LIKE ? OR Address LIKE ?)");
+            String searchPattern = "%" + search.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+        
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND Status = ?");
+            params.add(status.trim());
+        }
+        
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
+    // Find all listings with search, status filter, and pagination
+    public List<Listing> findAll(String search, String status, int offset, int limit) {
+        List<Listing> listings = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM Listings WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND (Title LIKE ? OR Description LIKE ? OR City LIKE ? OR Address LIKE ?)");
+            String searchPattern = "%" + search.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+        
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND Status = ?");
+            params.add(status.trim());
+        }
+        
+        sql.append(" ORDER BY CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        params.add(offset);
+        params.add(limit);
+        
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    listings.add(mapResultSetToListing(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return listings;
+    }
+    
+    // Approve a listing
+    public boolean approve(int listingId) {
+        String sql = "UPDATE Listings SET Status = 'approved' WHERE ListingID = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, listingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    // Reject a listing
+    public boolean reject(int listingId) {
+        String sql = "UPDATE Listings SET Status = 'rejected' WHERE ListingID = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, listingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    // Toggle listing status
+    public boolean toggleStatus(int listingId, String newStatus) {
+        String sql = "UPDATE Listings SET Status = ? WHERE ListingID = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setInt(2, listingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
