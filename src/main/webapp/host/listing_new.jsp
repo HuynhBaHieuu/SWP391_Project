@@ -4,6 +4,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css">
   <title>Tạo nơi lưu trú</title>
   <style>
     .wrap{max-width:980px;margin:32px auto;padding:0 16px;}
