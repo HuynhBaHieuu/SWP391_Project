@@ -2,6 +2,7 @@ package userDAO;
 
 import dao.DBConnection;
 import model.User;
+import model.Listing;
 import utils.PasswordUtil;
 
 import java.sql.Connection;
@@ -9,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.List;
+import java.util.ArrayList;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -345,56 +348,51 @@ public class UserDAO {
         }
     }
 
-    // Lấy danh sách sản phẩm yêu thích theo GuestID
     public List<Listing> getWishlistByUser(int guestId) {
         List<Listing> list = new ArrayList<>();
-
-        String sql = "SELECT l.* FROM Wishlist w " +
-                     "JOIN Listings l ON w.ListingID = l.ListingID " +
-                     "WHERE w.GuestID = ?";
-
+        String sql = "SELECT l.* FROM Wishlist w JOIN Listings l ON w.ListingID = l.ListingID WHERE w.GuestID = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, guestId);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                Listing l = new Listing();
-
-                l.setListingID(rs.getInt("ListingID"));
-                l.setHostID(rs.getInt("HostID"));
-                l.setTitle(rs.getString("Title"));
-                l.setDescription(rs.getString("Description"));
-                l.setAddress(rs.getString("Address"));
-                l.setCity(rs.getString("City"));
-                l.setPricePerNight(rs.getBigDecimal("PricePerNight"));
-                l.setMaxGuests(rs.getInt("MaxGuests"));
-                l.setCreatedAt(rs.getDate("CreatedAt"));
-                l.setStatus(rs.getString("Status"));
-                list.add(l);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Listing l = new Listing();
+                    l.setListingID(rs.getInt("ListingID"));
+                    l.setHostID(rs.getInt("HostID"));
+                    l.setTitle(rs.getString("Title"));
+                    l.setDescription(rs.getString("Description"));
+                    l.setAddress(rs.getString("Address"));
+                    l.setCity(rs.getString("City"));
+                    l.setPricePerNight(rs.getBigDecimal("PricePerNight"));
+                    l.setMaxGuests(rs.getInt("MaxGuests"));
+                    l.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    l.setStatus(rs.getString("Status"));
+                    list.add(l);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return list;
     }
-    
-     public List<Integer> getAllListingIDByUser(int userId) {
+
+    public List<Integer> getAllListingIDByUser(int userId) {
         List<Integer> wishlist = new ArrayList<>();
         String sql = "SELECT ListingID FROM Wishlist WHERE GuestID=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                wishlist.add(rs.getInt("ListingID"));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    wishlist.add(rs.getInt("ListingID"));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return wishlist;
     }
-    
+
     public boolean removeFromWishlist(int guestId, int listingId) {
         String sql = "DELETE FROM Wishlist WHERE GuestID=? AND ListingID=?";
         try (Connection conn = DBConnection.getConnection();
@@ -407,5 +405,190 @@ public class UserDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * Đếm tổng số người dùng theo tiêu chí tìm kiếm
+     */
+    public static int countAll(String q, String status, String role) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(*) FROM users WHERE 1=1");
+
+        List<Object> params = new java.util.ArrayList<>();
+
+        if (q != null && !q.trim().isEmpty()) {
+            sql.append(" AND (full_name LIKE ? ESCAPE '\\\\' OR email LIKE ? ESCAPE '\\\\')");
+        }
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND status = ?");
+            params.add(status.trim());
+        }
+        if (role != null && !role.trim().isEmpty()) {
+            sql.append(" AND role = ?");
+            params.add(role.trim());
+        }
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int idx = 1;
+            if (q != null && !q.trim().isEmpty()) {
+                String pattern = "%" + escapeLikeV2(q) + "%";
+                ps.setString(idx++, pattern);
+                ps.setString(idx++, pattern);
+            }
+            for (Object p : params) {
+                ps.setObject(idx++, p);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+
+    /**
+     * Lấy danh sách người dùng theo phân trang và tiêu chí tìm kiếm
+     */
+    public static List<User> findAll(String q, String status, String role, int page, int size) throws SQLException {
+        if (page < 1) page = 1;
+        if (size < 1) size = 10;
+        int offset = (page - 1) * size;
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT id, full_name, email, avatar_url, role, status, created_at ");
+        sql.append("FROM users WHERE 1=1");
+
+        List<Object> tailParams = new java.util.ArrayList<>();
+
+        if (q != null && !q.trim().isEmpty()) {
+            sql.append(" AND (full_name LIKE ? ESCAPE '\\\\' OR email LIKE ? ESCAPE '\\\\')");
+        }
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND status = ?");
+            tailParams.add(status.trim());
+        }
+        if (role != null && !role.trim().isEmpty()) {
+            sql.append(" AND role = ?");
+            tailParams.add(role.trim());
+        }
+
+        sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int idx = 1;
+            if (q != null && !q.trim().isEmpty()) {
+                String pattern = "%" + escapeLikeV2(q) + "%";
+                ps.setString(idx++, pattern);
+                ps.setString(idx++, pattern);
+            }
+            for (Object p : tailParams) {
+                ps.setObject(idx++, p);
+            }
+            ps.setInt(idx++, size);
+            ps.setInt(idx, offset);
+
+            List<User> result = new java.util.ArrayList<>();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.add(mapRowV2(rs));
+                }
+            }
+            return result;
+        }
+    }
+
+    /**
+     * Cập nhật trạng thái người dùng
+     */
+    public static boolean updateStatus(int userId, String status) throws SQLException {
+        String sql = "UPDATE users SET status = ? WHERE id = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, status.trim());
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Cập nhật vai trò người dùng
+     */
+    public static boolean updateRole(int userId, String role) throws SQLException {
+        String sql = "UPDATE users SET role = ? WHERE id = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, role.trim());
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // --- New CRUD aligned to MySQL users schema ---
+    public static boolean create(User u) throws SQLException {
+        String sql = "INSERT INTO users (full_name, email, avatar_url, role, status, created_at) VALUES (?,?,?,?,?,?)";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+
+            java.sql.Timestamp createdTs = u.getCreatedAtLocalDateTime() == null
+                    ? new java.sql.Timestamp(System.currentTimeMillis())
+                    : java.sql.Timestamp.valueOf(u.getCreatedAtLocalDateTime());
+
+            ps.setString(1, u.getFullName());
+            ps.setString(2, u.getEmail());
+            ps.setString(3, u.getAvatarUrl());
+            ps.setString(4, u.getRole());
+            ps.setString(5, u.getStatus());
+            ps.setTimestamp(6, createdTs);
+
+            int affected = ps.executeUpdate();
+            if (affected > 0) {
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        u.setId(keys.getInt(1));
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public static boolean update(User u) throws SQLException {
+        String sql = "UPDATE users SET full_name = ?, email = ?, avatar_url = ?, role = ?, status = ? WHERE id = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, u.getFullName());
+            ps.setString(2, u.getEmail());
+            ps.setString(3, u.getAvatarUrl());
+            ps.setString(4, u.getRole());
+            ps.setString(5, u.getStatus());
+            ps.setInt(6, u.getId());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // --- V2 helpers for MySQL mapping ---
+    private static String escapeLikeV2(String input) {
+        if (input == null) return null;
+        String trimmed = input.trim();
+        if (trimmed.isEmpty()) return "";
+        return trimmed.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+    }
+
+    private static User mapRowV2(ResultSet rs) throws SQLException {
+        User u = new User();
+        u.setId(rs.getInt("id"));
+        u.setFullName(rs.getString("full_name"));
+        u.setEmail(rs.getString("email"));
+        u.setAvatarUrl(rs.getString("avatar_url"));
+        u.setRole(rs.getString("role"));
+        u.setStatus(rs.getString("status"));
+        java.sql.Timestamp created = rs.getTimestamp("created_at");
+        java.time.LocalDateTime createdAt = created == null ? null : created.toLocalDateTime();
+        u.setCreatedAt(createdAt);
+        return u;
     }
 }

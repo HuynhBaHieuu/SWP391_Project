@@ -1,339 +1,804 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.sql.*" %>
+<%@ page import="dao.DBConnection" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - GO2BNB</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            padding: 12px 20px;
-            margin: 5px 0;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            color: white;
-            background: rgba(255,255,255,0.1);
-            transform: translateX(5px);
-        }
-        .main-content {
-            background-color: #f8f9fa;
-            min-height: 100vh;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-        }
-        .request-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #007bff;
-        }
-        .btn-approve {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            border: none;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-        }
-        .btn-approve:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
-        }
-        .btn-reject {
-            background: linear-gradient(45deg, #dc3545, #e83e8c);
-            border: none;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-        }
-        .btn-reject:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
-        }
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/jpg" href="image/logo.jpg">
+  <title>Admin Dashboard - go2bnb</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="<%=request.getContextPath()%>/css/dashboard.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar">
-                <div class="position-sticky pt-3">
-                    <div class="text-center mb-4">
-                        <h4 class="text-white">
-                            <i class="fas fa-crown me-2"></i>Admin Panel
-                        </h4>
-                    </div>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="${pageContext.request.contextPath}/admin/dashboard">
-                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-users me-2"></i>Quản lý User
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-home me-2"></i>Quản lý Listing
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-chart-bar me-2"></i>Thống kê
-                            </a>
-                        </li>
-                        <li class="nav-item mt-4">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-
-            <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                    </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary">
-                                <i class="fas fa-download me-1"></i>Export
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Thông báo -->
-                <c:if test="${not empty success}">
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle me-2"></i>${success}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                </c:if>
-                <c:if test="${not empty error}">
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>${error}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                </c:if>
-
-                <!-- Thống kê tổng quan -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="stat-card">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-icon" style="background: linear-gradient(45deg, #007bff, #0056b3);">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <h3 class="mb-0">${stats.totalUsers}</h3>
-                                    <p class="text-muted mb-0">Tổng số User</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="stat-card">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-icon" style="background: linear-gradient(45deg, #28a745, #20c997);">
-                                    <i class="fas fa-home"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <h3 class="mb-0">${stats.totalHosts}</h3>
-                                    <p class="text-muted mb-0">Tổng số Host</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="stat-card">
-                            <div class="d-flex align-items-center">
-                                <div class="stat-icon" style="background: linear-gradient(45deg, #ffc107, #fd7e14);">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <h3 class="mb-0">${stats.pendingRequests}</h3>
-                                    <p class="text-muted mb-0">Yêu cầu chờ duyệt</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Danh sách yêu cầu trở thành host -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-user-plus me-2"></i>Yêu cầu trở thành Host
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <c:choose>
-                                    <c:when test="${empty pendingRequests}">
-                                        <div class="text-center py-5">
-                                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                                            <h5 class="text-muted">Không có yêu cầu nào đang chờ duyệt</h5>
-                                            <p class="text-muted">Tất cả yêu cầu đã được xử lý!</p>
-                                        </div>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <c:forEach var="request" items="${pendingRequests}">
-                                            <div class="request-card">
-                                                <div class="row">
-                                                    <div class="col-md-8">
-                                                        <div class="d-flex align-items-center mb-3">
-                                                            <h5 class="mb-0 me-3">${request.fullName}</h5>
-                                                            <span class="status-badge status-pending">
-                                                                <i class="fas fa-clock me-1"></i>Chờ duyệt
-                                                            </span>
-                                                        </div>
-                                                        
-                                                        <!-- Thông tin cơ bản -->
-                                                        <div class="row mb-3">
-                                                            <div class="col-md-6">
-                                                                <small class="text-muted">
-                                                                    <i class="fas fa-envelope me-1"></i>${request.email}
-                                                                </small>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <small class="text-muted">
-                                                                    <i class="fas fa-phone me-1"></i>${request.phoneNumber}
-                                                                </small>
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <!-- Thông tin xác minh -->
-                                                        <div class="verification-info mb-3">
-                                                            <h6 class="text-primary mb-2">
-                                                                <i class="fas fa-id-card me-2"></i>Thông tin xác minh
-                                                            </h6>
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <p class="mb-1"><strong>Địa chỉ:</strong> ${request.address}</p>
-                                                                    <p class="mb-1"><strong>Giấy tờ:</strong> ${request.idType} - ${request.idNumber}</p>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <p class="mb-1"><strong>Ngân hàng:</strong> ${request.bankName}</p>
-                                                                    <p class="mb-1"><strong>Số TK:</strong> ${request.bankAccount}</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <!-- Kinh nghiệm và động lực -->
-                                                        <div class="experience-info mb-3">
-                                                            <h6 class="text-success mb-2">
-                                                                <i class="fas fa-briefcase me-2"></i>Kinh nghiệm
-                                                            </h6>
-                                                            <p class="mb-2">${request.experience}</p>
-                                                            
-                                                            <h6 class="text-warning mb-2">
-                                                                <i class="fas fa-heart me-2"></i>Động lực
-                                                            </h6>
-                                                            <p class="mb-2">${request.motivation}</p>
-                                                        </div>
-                                                        
-                                                        <!-- Thông tin yêu cầu -->
-                                                        <div class="request-info">
-                                                            <small class="text-muted">
-                                                                <i class="fas fa-calendar me-1"></i>
-                                                                <fmt:formatDate value="${request.requestedAt}" pattern="dd/MM/yyyy HH:mm"/>
-                                                            </small>
-                                                            <span class="ms-3">
-                                                                <small class="text-muted">
-                                                                    <i class="fas fa-tag me-1"></i>${request.serviceType}
-                                                                </small>
-                                                            </span>
-                                                            <c:if test="${not empty request.message}">
-                                                                <div class="mt-2">
-                                                                    <small class="text-muted">
-                                                                        <i class="fas fa-comment me-1"></i>${request.message}
-                                                                    </small>
-                                                                </div>
-                                                            </c:if>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4 text-end">
-                                                        <div class="action-buttons">
-                                                            <form method="post" style="display: inline;">
-                                                                <input type="hidden" name="action" value="approve">
-                                                                <input type="hidden" name="requestId" value="${request.requestId}">
-                                                                <button type="submit" class="btn btn-approve me-2" 
-                                                                        onclick="return confirm('Bạn có chắc chắn muốn duyệt yêu cầu này?')">
-                                                                    <i class="fas fa-check me-1"></i>Duyệt
-                                                                </button>
-                                                            </form>
-                                                            <form method="post" style="display: inline;">
-                                                                <input type="hidden" name="action" value="reject">
-                                                                <input type="hidden" name="requestId" value="${request.requestId}">
-                                                                <button type="submit" class="btn btn-reject"
-                                                                        onclick="return confirm('Bạn có chắc chắn muốn từ chối yêu cầu này?')">
-                                                                    <i class="fas fa-times me-1"></i>Từ chối
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </c:forEach>
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
+  <%
+    Connection conn = null;
+    Statement stmt = null;
+    ResultSet rs = null;
+    
+    // Stats variables
+    int totalUsers = 0;
+    int totalListings = 0;
+    int totalBookings = 0;
+    double totalRevenue = 0.0;
+    
+    try {
+      // Get database connection using DBConnection class
+      conn = DBConnection.getConnection();
+      
+      if (conn != null) {
+        stmt = conn.createStatement();
+        
+        // Fetch total users (SQL Server schema)
+        rs = stmt.executeQuery("SELECT COUNT(*) as total FROM Users");
+        if (rs.next()) {
+          totalUsers = rs.getInt("total");
+        }
+        rs.close();
+        
+        // Fetch total listings (SQL Server schema)
+        rs = stmt.executeQuery("SELECT COUNT(*) as total FROM Listings");
+        if (rs.next()) {
+          totalListings = rs.getInt("total");
+        }
+        rs.close();
+        
+        // Fetch total bookings (SQL Server schema)
+        rs = stmt.executeQuery("SELECT COUNT(*) as total FROM Bookings");
+        if (rs.next()) {
+          totalBookings = rs.getInt("total");
+        }
+        rs.close();
+        
+        // Fetch total revenue (adjust column names if different in your schema)
+        rs = stmt.executeQuery("SELECT SUM(TotalAmount) as revenue FROM Bookings WHERE Status = 'completed'");
+        if (rs.next()) {
+          totalRevenue = rs.getDouble("revenue");
+        }
+        rs.close();
+      }
+      
+    } catch (Exception e) {
+      out.println("<div style='color: red; padding: 20px;'>Database connection error: " + e.getMessage() + "</div>");
+    }
+  %>
+  
+  <div class="dashboard-container" data-context="<%=request.getContextPath()%>">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <!-- Fixed logo path with context path -->
+        <a href="#" class="sidebar-logo">
+          <img src="<%=request.getContextPath()%>/images/logo.png" alt="go2bnb" style="height: 40px; width: auto;">
+        </a>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Tổng quan</div>
+          <a href="#" class="nav-item active" data-section="dashboard">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+          </a>
+          <a href="#" class="nav-item" data-section="analytics">
+            <span class="nav-icon">📈</span>
+            <span>Analytics</span>
+          </a>
         </div>
-    </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Quản lý</div>
+          <a href="#" class="nav-item" data-section="users">
+            <span class="nav-icon">👥</span>
+            <span>Users Management</span>
+          </a>
+          <a href="#" class="nav-item" data-section="listings">
+            <span class="nav-icon">🏠</span>
+            <span>Listings Management</span>
+          </a>
+          <a href="#" class="nav-item" data-section="host-requests">
+            <span class="nav-icon">📝</span>
+            <span>Yêu cầu trở thành Host</span>
+          </a>
+          <a href="#" class="nav-item" data-section="bookings">
+            <span class="nav-icon">📅</span>
+            <span>Bookings</span>
+          </a>
+          <a href="#" class="nav-item" data-section="reviews">
+            <span class="nav-icon">💬</span>
+            <span>Reviews / Reports</span>
+          </a>
+          <a href="#" class="nav-item" data-section="payments">
+            <span class="nav-icon">💵</span>
+            <span>Payments</span>
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Hệ thống</div>
+          <!-- Logout with confirmation -->
+          <a href="#" class="nav-item" id="logout-link">
+            <span class="nav-icon">🚪</span>
+            <span>Đăng xuất</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard Section -->
+      <div id="dashboard" class="content-section active">
+        <div class="content-header">
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Tổng quan về hoạt động hệ thống go2bnb</p>
+        </div>
+        
+        <!-- Stats Cards now display data from database -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Tổng người dùng</span>
+              <div class="stat-icon blue">👥</div>
+            </div>
+            <div class="stat-value"><%= totalUsers > 0 ? totalUsers : "0" %></div>
+            <div class="stat-change">Cập nhật mới nhất</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Tổng chỗ ở</span>
+              <div class="stat-icon green">🏠</div>
+            </div>
+            <div class="stat-value"><%= totalListings > 0 ? totalListings : "0" %></div>
+            <div class="stat-change">Cập nhật mới nhất</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Lượt đặt phòng</span>
+              <div class="stat-icon purple">📅</div>
+            </div>
+            <div class="stat-value"><%= totalBookings > 0 ? totalBookings : "0" %></div>
+            <div class="stat-change">Số liệu theo hệ thống</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Doanh thu</span>
+              <div class="stat-icon orange">💵</div>
+            </div>
+            <div class="stat-value">$<%= totalRevenue > 0 ? String.format("%.2f", totalRevenue) : "0.00" %></div>
+            <div class="stat-change">Tổng hợp mới nhất</div>
+          </div>
+        </div>
+        
+        <!-- Recent Activity now fetches from database -->
+        <div class="content-section active">
+          <div class="section-header">
+            <h2 class="section-title">Hoạt động gần đây</h2>
+          </div>
+          
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Người dùng</th>
+                <th>Hoạt động</th>
+                <th>Thời gian</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%
+                try {
+                  rs = stmt.executeQuery(
+                    "SELECT u.FullName AS full_name, u.Email AS email, u.ProfileImage AS avatar_url, " +
+                    "       a.ActivityType AS activity_type, a.CreatedAt AS created_at, a.Status AS status " +
+                    "FROM Activities a " +
+                    "JOIN Users u ON a.UserID = u.UserID " +
+                    "ORDER BY a.CreatedAt DESC"
+                  );
+                  
+                  if (!rs.isBeforeFirst()) {
+                    out.println("<tr><td colspan='4' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có hoạt động nào</td></tr>");
+                  } else {
+                    int count = 0;
+                    while (rs.next() && count < 10) {
+                      count++;
+              %>
+              <tr>
+                <td>
+                  <div class="user-info">
+                    <img src="<%= rs.getString("avatar_url") != null ? rs.getString("avatar_url") : "https://i.pravatar.cc/150" %>" alt="User" class="user-avatar">
+                    <div class="user-details">
+                      <span class="user-name"><%= rs.getString("full_name") %></span>
+                      <span class="user-email"><%= rs.getString("email") %></span>
+                    </div>
+                  </div>
+                </td>
+                <td><%= rs.getString("activity_type") %></td>
+                <td><%= rs.getTimestamp("created_at") %></td>
+                <td>
+                  <span class="badge badge-<%= rs.getString("status").equals("success") ? "success" : "warning" %>">
+                    <%= rs.getString("status") %>
+                  </span>
+                </td>
+              </tr>
+              <%
+                    }
+                  }
+                } catch (Exception e) {
+                  out.println("<tr><td colspan='4' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                }
+              %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Users Management Section -->
+      <div id="users" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">Quản lý người dùng</h1>
+          <p class="page-subtitle">Quản lý tất cả người dùng trên hệ thống</p>
+        </div>
+        
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="Tìm kiếm người dùng...">
+          <button class="btn btn-primary">+ Thêm người dùng</button>
+        </div>
+        
+        <!-- User table now fetches from database -->
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Người dùng</th>
+              <th>Vai trò</th>
+              <th>Trạng thái</th>
+              <th>Ngày tham gia</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%
+              try {
+                rs = stmt.executeQuery(
+                  "SELECT UserID AS id, FullName AS full_name, Email AS email, ProfileImage AS avatar_url, " +
+                  "       Role AS role, CASE WHEN IsActive=1 THEN 'active' ELSE 'blocked' END AS status, " +
+                  "       CreatedAt AS created_at " +
+                  "FROM Users ORDER BY CreatedAt DESC"
+                );
+                
+                if (!rs.isBeforeFirst()) {
+                  out.println("<tr><td colspan='5' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có người dùng nào</td></tr>");
+                } else {
+                  while (rs.next()) {
+            %>
+            <tr>
+              <td>
+                <div class="user-info">
+                  <img src="<%= rs.getString("avatar_url") != null ? rs.getString("avatar_url") : "https://i.pravatar.cc/150" %>" alt="User" class="user-avatar">
+                  <div class="user-details">
+                    <span class="user-name"><%= rs.getString("full_name") %></span>
+                    <span class="user-email"><%= rs.getString("email") %></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge badge-info"><%= rs.getString("role") %></span></td>
+              <td>
+                <span class="badge badge-<%= rs.getString("status").equals("active") ? "success" : "danger" %>">
+                  <%= rs.getString("status") %>
+                </span>
+              </td>
+              <td><%= rs.getDate("created_at") %></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn action-btn-view" onclick="viewUser(<%= rs.getInt("id") %>)">Xem</button>
+                  <button class="action-btn action-btn-edit" onclick="editUser(<%= rs.getInt("id") %>)">Sửa</button>
+                  <button class="action-btn action-btn-delete" onclick="toggleUserStatus(<%= rs.getInt("id") %>)">
+                    <%= rs.getString("status").equals("active") ? "Khóa" : "Mở khóa" %>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <%
+                  }
+                }
+              } catch (Exception e) {
+                out.println("<tr><td colspan='5' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+              }
+            %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Listings Management Section -->
+      <div id="listings" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">Quản lý chỗ ở</h1>
+          <p class="page-subtitle">Duyệt và quản lý tất cả bài đăng chỗ ở</p>
+        </div>
+        
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="Tìm kiếm chỗ ở...">
+          <select class="form-select" style="width: auto;">
+            <option>Tất cả trạng thái</option>
+            <option>Chờ duyệt</option>
+            <option>Đã duyệt</option>
+            <option>Bị từ chối</option>
+          </select>
+        </div>
+        
+        <!-- Listings table now fetches from database -->
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Chỗ ở</th>
+              <th>Chủ nhà</th>
+              <th>Giá/đêm</th>
+              <th>Trạng thái</th>
+              <th>Ngày đăng</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%
+              try {
+                rs = stmt.executeQuery(
+                  "SELECT l.ListingID AS id, l.Title AS title, l.Description AS description, " +
+                  "       (SELECT TOP 1 ImageUrl FROM ListingImages li WHERE li.ListingID = l.ListingID) AS image_url, " +
+                  "       l.PricePerNight AS price_per_night, l.Status AS status, l.CreatedAt AS created_at, " +
+                  "       u.FullName AS host_name " +
+                  "FROM Listings l " +
+                  "JOIN Users u ON l.HostID = u.UserID " +
+                  "ORDER BY l.CreatedAt DESC"
+                );
+                
+                if (!rs.isBeforeFirst()) {
+                  out.println("<tr><td colspan='6' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có chỗ ở nào</td></tr>");
+                } else {
+                  while (rs.next()) {
+            %>
+            <tr>
+              <td>
+                <div class="user-info">
+                  <img src="<%= rs.getString("image_url") != null ? rs.getString("image_url") : "images/placeholder.jpg" %>" alt="Listing" class="user-avatar">
+                  <div class="user-details">
+                    <span class="user-name"><%= rs.getString("title") %></span>
+                    <span class="user-email"><%= rs.getString("description") %></span>
+                  </div>
+                </div>
+              </td>
+              <td><%= rs.getString("host_name") %></td>
+              <td>$<%= rs.getDouble("price_per_night") %></td>
+              <td>
+                <span class="badge badge-<%= rs.getString("status").equals("approved") ? "success" : "warning" %>">
+                  <%= rs.getString("status") %>
+                </span>
+              </td>
+              <td><%= rs.getDate("created_at") %></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn action-btn-view" onclick="viewListing(<%= rs.getInt("id") %>)">Xem</button>
+                  <button class="action-btn action-btn-edit" onclick="approveListing(<%= rs.getInt("id") %>)">Duyệt</button>
+                  <button class="action-btn action-btn-delete" onclick="rejectListing(<%= rs.getInt("id") %>)">Từ chối</button>
+                </div>
+              </td>
+            </tr>
+            <%
+                  }
+                }
+              } catch (Exception e) {
+                out.println("<tr><td colspan='6' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+              }
+            %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Host Requests Management Section -->
+      <div id="host-requests" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">Yêu cầu trở thành Host</h1>
+          <p class="page-subtitle">Duyệt các yêu cầu từ khách muốn trở thành chủ nhà</p>
+        </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Người dùng</th>
+              <th>Dịch vụ</th>
+              <th>Ngày yêu cầu</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%
+              try {
+                rs = stmt.executeQuery(
+                  "SELECT hr.RequestID, u.FullName, u.Email, u.PhoneNumber, hr.ServiceType, hr.Status, hr.RequestedAt " +
+                  "FROM HostRequests hr LEFT JOIN Users u ON hr.UserID = u.UserID " +
+                  "WHERE hr.Status = 'PENDING' ORDER BY hr.RequestedAt DESC"
+                );
+                if (!rs.isBeforeFirst()) {
+                  out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#6b7280;'>Không có yêu cầu chờ duyệt</td></tr>");
+                } else {
+                  while (rs.next()) {
+            %>
+            <tr>
+              <td>
+                <div class="user-info">
+                  <div class="user-details">
+                    <span class="user-name"><%= rs.getString("FullName") != null ? rs.getString("FullName") : rs.getString("Email") %></span>
+                    <span class="user-email"><%= rs.getString("Email") %></span>
+                  </div>
+                </div>
+              </td>
+              <td><%= rs.getString("ServiceType") %></td>
+              <td><%= rs.getTimestamp("RequestedAt") %></td>
+              <td><span class="badge badge-warning">PENDING</span></td>
+              <td>
+                <form class="form-inline" method="post" action="<%=request.getContextPath()%>/admin/dashboard">
+                  <input type="hidden" name="requestId" value="<%= rs.getInt("RequestID") %>" />
+                  <button class="btn btn-success btn-sm" name="action" value="approve">Duyệt</button>
+                  <button class="btn btn-danger btn-sm" name="action" value="reject">Từ chối</button>
+                </form>
+              </td>
+            </tr>
+            <%
+                  }
+                }
+              } catch (Exception e) {
+                out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+              }
+            %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Bookings Section -->
+      <div id="bookings" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">Quản lý đặt phòng</h1>
+          <p class="page-subtitle">Theo dõi và quản lý tất cả đặt phòng</p>
+        </div>
+        
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="Tìm kiếm đặt phòng...">
+          <select class="form-select" style="width: auto;">
+            <option>Tất cả trạng thái</option>
+            <option>Đang xử lý</option>
+            <option>Đã xác nhận</option>
+            <option>Đã hủy</option>
+          </select>
+        </div>
+        
+        <!-- Bookings table now fetches from database -->
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã đặt phòng</th>
+              <th>Khách hàng</th>
+              <th>Chỗ ở</th>
+              <th>Ngày nhận phòng</th>
+              <th>Ngày trả phòng</th>
+              <th>Tổng tiền</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%
+              try {
+                rs = stmt.executeQuery(
+                  "SELECT b.BookingID AS id, b.BookingCode AS booking_code, " +
+                  "       b.CheckInDate AS check_in_date, b.CheckOutDate AS check_out_date, " +
+                  "       b.TotalAmount AS total_amount, b.Status AS status, " +
+                  "       u.FullName AS guest_name, u.ProfileImage AS avatar_url, l.Title AS listing_title " +
+                  "FROM Bookings b " +
+                  "JOIN Users u ON b.GuestID = u.UserID " +
+                  "JOIN Listings l ON b.ListingID = l.ListingID " +
+                  "ORDER BY b.CreatedAt DESC"
+                );
+                
+                if (!rs.isBeforeFirst()) {
+                  out.println("<tr><td colspan='8' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có đặt phòng nào</td></tr>");
+                } else {
+                  while (rs.next()) {
+            %>
+            <tr>
+              <td><%= rs.getString("booking_code") %></td>
+              <td>
+                <div class="user-info">
+                  <img src="<%= rs.getString("avatar_url") != null ? rs.getString("avatar_url") : "https://i.pravatar.cc/150" %>" alt="User" class="user-avatar">
+                  <span class="user-name"><%= rs.getString("guest_name") %></span>
+                </div>
+              </td>
+              <td><%= rs.getString("listing_title") %></td>
+              <td><%= rs.getDate("check_in_date") %></td>
+              <td><%= rs.getDate("check_out_date") %></td>
+              <td>$<%= rs.getDouble("total_amount") %></td>
+              <td>
+                <span class="badge badge-<%= rs.getString("status").equals("confirmed") ? "success" : "warning" %>">
+                  <%= rs.getString("status") %>
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn action-btn-view" onclick="viewBooking(<%= rs.getInt("id") %>)">Xem</button>
+                  <button class="action-btn action-btn-delete" onclick="cancelBooking(<%= rs.getInt("id") %>)">Hủy</button>
+                </div>
+              </td>
+            </tr>
+            <%
+                  }
+                }
+              } catch (Exception e) {
+                out.println("<tr><td colspan='8' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+              }
+            %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Reviews & Reports Section -->
+      <div id="reviews" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">Quản lý đánh giá & báo cáo</h1>
+          <p class="page-subtitle">Xem và xử lý đánh giá, báo cáo từ người dùng</p>
+        </div>
+        
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="Tìm kiếm đánh giá...">
+          <select class="form-select" style="width: auto;">
+            <option>Tất cả loại</option>
+            <option>Đánh giá</option>
+            <option>Báo cáo listing</option>
+            <option>Báo cáo user</option>
+          </select>
+        </div>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Người gửi</th>
+              <th>Loại</th>
+              <th>Nội dung</th>
+              <th>Đánh giá</th>
+              <th>Ngày gửi</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 40px; color: #6b7280;">
+                Chưa có đánh giá hoặc báo cáo nào
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Payments Section -->
+      <div id="payments" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">Quản lý thanh toán</h1>
+          <p class="page-subtitle">Theo dõi giao dịch và xử lý thanh toán</p>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Tổng doanh thu</span>
+              <div class="stat-icon green">💰</div>
+            </div>
+            <div class="stat-value">$<%= totalRevenue > 0 ? String.format("%.2f", totalRevenue) : "0.00" %></div>
+            <div class="stat-change">Dữ liệu từ database</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Hoa hồng</span>
+              <div class="stat-icon blue">💵</div>
+            </div>
+            <div class="stat-value">$<%= totalRevenue > 0 ? String.format("%.2f", totalRevenue * 0.15) : "0.00" %></div>
+            <div class="stat-change">15% doanh thu</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Hoàn tiền</span>
+              <div class="stat-icon orange">🔄</div>
+            </div>
+            <div class="stat-value">$0.00</div>
+            <div class="stat-change">Dữ liệu từ database</div>
+          </div>
+        </div>
+        
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="Tìm kiếm giao dịch...">
+          <button class="btn btn-primary">+ Tạo mã giảm giá</button>
+        </div>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã giao dịch</th>
+              <th>Người dùng</th>
+              <th>Loại</th>
+              <th>Số tiền</th>
+              <th>Ngày</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 40px; color: #6b7280;">
+                Chưa có giao dịch nào
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Analytics Section -->
+      <div id="analytics" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">Thống kê & Báo cáo</h1>
+          <p class="page-subtitle">Phân tích chi tiết về hoạt động hệ thống</p>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Tỷ lệ sử dụng</span>
+              <div class="stat-icon purple">📊</div>
+            </div>
+            <div class="stat-value">0%</div>
+            <div class="stat-change">Dữ liệu từ database</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Người dùng mới</span>
+              <div class="stat-icon blue">👤</div>
+            </div>
+            <div class="stat-value">0</div>
+            <div class="stat-change">Dữ liệu từ database</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Tỷ lệ chuyển đổi</span>
+              <div class="stat-icon green">💹</div>
+            </div>
+            <div class="stat-value">0%</div>
+            <div class="stat-change">Dữ liệu từ database</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Đánh giá trung bình</span>
+              <div class="stat-icon orange">⭐</div>
+            </div>
+            <div class="stat-value">0.0</div>
+            <div class="stat-change">Dữ liệu từ database</div>
+          </div>
+        </div>
+        
+        <div class="content-section active">
+          <div class="section-header">
+            <h2 class="section-title">Biểu đồ doanh thu theo tháng</h2>
+          </div>
+          <div class="chart-container">
+            📈 Biểu đồ sẽ được hiển thị khi có dữ liệu (tích hợp Chart.js)
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Hidden logout form (POST) -->
+  <form id="logoutForm" action="<%=request.getContextPath()%>/logout" method="post" style="display:none;"></form>
+  
+  <%
+    try {
+      if (rs != null) rs.close();
+      if (stmt != null) stmt.close();
+      if (conn != null) conn.close();
+    } catch (SQLException e) {
+      out.println("<div style='color: red;'>Error closing database connection: " + e.getMessage() + "</div>");
+    }
+  %>
+  
+  <script>
+    // Navigation handling (exclude items without data-section, e.g., logout)
+    document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Remove active class from all nav items
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        
+        // Add active class to clicked item
+        this.classList.add('active');
+        
+        // Hide all content sections
+        document.querySelectorAll('.content-section').forEach(section => {
+          section.classList.remove('active');
+          section.style.display = 'none';
+        });
+        
+        // Show selected section
+        const sectionId = this.getAttribute('data-section');
+        const section = document.getElementById(sectionId);
+        if (section) {
+          section.classList.add('active');
+          section.style.display = 'block';
+        }
+      });
+    });
+    
+    // Logout confirmation
+    const logoutLink = document.getElementById('logout-link');
+    if (logoutLink) {
+      logoutLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation(); // prevent nav handler
+        const confirmed = window.confirm('Bạn có chắc muốn đăng xuất?');
+        if (confirmed) {
+          const form = document.getElementById('logoutForm');
+          if (form) form.submit();
+        }
+      });
+    }
+    
+    // Action functions
+    function viewUser(id) {
+      console.log('[v0] View user:', id);
+      // Implement view user logic
+    }
+    
+    function editUser(id) {
+      console.log('[v0] Edit user:', id);
+      // Implement edit user logic
+    }
+    
+    function toggleUserStatus(id) {
+      console.log('[v0] Toggle user status:', id);
+      // Implement toggle user status logic
+    }
+    
+    function viewListing(id) {
+      console.log('[v0] View listing:', id);
+      // Implement view listing logic
+    }
+    
+    function approveListing(id) {
+      console.log('[v0] Approve listing:', id);
+      // Implement approve listing logic
+    }
+    
+    function rejectListing(id) {
+      console.log('[v0] Reject listing:', id);
+      // Implement reject listing logic
+    }
+    
+    function viewBooking(id) {
+      console.log('[v0] View booking:', id);
+      // Implement view booking logic
+    }
+    
+    function cancelBooking(id) {
+      console.log('[v0] Cancel booking:', id);
+      // Implement cancel booking logic
+    }
+    
+    console.log('[v0] Dashboard initialized with database integration');
+  </script>
 </body>
 </html>
+    
