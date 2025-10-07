@@ -13,8 +13,10 @@ import model.User;
 import utils.PasswordUtil;
 import java.sql.SQLException;
 import jakarta.mail.*;
+import java.util.List;
 import utils.EmailUtil;
 import java.util.Properties;
+import model.Listing;
 
 public class UserService implements IUserService{
     private final UserDAO userDAO;
@@ -90,5 +92,25 @@ public class UserService implements IUserService{
             System.err.println("[ERROR] Failed to send email: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    @Override
+    public boolean addToWishlist(int guestId, int listingId) {
+        return userDAO.addToWishlist(guestId, listingId);
+    }
+
+    @Override
+    public List<Listing> getWishlistByUser(int guestId) {
+        return userDAO.getWishlistByUser(guestId);
+    }
+    
+    @Override
+    public boolean removeFromWishlist(int guestId, int listingId) {
+        return userDAO.removeFromWishlist(guestId, listingId);
+    }
+    
+    @Override
+    public List<Integer> getAllListingIDByUser(int guestId) {
+        return userDAO.getAllListingIDByUser(guestId);
     }
 }

@@ -273,3 +273,23 @@ try {
 } catch (error) {
     console.error("Error setting up chatbot:", error);
 }
+
+document.querySelectorAll('.wishlist-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const icon = this.querySelector('i');
+        const listingId = this.dataset.listingId;
+        const isFavorite = icon.classList.contains('bi-heart-fill');
+
+        // Toggle giao diện trước
+        icon.classList.toggle('bi-heart');
+        icon.classList.toggle('bi-heart-fill');
+        icon.classList.toggle('text-danger');
+
+        // Gửi request AJAX đến servlet
+        fetch('WishlistServlet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `listingId=${listingId}&action=${isFavorite ? 'remove' : 'add'}`
+        });
+    });
+});
