@@ -2,87 +2,177 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Danh sách bài đăng</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/listings.css">
-</head>
-<body>
-    <jsp:include page="/design/host_header.jsp">
-        <jsp:param name="active" value="listings" />
-    </jsp:include>
-    <div class="listing-container">
-        <h2 class="page-title">Bài đăng của bạn</h2>
+    <head>
+        <meta charset="UTF-8">
+        <title>Danh sách bài đăng</title>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css?v=7">
+    </head>
+    <body>
+        <jsp:include page="/design/host_header.jsp">
+            <jsp:param name="active" value="listings" />
+        </jsp:include>
 
-        <c:if test="${not empty listings}">
-            <div class="listing-grid">
-                <c:forEach var="listing" items="${listings}">
-                    <a href="${pageContext.request.contextPath}/host/listing/edit?id=${listing.listingID}" class="listing-card-link">
-                        <div class="listing-card">
-                            <!-- Carousel hình ảnh -->
-                            <div class="carousel" id="carousel_${listing.listingID}">
-                                <button class="carousel-nav prev" type="button" onclick="event.preventDefault(); event.stopPropagation(); prevSlide('${listing.listingID}'); return false;">&#10094;</button>
-                                <div class="carousel-slides">
+        <div class="listing-container">
+            <div class="listings-header">
+                <h2 class="page-title">Bài đăng của bạn</h2>
+                <div class="listings-actions">
+                    <button type="button" class="icon-btn" id="btnTable" title="Dạng bảng">☷</button>
+                    <button type="button" class="icon-btn" id="btnGrid"  title="Dạng lưới">▦</button>
+                    <a class="btn btn-primary add-listing" href="${pageContext.request.contextPath}/host/listing/new">+ Thêm chỗ ở</a>
+                </div>
+            </div>
+
+            <!-- GRID (card lớn + carousel) -->
+            <c:if test="${not empty listings}">
+                <div class="listings-grid" id="modeGrid">
+                    <c:forEach var="listing" items="${listings}">
+                        <a href="${pageContext.request.contextPath}/host/listing/edit?id=${listing.listingID}" class="bigcard-link">
+                            <article class="bigcard">
+                                <div class="bigcard-media">
+                                    <span class="listing-status ${listing.status == 'Active' ? 'status-active' : 'status-inactive'}">
+                                        ${listing.status == 'Active' ? 'Đang thực hiện' : listing.status}
+                                    </span>
+
                                     <c:set var="imgKey" value="${'images_'}${listing.listingID}" />
-                                    <c:forEach var="image" items="${requestScope[imgKey]}" varStatus="s">
-                                        <img src="${image}" alt="Ảnh bài đăng" class="listing-image carousel-slide ${s.first ? 'active' : ''}">
-                                    </c:forEach>
+                                    <c:choose>
+                                        <c:when test="${not empty requestScope[imgKey]}">
+                                            <div class="bigcard-carousel" id="bc_${listing.listingID}">
+                                                <c:forEach var="image" items="${requestScope[imgKey]}" varStatus="s">
+                                                    <div class="bigcard-slide ${s.first ? 'on' : ''}" style="background-image:url('${image}')"></div>
+                                                </c:forEach>
+                                                <button class="bc-nav prev" onclick="event.preventDefault(); event.stopPropagation(); slidePrev('${listing.listingID}')">‹</button>
+                                                <button class="bc-nav next" onclick="event.preventDefault(); event.stopPropagation(); slideNext('${listing.listingID}')">›</button>
+                                                <div class="bc-dots">
+                                                    <c:forEach var="image" items="${requestScope[imgKey]}" varStatus="s">
+                                                        <span class="bc-dot ${s.first ? 'on' : ''}"
+                                                              onclick="event.preventDefault(); event.stopPropagation(); gotoSlide('${listing.listingID}', ${s.index})"></span>
+                                                    </c:forEach>
+                                                </div>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="bigcard-placeholder"></div>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
-                                <button class="carousel-nav next" type="button" onclick="event.preventDefault(); event.stopPropagation(); nextSlide('${listing.listingID}'); return false;">&#10095;</button>
+
+                                <div class="bigcard-body">
+                                    <h3 class="bigcard-title">${listing.title}</h3>
+                                    <p class="bigcard-meta">${listing.address}, ${listing.city}</p>
+                                </div>
+                            </article>
+                        </a>
+                    </c:forEach>
+                </div>
+            </c:if>
+
+            <!-- TABLE (có thumbnail ảnh đầu tiên) -->
+            <div class="listings-table" id="modeTable" style="display:none;">
+                <div class="lt-head">
+                    <div class="lt-col lt-col-item">Mục cho thuê</div>
+                    <div class="lt-col lt-col-type">Loại</div>
+                    <div class="lt-col lt-col-loc">Vị trí</div>
+                    <div class="lt-col lt-col-status">Trạng thái</div>
+                </div>
+
+                <c:forEach var="listing" items="${listings}">
+                    <c:set var="imgKey" value="${'images_'}${listing.listingID}" />
+                    <c:set var="firstImg" value="" />
+                    <!-- Lấy đúng ảnh đầu an toàn -->
+                    <c:if test="${not empty requestScope[imgKey]}">
+                        <c:forEach var="img" items="${requestScope[imgKey]}" begin="0" end="0">
+                            <c:set var="firstImg" value="${img}" />
+                        </c:forEach>
+                    </c:if>
+
+                    <a href="${pageContext.request.contextPath}/host/listing/edit?id=${listing.listingID}" class="lt-row-link">
+                        <div class="lt-row">
+                            <div class="lt-col lt-col-item">
+                                <c:choose>
+                                    <c:when test="${not empty firstImg}">
+                                        <img class="lt-thumb-img" src="${firstImg}" alt="thumb">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="lt-thumb"></div>
+                                    </c:otherwise>
+                                </c:choose>
+                                <div class="lt-title">Nhà/phòng cho thuê được tạo vào ${listing.createdAt}</div>
                             </div>
-                            <div class="listing-info">
-                                <h3 class="listing-title">${listing.title}</h3>
-                                <p class="listing-address">${listing.address}, ${listing.city}</p>
-                                <p class="listing-price">Giá: ${listing.pricePerNight} VND/đêm</p>
-                                <p class="listing-guests">Khách tối đa: ${listing.maxGuests}</p>
-                                <p class="listing-status ${listing.status == 'Active' ? 'active' : 'inactive'}">${listing.status}</p>
+                            <div class="lt-col lt-col-type">Nhà</div>
+                            <div class="lt-col lt-col-loc">${listing.city}</div>
+                            <div class="lt-col lt-col-status">
+                                <span class="dot ${listing.status == 'Active' ? 'dot-on' : ''}"></span>
+                                <span class="lt-status-text">${listing.status == 'Active' ? 'Đang thực hiện' : listing.status}</span>
                             </div>
                         </div>
                     </a>
                 </c:forEach>
+
+                <c:if test="${empty listings}">
+                    <div class="lt-empty">Bạn chưa có bài đăng nào.</div>
+                </c:if>
             </div>
-        </c:if>
 
-        <c:if test="${empty listings}">
-            <p>Bạn chưa có bài đăng nào. Hãy tạo bài đăng mới!</p>
-            <a href="${pageContext.request.contextPath}/host/listing/new" class="create-button">Tạo bài đăng mới</a>
-        </c:if>
-    </div>
-    <script>
-    (function(){
-        window._carousels = window._carousels || {};
+            <c:if test="${empty listings}">
+                <div class="empty-wrap">
+                    <p>Bạn chưa có bài đăng nào.</p>
+                    <a class="btn btn-primary add-listing" href="${pageContext.request.contextPath}/host/listing/new">+ Thêm chỗ ở</a>
+                </div>
+            </c:if>
+        </div>
 
-        function showSlide(id, index){
-            var container = document.getElementById('carousel_' + id);
-            if(!container) return;
-            var slides = container.querySelectorAll('.carousel-slide');
-            if(!slides || slides.length === 0) return;
-            var newIndex = ((index % slides.length) + slides.length) % slides.length;
-            for(var i=0;i<slides.length;i++){
-                if(i === newIndex){ slides[i].classList.add('active'); }
-                else { slides[i].classList.remove('active'); }
-            }
-            window._carousels[id] = newIndex;
-        }
+        <!-- Toggle + Carousel -->
+        <script>
+            (function () {
+                const g = document.getElementById('modeGrid');
+                const t = document.getElementById('modeTable');
+                const bG = document.getElementById('btnGrid');
+                const bT = document.getElementById('btnTable');
+                function setMode(mode) {
+                    if (mode === 'grid') {
+                        if (g)
+                            g.style.display = 'grid';
+                        if (t)
+                            t.style.display = 'none';
+                    } else {
+                        if (g)
+                            g.style.display = 'none';
+                        if (t)
+                            t.style.display = 'block';
+                    }
+                    localStorage.setItem('listMode', mode);
+                }
+                bG && bG.addEventListener('click', () => setMode('grid'));
+                bT && bT.addEventListener('click', () => setMode('table'));
+                setMode(localStorage.getItem('listMode') || 'grid');
+            })();
 
-        window.nextSlide = function(id){
-            var idx = window._carousels[id] || 0;
-            showSlide(id, idx + 1);
-        };
-
-        window.prevSlide = function(id){
-            var idx = window._carousels[id] || 0;
-            showSlide(id, idx - 1);
-        };
-
-        document.addEventListener('DOMContentLoaded', function(){
-            var carousels = document.querySelectorAll('.carousel');
-            for(var i=0;i<carousels.length;i++){
-                var id = carousels[i].id.replace('carousel_','');
-                showSlide(id, window._carousels[id] || 0);
-            }
-        });
-    })();
-    </script>
-</body>
+            (function () {
+                window._bcIndex = window._bcIndex || {};
+                function setSlide(id, idx) {
+                    const wrap = document.getElementById('bc_' + id);
+                    if (!wrap)
+                        return;
+                    const slides = wrap.querySelectorAll('.bigcard-slide');
+                    const dots = wrap.querySelectorAll('.bc-dot');
+                    if (!slides.length)
+                        return;
+                    const n = slides.length;
+                    const i = ((idx % n) + n) % n;
+                    slides.forEach((el, k) => el.classList.toggle('on', k === i));
+                    dots.forEach((el, k) => el.classList.toggle('on', k === i));
+                    window._bcIndex[id] = i;
+                }
+                window.slideNext = id => setSlide(id, (window._bcIndex[id] || 0) + 1);
+                window.slidePrev = id => setSlide(id, (window._bcIndex[id] || 0) - 1);
+                window.gotoSlide = (id, i) => setSlide(id, i);
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('.bigcard-carousel').forEach(wrap => {
+                        const id = wrap.id.replace('bc_', '');
+                        window._bcIndex[id] = 0;
+                    });
+                });
+            })();
+        </script>
+    </body>
 </html>

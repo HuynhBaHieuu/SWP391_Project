@@ -7,6 +7,7 @@
   <title>Trở thành host</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css">
   <style>
     .grid { display:grid; grid-template-columns: repeat(3, minmax(220px,1fr)); gap:24px; }
     .card { border:2px solid #eee; border-radius:16px; padding:28px; cursor:pointer; text-align:center; transition:.2s; }

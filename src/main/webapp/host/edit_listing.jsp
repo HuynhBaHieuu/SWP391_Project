@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <title>Chỉnh sửa bài đăng</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/listings.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css">
     <style>
         body {
             margin: 0;
