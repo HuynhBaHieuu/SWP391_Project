@@ -212,7 +212,7 @@
         }
     </style>
 </head>
-<body>
+<body data-context="${pageContext.request.contextPath}">
     <div class="container">
         <div class="header">
             <h1>Quản lý tin đăng</h1>

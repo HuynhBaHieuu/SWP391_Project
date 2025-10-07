@@ -30,29 +30,29 @@
       if (conn != null) {
         stmt = conn.createStatement();
         
-        // Fetch total users
-        rs = stmt.executeQuery("SELECT COUNT(*) as total FROM users");
+        // Fetch total users (SQL Server schema)
+        rs = stmt.executeQuery("SELECT COUNT(*) as total FROM Users");
         if (rs.next()) {
           totalUsers = rs.getInt("total");
         }
         rs.close();
         
-        // Fetch total listings
-        rs = stmt.executeQuery("SELECT COUNT(*) as total FROM listings");
+        // Fetch total listings (SQL Server schema)
+        rs = stmt.executeQuery("SELECT COUNT(*) as total FROM Listings");
         if (rs.next()) {
           totalListings = rs.getInt("total");
         }
         rs.close();
         
-        // Fetch total bookings
-        rs = stmt.executeQuery("SELECT COUNT(*) as total FROM bookings");
+        // Fetch total bookings (SQL Server schema)
+        rs = stmt.executeQuery("SELECT COUNT(*) as total FROM Bookings");
         if (rs.next()) {
           totalBookings = rs.getInt("total");
         }
         rs.close();
         
-        // Fetch total revenue
-        rs = stmt.executeQuery("SELECT SUM(total_amount) as revenue FROM bookings WHERE status = 'completed'");
+        // Fetch total revenue (adjust column names if different in your schema)
+        rs = stmt.executeQuery("SELECT SUM(TotalAmount) as revenue FROM Bookings WHERE Status = 'completed'");
         if (rs.next()) {
           totalRevenue = rs.getDouble("revenue");
         }
@@ -64,7 +64,7 @@
     }
   %>
   
-  <div class="dashboard-container">
+  <div class="dashboard-container" data-context="<%=request.getContextPath()%>">
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
@@ -97,10 +97,14 @@
             <span class="nav-icon">🏠</span>
             <span>Listings Management</span>
           </a>
-          <a href="#" class="nav-item" data-section="bookings">
+          <a href="#" class="nav-item" data-section="host-requests">
+            <span class="nav-icon">📝</span>
+            <span>Yêu cầu trở thành Host</span>
+          </a>
+          <!-- <a href="#" class="nav-item" data-section="bookings">
             <span class="nav-icon">📅</span>
             <span>Bookings</span>
-          </a>
+          </a> -->
           <a href="#" class="nav-item" data-section="reviews">
             <span class="nav-icon">💬</span>
             <span>Reviews / Reports</span>
@@ -175,7 +179,6 @@
           <div class="section-header">
             <h2 class="section-title">Hoạt động gần đây</h2>
           </div>
-          
           <table class="data-table">
             <thead>
               <tr>
@@ -189,18 +192,16 @@
               <%
                 try {
                   rs = stmt.executeQuery(
-                    "SELECT u.full_name, u.email, u.avatar_url, a.activity_type, a.created_at, a.status " +
-                    "FROM activities a " +
-                    "JOIN users u ON a.user_id = u.id " +
-                    "ORDER BY a.created_at DESC"
+                    "SELECT TOP 10 u.FullName AS full_name, u.Email AS email, u.ProfileImage AS avatar_url, " +
+                    "       'Đặt phòng' AS activity_type, b.CreatedAt AS created_at, b.Status AS status " +
+                    "FROM Bookings b " +
+                    "JOIN Users u ON b.GuestID = u.UserID " +
+                    "ORDER BY b.CreatedAt DESC"
                   );
-                  
                   if (!rs.isBeforeFirst()) {
                     out.println("<tr><td colspan='4' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có hoạt động nào</td></tr>");
                   } else {
-                    int count = 0;
-                    while (rs.next() && count < 10) {
-                      count++;
+                    while (rs.next()) {
               %>
               <tr>
                 <td>
@@ -215,7 +216,7 @@
                 <td><%= rs.getString("activity_type") %></td>
                 <td><%= rs.getTimestamp("created_at") %></td>
                 <td>
-                  <span class="badge badge-<%= rs.getString("status").equals("success") ? "success" : "warning" %>">
+                  <span class="badge badge-<%= rs.getString("status").equals("Completed") ? "success" : "warning" %>">
                     <%= rs.getString("status") %>
                   </span>
                 </td>
@@ -259,8 +260,10 @@
             <%
               try {
                 rs = stmt.executeQuery(
-                  "SELECT id, full_name, email, avatar_url, role, status, created_at " +
-                  "FROM users ORDER BY created_at DESC"
+                  "SELECT UserID AS id, FullName AS full_name, Email AS email, ProfileImage AS avatar_url, " +
+                  "       Role AS role, CASE WHEN IsActive=1 THEN 'active' ELSE 'blocked' END AS status, " +
+                  "       CreatedAt AS created_at " +
+                  "FROM Users ORDER BY CreatedAt DESC"
                 );
                 
                 if (!rs.isBeforeFirst()) {
@@ -286,10 +289,13 @@
               </td>
               <td><%= rs.getDate("created_at") %></td>
               <td>
+                <%
+                  int userId = rs.getInt("id");
+                %>
                 <div class="action-buttons">
-                  <button class="action-btn action-btn-view" onclick="viewUser(<%= rs.getInt("id") %>)">Xem</button>
-                  <button class="action-btn action-btn-edit" onclick="editUser(<%= rs.getInt("id") %>)">Sửa</button>
-                  <button class="action-btn action-btn-delete" onclick="toggleUserStatus(<%= rs.getInt("id") %>)">
+                  <button class="action-btn action-btn-view" onclick="viewUser(<%=userId%>)">Xem</button>
+                  <button class="action-btn action-btn-edit" onclick="editUser(<%=userId%>)">Sửa</button>
+                  <button class="action-btn action-btn-delete" onclick="toggleUserStatus(<%=userId%>)">
                     <%= rs.getString("status").equals("active") ? "Khóa" : "Mở khóa" %>
                   </button>
                 </div>
@@ -339,10 +345,13 @@
             <%
               try {
                 rs = stmt.executeQuery(
-                  "SELECT l.id, l.title, l.description, l.image_url, l.price_per_night, l.status, l.created_at, u.full_name as host_name " +
-                  "FROM listings l " +
-                  "JOIN users u ON l.host_id = u.id " +
-                  "ORDER BY l.created_at DESC"
+                  "SELECT l.ListingID AS id, l.Title AS title, l.Description AS description, " +
+                  "       (SELECT TOP 1 ImageUrl FROM ListingImages li WHERE li.ListingID = l.ListingID) AS image_url, " +
+                  "       l.PricePerNight AS price_per_night, l.Status AS status, l.CreatedAt AS created_at, " +
+                  "       u.FullName AS host_name " +
+                  "FROM Listings l " +
+                  "JOIN Users u ON l.HostID = u.UserID " +
+                  "ORDER BY l.CreatedAt DESC"
                 );
                 
                 if (!rs.isBeforeFirst()) {
@@ -369,10 +378,13 @@
               </td>
               <td><%= rs.getDate("created_at") %></td>
               <td>
+                <%
+                  int listingId = rs.getInt("id");
+                %>
                 <div class="action-buttons">
-                  <button class="action-btn action-btn-view" onclick="viewListing(<%= rs.getInt("id") %>)">Xem</button>
-                  <button class="action-btn action-btn-edit" onclick="approveListing(<%= rs.getInt("id") %>)">Duyệt</button>
-                  <button class="action-btn action-btn-delete" onclick="rejectListing(<%= rs.getInt("id") %>)">Từ chối</button>
+                  <button class="action-btn action-btn-view" onclick="viewListing(<%=listingId%>)">Xem</button>
+                  <button class="action-btn action-btn-edit" onclick="approveListing(<%=listingId%>)">Duyệt</button>
+                  <button class="action-btn action-btn-delete" onclick="rejectListing(<%=listingId%>)">Từ chối</button>
                 </div>
               </td>
             </tr>
@@ -387,33 +399,19 @@
         </table>
       </div>
       
-      <!-- Bookings Section -->
-      <div id="bookings" class="content-section">
+      <!-- Host Requests Management Section -->
+      <div id="host-requests" class="content-section">
         <div class="content-header">
-          <h1 class="page-title">Quản lý đặt phòng</h1>
-          <p class="page-subtitle">Theo dõi và quản lý tất cả đặt phòng</p>
+          <h1 class="page-title">Yêu cầu trở thành Host</h1>
+          <p class="page-subtitle">Duyệt các yêu cầu từ khách muốn trở thành chủ nhà</p>
         </div>
-        
-        <div class="search-bar">
-          <input type="text" class="search-input" placeholder="Tìm kiếm đặt phòng...">
-          <select class="form-select" style="width: auto;">
-            <option>Tất cả trạng thái</option>
-            <option>Đang xử lý</option>
-            <option>Đã xác nhận</option>
-            <option>Đã hủy</option>
-          </select>
-        </div>
-        
-        <!-- Bookings table now fetches from database -->
+
         <table class="data-table">
           <thead>
             <tr>
-              <th>Mã đặt phòng</th>
-              <th>Khách hàng</th>
-              <th>Chỗ ở</th>
-              <th>Ngày nhận phòng</th>
-              <th>Ngày trả phòng</th>
-              <th>Tổng tiền</th>
+              <th>Người dùng</th>
+              <th>Dịch vụ</th>
+              <th>Ngày yêu cầu</th>
               <th>Trạng thái</th>
               <th>Hành động</th>
             </tr>
@@ -422,50 +420,48 @@
             <%
               try {
                 rs = stmt.executeQuery(
-                  "SELECT b.id, b.booking_code, b.check_in_date, b.check_out_date, b.total_amount, b.status, " +
-                  "u.full_name as guest_name, u.avatar_url, l.title as listing_title " +
-                  "FROM bookings b " +
-                  "JOIN users u ON b.guest_id = u.id " +
-                  "JOIN listings l ON b.listing_id = l.id " +
-                  "ORDER BY b.created_at DESC"
+                  "SELECT hr.RequestID, u.FullName, u.Email, u.PhoneNumber, hr.ServiceType, hr.Status, hr.RequestedAt " +
+                  "FROM HostRequests hr LEFT JOIN Users u ON hr.UserID = u.UserID " +
+                  "WHERE hr.Status = 'PENDING' ORDER BY hr.RequestedAt DESC"
                 );
-                
                 if (!rs.isBeforeFirst()) {
-                  out.println("<tr><td colspan='8' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có đặt phòng nào</td></tr>");
+                  out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#6b7280;'>Không có yêu cầu chờ duyệt</td></tr>");
                 } else {
                   while (rs.next()) {
             %>
             <tr>
-              <td><%= rs.getString("booking_code") %></td>
               <td>
                 <div class="user-info">
-                  <img src="<%= rs.getString("avatar_url") != null ? rs.getString("avatar_url") : "https://i.pravatar.cc/150" %>" alt="User" class="user-avatar">
-                  <span class="user-name"><%= rs.getString("guest_name") %></span>
+                  <div class="user-details">
+                    <span class="user-name"><%= rs.getString("FullName") != null ? rs.getString("FullName") : rs.getString("Email") %></span>
+                    <span class="user-email"><%= rs.getString("Email") %></span>
+                  </div>
                 </div>
               </td>
-              <td><%= rs.getString("listing_title") %></td>
-              <td><%= rs.getDate("check_in_date") %></td>
-              <td><%= rs.getDate("check_out_date") %></td>
-              <td>$<%= rs.getDouble("total_amount") %></td>
+              <td><%= rs.getString("ServiceType") %></td>
+              <td><%= rs.getTimestamp("RequestedAt") %></td>
+              <td><span class="badge badge-warning">PENDING</span></td>
               <td>
-                <span class="badge badge-<%= rs.getString("status").equals("confirmed") ? "success" : "warning" %>">
-                  <%= rs.getString("status") %>
-                </span>
-              </td>
-              <td>
-                <div class="action-buttons">
-                  <button class="action-btn action-btn-view" onclick="viewBooking(<%= rs.getInt("id") %>)">Xem</button>
-                  <button class="action-btn action-btn-delete" onclick="cancelBooking(<%= rs.getInt("id") %>)">Hủy</button>
-                </div>
+                <form class="form-inline" method="post" action="<%=request.getContextPath()%>/admin/dashboard">
+                  <input type="hidden" name="requestId" value="<%= rs.getInt("RequestID") %>" />
+                  <button class="btn btn-success btn-sm" name="action" value="approve">Duyệt</button>
+                  <button class="btn btn-danger btn-sm" name="action" value="reject">Từ chối</button>
+                </form>
               </td>
             </tr>
             <%
                   }
                 }
               } catch (Exception e) {
-                out.println("<tr><td colspan='8' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
               }
             %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Bookings Section -->
+      <!-- Bookings section removed as requested -->
           </tbody>
         </table>
       </div>

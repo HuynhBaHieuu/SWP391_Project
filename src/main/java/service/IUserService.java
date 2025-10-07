@@ -5,6 +5,8 @@
 package service;
 
 import java.sql.SQLException;
+import java.util.List;
+import model.Listing;
 import model.User;
 
 /**
@@ -21,4 +23,8 @@ public interface IUserService {
     boolean validateResetToken(String token) throws SQLException;
     User findUserByEmail(String email) throws SQLException;
     void sendResetEmail(String email, String resetLink);
+    boolean addToWishlist(int guestId, int listingId);
+    List<Listing> getWishlistByUser(int guestId);
+    boolean removeFromWishlist(int guestId, int listingId);
+    List<Integer>getAllListingIDByUser(int guestId);
 }

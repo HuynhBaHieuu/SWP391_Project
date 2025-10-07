@@ -1,5 +1,6 @@
 // Admin Users Management JavaScript
 document.addEventListener('DOMContentLoaded', function() {
+    const contextPath = document.body.getAttribute('data-context') || '';
     
     // Handle lock/unlock user buttons
     const lockButtons = document.querySelectorAll('button[data-action="toggle-status"]');
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add current page parameters to maintain pagination/filters
         addCurrentPageParams(formData);
         
-        fetch('/admin/users', {
+        fetch(contextPath + '/admin/users', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -80,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add current page parameters to maintain pagination/filters
         addCurrentPageParams(formData);
         
-        fetch('/admin/users', {
+        fetch(contextPath + '/admin/users', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

@@ -221,7 +221,7 @@
         }
     </style>
 </head>
-<body>
+<body data-context="${pageContext.request.contextPath}">
     <div class="container">
         <div class="header">
             <h1>Quản lý người dùng</h1>
@@ -420,6 +420,6 @@
         </c:choose>
     </div>
 
-    <script src="admin-users.js"></script>
+    <script src="<c:url value='/admin/admin-users.js' />"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize event listeners
+    window.__CTX__ = document.body.getAttribute('data-context') || '';
     initializeEventListeners();
 });
 
@@ -182,7 +182,7 @@ function sendListingAction(action, listingId, status = null) {
         formData.append(key, value);
     }
 
-    return fetch(window.location.pathname, {
+    return fetch((window.__CTX__ || '') + window.location.pathname, {
         method: 'POST',
         body: formData,
         headers: {
