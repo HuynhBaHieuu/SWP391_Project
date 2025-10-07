@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import jakarta.mail.*;
 import java.util.List;
 import utils.EmailUtil;
+import java.util.Properties;
 import model.Listing;
 
 public class UserService implements IUserService{

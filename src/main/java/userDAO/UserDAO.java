@@ -12,6 +12,10 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.ArrayList;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import model.Listing;
 
 public class UserDAO {
 
@@ -328,8 +332,8 @@ public class UserDAO {
             return false;
         }
     }
-
-    // ===== Wishlist methods (legacy schema tables: Wishlist, Listings) =====
+    
+    // Thêm sản phẩm vào Wishlist
     public boolean addToWishlist(int guestId, int listingId) {
         String sql = "INSERT INTO Wishlist(GuestID, ListingID) VALUES (?, ?)";
         try (Connection conn = DBConnection.getConnection();
@@ -338,6 +342,7 @@ public class UserDAO {
             ps.setInt(2, listingId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
+            // UNIQUE constraint nếu đã tồn tại sẽ throw
             e.printStackTrace();
             return false;
         }
@@ -396,6 +401,7 @@ public class UserDAO {
             ps.setInt(2, listingId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
+            // UNIQUE constraint nếu đã tồn tại sẽ throw
             e.printStackTrace();
             return false;
         }
