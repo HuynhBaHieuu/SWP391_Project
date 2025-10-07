@@ -101,10 +101,10 @@
             <span class="nav-icon">📝</span>
             <span>Yêu cầu trở thành Host</span>
           </a>
-          <!-- <a href="#" class="nav-item" data-section="bookings">
+          <a href="#" class="nav-item" data-section="bookings">
             <span class="nav-icon">📅</span>
             <span>Bookings</span>
-          </a> -->
+          </a>
           <a href="#" class="nav-item" data-section="reviews">
             <span class="nav-icon">💬</span>
             <span>Reviews / Reports</span>
@@ -179,6 +179,7 @@
           <div class="section-header">
             <h2 class="section-title">Hoạt động gần đây</h2>
           </div>
+          
           <table class="data-table">
             <thead>
               <tr>
@@ -192,16 +193,19 @@
               <%
                 try {
                   rs = stmt.executeQuery(
-                    "SELECT TOP 10 u.FullName AS full_name, u.Email AS email, u.ProfileImage AS avatar_url, " +
-                    "       'Đặt phòng' AS activity_type, b.CreatedAt AS created_at, b.Status AS status " +
-                    "FROM Bookings b " +
-                    "JOIN Users u ON b.GuestID = u.UserID " +
-                    "ORDER BY b.CreatedAt DESC"
+                    "SELECT u.FullName AS full_name, u.Email AS email, u.ProfileImage AS avatar_url, " +
+                    "       a.ActivityType AS activity_type, a.CreatedAt AS created_at, a.Status AS status " +
+                    "FROM Activities a " +
+                    "JOIN Users u ON a.UserID = u.UserID " +
+                    "ORDER BY a.CreatedAt DESC"
                   );
+                  
                   if (!rs.isBeforeFirst()) {
                     out.println("<tr><td colspan='4' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có hoạt động nào</td></tr>");
                   } else {
-                    while (rs.next()) {
+                    int count = 0;
+                    while (rs.next() && count < 10) {
+                      count++;
               %>
               <tr>
                 <td>
@@ -216,7 +220,7 @@
                 <td><%= rs.getString("activity_type") %></td>
                 <td><%= rs.getTimestamp("created_at") %></td>
                 <td>
-                  <span class="badge badge-<%= rs.getString("status").equals("Completed") ? "success" : "warning" %>">
+                  <span class="badge badge-<%= rs.getString("status").equals("success") ? "success" : "warning" %>">
                     <%= rs.getString("status") %>
                   </span>
                 </td>
@@ -289,13 +293,10 @@
               </td>
               <td><%= rs.getDate("created_at") %></td>
               <td>
-                <%
-                  int userId = rs.getInt("id");
-                %>
                 <div class="action-buttons">
-                  <button class="action-btn action-btn-view" onclick="viewUser(<%=userId%>)">Xem</button>
-                  <button class="action-btn action-btn-edit" onclick="editUser(<%=userId%>)">Sửa</button>
-                  <button class="action-btn action-btn-delete" onclick="toggleUserStatus(<%=userId%>)">
+                  <button class="action-btn action-btn-view" onclick="viewUser(<%= rs.getInt("id") %>)">Xem</button>
+                  <button class="action-btn action-btn-edit" onclick="editUser(<%= rs.getInt("id") %>)">Sửa</button>
+                  <button class="action-btn action-btn-delete" onclick="toggleUserStatus(<%= rs.getInt("id") %>)">
                     <%= rs.getString("status").equals("active") ? "Khóa" : "Mở khóa" %>
                   </button>
                 </div>
@@ -378,13 +379,10 @@
               </td>
               <td><%= rs.getDate("created_at") %></td>
               <td>
-                <%
-                  int listingId = rs.getInt("id");
-                %>
                 <div class="action-buttons">
-                  <button class="action-btn action-btn-view" onclick="viewListing(<%=listingId%>)">Xem</button>
-                  <button class="action-btn action-btn-edit" onclick="approveListing(<%=listingId%>)">Duyệt</button>
-                  <button class="action-btn action-btn-delete" onclick="rejectListing(<%=listingId%>)">Từ chối</button>
+                  <button class="action-btn action-btn-view" onclick="viewListing(<%= rs.getInt("id") %>)">Xem</button>
+                  <button class="action-btn action-btn-edit" onclick="approveListing(<%= rs.getInt("id") %>)">Duyệt</button>
+                  <button class="action-btn action-btn-delete" onclick="rejectListing(<%= rs.getInt("id") %>)">Từ chối</button>
                 </div>
               </td>
             </tr>
@@ -461,7 +459,86 @@
       </div>
       
       <!-- Bookings Section -->
-      <!-- Bookings section removed as requested -->
+      <div id="bookings" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">Quản lý đặt phòng</h1>
+          <p class="page-subtitle">Theo dõi và quản lý tất cả đặt phòng</p>
+        </div>
+        
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="Tìm kiếm đặt phòng...">
+          <select class="form-select" style="width: auto;">
+            <option>Tất cả trạng thái</option>
+            <option>Đang xử lý</option>
+            <option>Đã xác nhận</option>
+            <option>Đã hủy</option>
+          </select>
+        </div>
+        
+        <!-- Bookings table now fetches from database -->
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã đặt phòng</th>
+              <th>Khách hàng</th>
+              <th>Chỗ ở</th>
+              <th>Ngày nhận phòng</th>
+              <th>Ngày trả phòng</th>
+              <th>Tổng tiền</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%
+              try {
+                rs = stmt.executeQuery(
+                  "SELECT b.BookingID AS id, b.BookingCode AS booking_code, " +
+                  "       b.CheckInDate AS check_in_date, b.CheckOutDate AS check_out_date, " +
+                  "       b.TotalAmount AS total_amount, b.Status AS status, " +
+                  "       u.FullName AS guest_name, u.ProfileImage AS avatar_url, l.Title AS listing_title " +
+                  "FROM Bookings b " +
+                  "JOIN Users u ON b.GuestID = u.UserID " +
+                  "JOIN Listings l ON b.ListingID = l.ListingID " +
+                  "ORDER BY b.CreatedAt DESC"
+                );
+                
+                if (!rs.isBeforeFirst()) {
+                  out.println("<tr><td colspan='8' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có đặt phòng nào</td></tr>");
+                } else {
+                  while (rs.next()) {
+            %>
+            <tr>
+              <td><%= rs.getString("booking_code") %></td>
+              <td>
+                <div class="user-info">
+                  <img src="<%= rs.getString("avatar_url") != null ? rs.getString("avatar_url") : "https://i.pravatar.cc/150" %>" alt="User" class="user-avatar">
+                  <span class="user-name"><%= rs.getString("guest_name") %></span>
+                </div>
+              </td>
+              <td><%= rs.getString("listing_title") %></td>
+              <td><%= rs.getDate("check_in_date") %></td>
+              <td><%= rs.getDate("check_out_date") %></td>
+              <td>$<%= rs.getDouble("total_amount") %></td>
+              <td>
+                <span class="badge badge-<%= rs.getString("status").equals("confirmed") ? "success" : "warning" %>">
+                  <%= rs.getString("status") %>
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn action-btn-view" onclick="viewBooking(<%= rs.getInt("id") %>)">Xem</button>
+                  <button class="action-btn action-btn-delete" onclick="cancelBooking(<%= rs.getInt("id") %>)">Hủy</button>
+                </div>
+              </td>
+            </tr>
+            <%
+                  }
+                }
+              } catch (Exception e) {
+                out.println("<tr><td colspan='8' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+              }
+            %>
           </tbody>
         </table>
       </div>
@@ -724,3 +801,4 @@
   </script>
 </body>
 </html>
+    
