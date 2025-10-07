@@ -18,7 +18,7 @@ public class SwitchToGuestController extends HttpServlet {
             // Đánh dấu chế độ xem hiện tại là Guest, không thay đổi quyền trong DB
             session.setAttribute("mode", "Guest");
         }
-        resp.sendRedirect(req.getContextPath() + "/home.jsp");
+        resp.sendRedirect(req.getContextPath() + "/home");
     }
 }
 
