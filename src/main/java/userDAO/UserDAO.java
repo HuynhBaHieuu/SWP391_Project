@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import listingDAO.ListingImageDAO;
 import model.Listing;
 
 public class UserDAO {
@@ -367,6 +368,7 @@ public class UserDAO {
                     l.setMaxGuests(rs.getInt("MaxGuests"));
                     l.setCreatedAt(rs.getTimestamp("CreatedAt"));
                     l.setStatus(rs.getString("Status"));
+                    l.setFirstImage(new ListingImageDAO().getFirstImage(l.getListingID()));
                     list.add(l);
                 }
             }

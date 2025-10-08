@@ -122,10 +122,13 @@ public class NewListingController extends HttpServlet {
     /** Lưu file ảnh vào thư mục /uploads/listings/{listingId}/ và trả về URL tương đối */
     private List<String> saveUploadsAndReturnUrls(HttpServletRequest req, int listingId) throws IOException, ServletException {
         List<String> urls = new ArrayList<>();
-        // thư mục thật trên server (đổi theo nhu cầu)
+        // thư mục vĩnh viễn trong webapp/uploads (không bị mất khi restart)
         String uploadRoot = getServletContext().getRealPath("/uploads/listings/" + listingId);
         File dir = new File(uploadRoot);
-        if (!dir.exists()) Files.createDirectories(dir.toPath());
+        if (!dir.exists()) {
+            Files.createDirectories(dir.toPath());
+            System.out.println("Created listing upload directory: " + uploadRoot);
+        }
 
         for (Part part : req.getParts()) {
             if (!"images".equals(part.getName())) continue;
