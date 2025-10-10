@@ -29,8 +29,14 @@
                         <a href="${pageContext.request.contextPath}/host/listing/edit?id=${listing.listingID}" class="bigcard-link">
                             <article class="bigcard">
                                 <div class="bigcard-media">
-                                    <span class="listing-status ${listing.status == 'Active' ? 'status-active' : 'status-inactive'}">
-                                        ${listing.status == 'Active' ? 'Đang thực hiện' : listing.status}
+                                    <span class="listing-status ${listing.status == 'approved' ? 'status-active' : 
+                                                                   listing.status == 'pending' ? 'status-pending' : 'status-inactive'}">
+                                        <c:choose>
+                                            <c:when test="${listing.status == 'approved'}">Đã duyệt</c:when>
+                                            <c:when test="${listing.status == 'pending'}">Chờ duyệt</c:when>
+                                            <c:when test="${listing.status == 'rejected'}">Bị từ chối</c:when>
+                                            <c:otherwise>${listing.status}</c:otherwise>
+                                        </c:choose>
                                     </span>
 
                                     <c:set var="imgKey" value="${'images_'}${listing.listingID}" />
@@ -101,8 +107,15 @@
                             <div class="lt-col lt-col-type">Nhà</div>
                             <div class="lt-col lt-col-loc">${listing.city}</div>
                             <div class="lt-col lt-col-status">
-                                <span class="dot ${listing.status == 'Active' ? 'dot-on' : ''}"></span>
-                                <span class="lt-status-text">${listing.status == 'Active' ? 'Đang thực hiện' : listing.status}</span>
+                                <span class="dot ${listing.status == 'approved' ? 'dot-on' : ''}"></span>
+                                <span class="lt-status-text">
+                                    <c:choose>
+                                        <c:when test="${listing.status == 'approved'}">Đã duyệt</c:when>
+                                        <c:when test="${listing.status == 'pending'}">Chờ duyệt</c:when>
+                                        <c:when test="${listing.status == 'rejected'}">Bị từ chối</c:when>
+                                        <c:otherwise>${listing.status}</c:otherwise>
+                                    </c:choose>
+                                </span>
                             </div>
                         </div>
                     </a>

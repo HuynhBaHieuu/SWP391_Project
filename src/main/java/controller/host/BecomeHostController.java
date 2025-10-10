@@ -7,6 +7,7 @@ import java.io.IOException;
 import model.User;
 import userDAO.UserDAO;
 import userDAO.HostRequestDAO;
+import model.HostRequest;
 
 @WebServlet(urlPatterns = {"/become-host"})
 public class BecomeHostController extends HttpServlet {

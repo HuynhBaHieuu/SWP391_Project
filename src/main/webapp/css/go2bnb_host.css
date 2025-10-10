@@ -275,6 +275,10 @@ img{
     color:#ff385c;
     border-color:#ff385c
 }
+.listing-status.status-pending{
+    color:#ffa500;
+    border-color:#ffa500
+}
 .listing-status.status-inactive{
     color:#666;
     border-color:#ddd

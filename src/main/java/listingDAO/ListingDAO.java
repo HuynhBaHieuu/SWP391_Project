@@ -14,7 +14,7 @@ public class ListingDAO {
             String address, String city, java.math.BigDecimal pricePerNight, int maxGuests
     ) {
         String sql = "INSERT INTO Listings (HostID, Title, Description, Address, City, PricePerNight, MaxGuests, Status) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Active')";
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, hostId);
@@ -145,7 +145,7 @@ public class ListingDAO {
     // ====== SEARCH LISTINGS ======
     public List<Listing> searchListings(String keyword) {
         List<Listing> listings = new ArrayList<>();
-        String sql = "SELECT * FROM Listings WHERE Status='Active' AND "
+        String sql = "SELECT * FROM Listings WHERE Status='approved' AND "
                    + "(Title LIKE ? OR City LIKE ? OR Address LIKE ? OR Description LIKE ?) "
                    + "ORDER BY CreatedAt DESC";
         try (Connection con = DBConnection.getConnection();
@@ -169,7 +169,7 @@ public class ListingDAO {
     // ====== GET ALL ACTIVE LISTINGS ======
     public List<Listing> getAllListings() {
         List<Listing> listings = new ArrayList<>();
-        String sql = "SELECT * FROM Listings WHERE Status='Active' ORDER BY CreatedAt DESC";
+        String sql = "SELECT * FROM Listings WHERE Status='approved' ORDER BY CreatedAt DESC";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -352,7 +352,7 @@ public class ListingDAO {
     // Get all active listings (excluding soft deleted)
     public List<Listing> getAllActiveListings() {
         List<Listing> listings = new ArrayList<>();
-        String sql = "SELECT * FROM Listings WHERE Status='Active' AND (IsDeleted = 0 OR IsDeleted IS NULL) ORDER BY CreatedAt DESC";
+        String sql = "SELECT * FROM Listings WHERE Status='approved' AND (IsDeleted = 0 OR IsDeleted IS NULL) ORDER BY CreatedAt DESC";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -368,7 +368,7 @@ public class ListingDAO {
     // Search listings (excluding soft deleted)
     public List<Listing> searchActiveListings(String keyword) {
         List<Listing> listings = new ArrayList<>();
-        String sql = "SELECT * FROM Listings WHERE Status='Active' AND (IsDeleted = 0 OR IsDeleted IS NULL) AND "
+        String sql = "SELECT * FROM Listings WHERE Status='approved' AND (IsDeleted = 0 OR IsDeleted IS NULL) AND "
                    + "(Title LIKE ? OR City LIKE ? OR Address LIKE ? OR Description LIKE ?) "
                    + "ORDER BY CreatedAt DESC";
         try (Connection con = DBConnection.getConnection();

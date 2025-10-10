@@ -49,4 +49,14 @@ public class ListingService implements IListingService {
     public List<Listing> searchListings(String keyword) throws SQLException {
         return listingDAO.searchListings(keyword);
     }
+    
+    // ✅ Thêm mới: duyệt listing
+    public boolean approveListing(int listingId) throws SQLException {
+        return listingDAO.approve(listingId);
+    }
+    
+    // ✅ Thêm mới: từ chối listing
+    public boolean rejectListing(int listingId) throws SQLException {
+        return listingDAO.reject(listingId);
+    }
 }

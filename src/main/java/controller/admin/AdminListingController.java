@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import listingDAO.ListingDAO;
 import model.Listing;
+import service.ListingService;
 import java.io.IOException;
 import java.util.List;
 
@@ -16,10 +17,12 @@ public class AdminListingController extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     private ListingDAO listingDAO;
+    private ListingService listingService;
 
     @Override
     public void init() throws ServletException {
         listingDAO = new ListingDAO();
+        listingService = new ListingService();
     }
 
     @Override
@@ -67,17 +70,27 @@ public class AdminListingController extends HttpServlet {
         // Xử lý các hành động tương ứng
         switch (action) {
             case "approve":
-                if (listingDAO.approve(id)) {
-                    setFlashMessage(request, "Tin đăng đã được phê duyệt.");
-                } else {
-                    setFlashMessage(request, "Không thể phê duyệt tin đăng.");
+                try {
+                    if (listingService.approveListing(id)) {
+                        setFlashMessage(request, "Tin đăng đã được phê duyệt.");
+                    } else {
+                        setFlashMessage(request, "Không thể phê duyệt tin đăng.");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    setFlashMessage(request, "Có lỗi xảy ra khi phê duyệt tin đăng.");
                 }
                 break;
             case "reject":
-                if (listingDAO.reject(id)) {
-                    setFlashMessage(request, "Tin đăng đã bị từ chối.");
-                } else {
-                    setFlashMessage(request, "Không thể từ chối tin đăng.");
+                try {
+                    if (listingService.rejectListing(id)) {
+                        setFlashMessage(request, "Tin đăng đã bị từ chối.");
+                    } else {
+                        setFlashMessage(request, "Không thể từ chối tin đăng.");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    setFlashMessage(request, "Có lỗi xảy ra khi từ chối tin đăng.");
                 }
                 break;
             case "toggleStatus":
