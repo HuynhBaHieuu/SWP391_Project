@@ -77,13 +77,54 @@
             color: #000;
         }
         
-        .settings-icon {
+        .settings-dropdown {
+            position: relative;
             margin-left: auto;
+        }
+        
+        .settings-icon {
             background: none;
             border: none;
             cursor: pointer;
             font-size: 16px;
             color: #666;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .settings-icon:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .settings-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            min-width: 150px;
+            margin-top: 4px;
+        }
+        
+        .delete-listing-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 12px 16px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            color: #dc3545;
+            transition: background-color 0.3s ease;
+            border-radius: 8px;
+        }
+        
+        .delete-listing-btn:hover {
+            background-color: #f8f9fa;
         }
         
         .completion-card {
@@ -378,15 +419,20 @@
             <div class="sidebar-tabs">
                 <button class="tab-btn active" onclick="switchTab('property')">Chỗ ở cho thuê của bạn</button>
                 <button class="tab-btn" onclick="switchTab('guide')">Hướng dẫn khi khách đến</button>
-                <button class="settings-icon">⚙️</button>
+                <div class="settings-dropdown">
+                    <button class="settings-icon" onclick="toggleSettingsDropdown()">⚙️</button>
+                    <div id="settings-dropdown" class="settings-dropdown-menu" style="display: none;">
+                        <button class="delete-listing-btn" onclick="deleteListing()">🗑️ Xóa bài đăng</button>
+                    </div>
+                </div>
             </div>
             
             <div class="completion-card">
                 <div class="completion-header">
                     <div class="completion-dot"></div>
-                    <span class="completion-title">Hoàn thành các bước bắt buộc</span>
+                    <span class="completion-title">Mục chỉnh sửa</span>
                 </div>
-                <p class="completion-text">Vui lòng hoàn tất các nhiệm vụ cuối cùng này để đăng bài đăng và bắt đầu nhận yêu cầu đặt.</p>
+                <p class="completion-text">Vui lòng chọn các mục dưới đây để chỉnh sửa.</p>
             </div>
             
             <div class="sidebar-section">
@@ -842,6 +888,52 @@
             t.style.background = type === 'success' ? '#28a745' : '#dc3545';
             document.body.appendChild(t);
             setTimeout(() => { t.remove(); }, 2500);
+        }
+
+        // Toggle settings dropdown
+        function toggleSettingsDropdown() {
+            const dropdown = document.getElementById('settings-dropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('settings-dropdown');
+            const settingsIcon = event.target.closest('.settings-icon');
+            
+            if (!settingsIcon && dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // Delete listing function (soft delete)
+        function deleteListing() {
+            if (!confirm('Bạn có chắc muốn xóa bài đăng này? Bài đăng sẽ bị ẩn khỏi trang web nhưng vẫn có thể khôi phục bởi Admin.')) {
+                return;
+            }
+            
+            const listingId = '${listing.listingID}';
+            
+            fetch('${pageContext.request.contextPath}/host/listing/soft-delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: 'listingId=' + listingId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Bài đăng đã được xóa thành công!');
+                    window.location.href = '${pageContext.request.contextPath}/host/listings';
+                } else {
+                    alert('Không thể xóa bài đăng: ' + (data.message || 'Lỗi không xác định'));
+                }
+            })
+            .catch(error => {
+                console.error('Delete listing error:', error);
+                alert('Lỗi khi xóa bài đăng');
+            });
         }
 
         // Delete image function: call server to delete DB record and file, then remove from UI

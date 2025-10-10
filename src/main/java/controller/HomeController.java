@@ -23,8 +23,8 @@ public class HomeController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Lấy tất cả listings để hiển thị trên trang chủ
-        List<Listing> listings = listingDAO.getAllListings();
+        // Lấy tất cả listings để hiển thị trên trang chủ (loại trừ soft deleted)
+        List<Listing> listings = listingDAO.getAllActiveListings();
         
         request.setAttribute("listings", listings);
         

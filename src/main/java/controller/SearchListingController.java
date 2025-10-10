@@ -31,8 +31,8 @@ public class SearchListingController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/home");
             return;
         } else {
-            // Tìm kiếm với keyword
-            listings = listingDAO.searchListings(keyword.trim());
+            // Tìm kiếm với keyword (loại trừ soft deleted)
+            listings = listingDAO.searchActiveListings(keyword.trim());
         }
 
         request.setAttribute("listings", listings);
