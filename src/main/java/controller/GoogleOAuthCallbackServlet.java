@@ -59,6 +59,12 @@ public class GoogleOAuthCallbackServlet extends HttpServlet {
                     user.setProfileImage(ga.getPicture());
                 }
             } else {
+                // Check if account is locked
+                if (!user.isActive()) {
+                    resp.sendRedirect(req.getContextPath() + "/login.jsp?err=" + java.net.URLEncoder.encode("Tài khoản của bạn đã bị khóa. Liên hệ hỗ trợ.", "UTF-8"));
+                    return;
+                }
+                
                 // Update profile image if changed
                 if (ga.getPicture() != null && !ga.getPicture().isEmpty() && (user.getProfileImage() == null || !user.getProfileImage().equals(ga.getPicture()))) {
                     userDAO.updateProfileImage(user.getUserID(), ga.getPicture());

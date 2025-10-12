@@ -317,6 +317,9 @@
                                     <div class="actions">
                                         <!-- Toggle Status Button -->
                                         <c:choose>
+                                            <c:when test="${user.role == 'admin'}">
+                                                <span style="color: #6c757d; font-style: italic;">Không thể khóa admin</span>
+                                            </c:when>
                                             <c:when test="${user.status == 'active'}">
                                                 <button type="button" class="btn btn-warning btn-sm" 
                                                         data-action="toggle-status"
@@ -330,20 +333,10 @@
                                                         data-action="toggle-status"
                                                         data-user-id="<c:out value='${user.id}' />"
                                                         data-current-status="blocked">
-                                                    Kích hoạt
+                                                    Đã khóa
                                                 </button>
                                             </c:otherwise>
                                         </c:choose>
-
-                                        <!-- Update Role Select -->
-                                        <select data-action="update-role"
-                                                data-user-id="<c:out value='${user.id}' />"
-                                                data-current-role="<c:out value='${user.role}' />"
-                                                class="btn btn-sm" style="padding: 4px 8px;">
-                                            <option value="user" <c:if test="${user.role == 'user'}">selected</c:if>>Người dùng</option>
-                                            <option value="host" <c:if test="${user.role == 'host'}">selected</c:if>>Chủ nhà</option>
-                                            <option value="admin" <c:if test="${user.role == 'admin'}">selected</c:if>>Quản trị viên</option>
-                                        </select>
                                     </div>
                                 </td>
                             </tr>
