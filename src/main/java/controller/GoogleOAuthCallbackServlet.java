@@ -1,4 +1,6 @@
 
+package controller;
+
 import controller.GoogleLogin;
 import model.GoogleAccount;
 import model.User;
@@ -67,10 +69,16 @@ public class GoogleOAuthCallbackServlet extends HttpServlet {
             // Set session and login
             HttpSession session = req.getSession(true);
             session.setAttribute("user", user);
+            session.setAttribute("userRole", user.getRole()); // Set userRole for filter compatibility
             session.setAttribute("mode", "Guest");
 
-            // Redirect to home
-            resp.sendRedirect(req.getContextPath() + "/home.jsp");
+            // Redirect based on role (Guest/Host/Admin)
+            String role = user.getRole();
+            if ("Admin".equalsIgnoreCase(role)) {
+                resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/home.jsp");
+            }
 
         } catch (Exception ex) {
             ex.printStackTrace();

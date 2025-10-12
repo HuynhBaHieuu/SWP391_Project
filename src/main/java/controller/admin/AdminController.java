@@ -25,7 +25,7 @@ public class AdminController extends HttpServlet {
 
         // Kiểm tra quyền admin
         if (user == null || !user.isAdmin()) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/unauthorized.jsp");
             return;
         }
 
@@ -68,7 +68,7 @@ public class AdminController extends HttpServlet {
         User user = (session != null) ? (User) session.getAttribute("user") : null;
 
         if (user == null || !user.isAdmin()) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/unauthorized.jsp");
             return;
         }
 
