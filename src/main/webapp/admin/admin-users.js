@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const userId = this.dataset.userId;
             const currentStatus = this.dataset.currentStatus;
             const newStatus = currentStatus === 'active' ? 'blocked' : 'active';
-            const actionText = currentStatus === 'active' ? 'khóa' : 'kích hoạt';
+            const actionText = currentStatus === 'active' ? 'khóa' : 'mở khóa';
             
             if (confirm(`Bạn có chắc muốn ${actionText} người dùng này?`)) {
                 toggleUserStatus(userId, newStatus);
@@ -19,26 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Handle role change dropdowns
-    const roleSelects = document.querySelectorAll('select[data-action="update-role"]');
-    roleSelects.forEach(select => {
-        select.addEventListener('change', function(e) {
-            e.preventDefault();
-            
-            const userId = this.dataset.userId;
-            const newRole = this.value;
-            const currentRole = this.dataset.currentRole;
-            
-            if (newRole !== currentRole) {
-                if (confirm('Bạn có chắc muốn thay đổi vai trò của người dùng này?')) {
-                    updateUserRole(userId, newRole);
-                } else {
-                    // Reset to original value
-                    this.value = currentRole;
-                }
-            }
-        });
-    });
+    // Role change functionality removed - admin can only lock/unlock accounts
     
     // Function to toggle user status
     function toggleUserStatus(userId, status) {
@@ -47,9 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('id', userId);
         formData.append('status', status);
         
-        // Add current page parameters to maintain pagination/filters
-        addCurrentPageParams(formData);
-        
         fetch(contextPath + '/admin/users', {
             method: 'POST',
             headers: {
@@ -58,49 +36,117 @@ document.addEventListener('DOMContentLoaded', function() {
             body: formData
         })
         .then(response => {
-            if (response.ok) {
-                // Reload page to show updated status and flash message
-                window.location.reload();
-            } else {
+            if (!response.ok) {
                 throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Hiển thị thông báo thành công
+                showSuccessMessage(data.message);
+                
+                // Tự động reload trang sau 1.5 giây để đảm bảo UI được cập nhật
+                setTimeout(() => {
+                    console.log('Auto reloading page after successful status update');
+                    window.location.reload();
+                }, 1500);
+                
+                console.log('Status updated successfully, page will reload in 1.5 seconds');
+            } else {
+                showErrorMessage(data.message || 'Có lỗi xảy ra khi cập nhật trạng thái.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Có lỗi xảy ra khi cập nhật trạng thái người dùng. Vui lòng thử lại.');
+            showErrorMessage('Có lỗi xảy ra khi cập nhật trạng thái người dùng. Vui lòng thử lại.');
         });
     }
     
-    // Function to update user role
-    function updateUserRole(userId, role) {
-        const formData = new URLSearchParams();
-        formData.append('action', 'updateRole');
-        formData.append('id', userId);
-        formData.append('role', role);
-        
-        // Add current page parameters to maintain pagination/filters
-        addCurrentPageParams(formData);
-        
-        fetch(contextPath + '/admin/users', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: formData
-        })
-        .then(response => {
-            if (response.ok) {
-                // Reload page to show updated role and flash message
-                window.location.reload();
+    // Cập nhật UI trực tiếp
+    function updateUserStatusUI(userId, newStatus) {
+        // Tìm button và cập nhật
+        const button = document.querySelector(`button[data-user-id="${userId}"][data-action="toggle-status"]`);
+        if (button) {
+            if (newStatus === 'active') {
+                button.textContent = 'Khóa';
+                button.className = 'btn btn-warning btn-sm';
+                button.dataset.currentStatus = 'active';
             } else {
-                throw new Error('Network response was not ok');
+                button.textContent = 'Đã khóa';
+                button.className = 'btn btn-success btn-sm';
+                button.dataset.currentStatus = 'blocked';
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Có lỗi xảy ra khi cập nhật vai trò người dùng. Vui lòng thử lại.');
-        });
+        }
+        
+        // Tìm status badge và cập nhật
+        const row = button ? button.closest('tr') : null;
+        if (row) {
+            const statusBadge = row.querySelector('.status-badge');
+            if (statusBadge) {
+                if (newStatus === 'active') {
+                    statusBadge.textContent = 'Hoạt động';
+                    statusBadge.className = 'status-badge status-active';
+                } else {
+                    statusBadge.textContent = 'Bị khóa';
+                    statusBadge.className = 'status-badge status-blocked';
+                }
+            }
+        }
     }
+    
+    // Hiển thị thông báo thành công
+    function showSuccessMessage(message) {
+        showFlashMessage('success', message);
+    }
+    
+    // Hiển thị thông báo lỗi
+    function showErrorMessage(message) {
+        showFlashMessage('error', message);
+    }
+    
+    // Hiển thị flash message
+    function showFlashMessage(type, message) {
+        // Tạo flash message element
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.style.cssText = `
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        `;
+        
+        if (type === 'success') {
+            alertDiv.style.backgroundColor = '#d4edda';
+            alertDiv.style.borderColor = '#c3e6cb';
+            alertDiv.style.color = '#155724';
+        } else {
+            alertDiv.style.backgroundColor = '#f8d7da';
+            alertDiv.style.borderColor = '#f5c6cb';
+            alertDiv.style.color = '#721c24';
+        }
+        
+        alertDiv.textContent = message;
+        
+        // Thêm vào body
+        document.body.appendChild(alertDiv);
+        
+        // Tự động xóa sau 3 giây
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 3000);
+    }
+    
+    // updateUserRole function removed - admin can only lock/unlock accounts
     
     // Helper function to add current page parameters to form data
     function addCurrentPageParams(formData) {

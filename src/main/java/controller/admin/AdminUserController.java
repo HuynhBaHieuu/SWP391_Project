@@ -2,6 +2,7 @@ package controller.admin;
 
 import userDAO.UserDAO;
 import model.User;
+import dao.DBConnection;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,6 +11,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet(urlPatterns = {"/admin/users"})
@@ -61,41 +66,76 @@ public class AdminUserController extends HttpServlet {
 
         try {
             if ("toggleStatus".equals(action)) {
-                // Xử lý thay đổi trạng thái người dùng
+                // Xử lý khóa/mở khóa tài khoản người dùng
                 int id = parseIntSafe(getParam(request, "id", ""), -1);
                 String status = getParam(request, "status", "");
+                
                 if (id > 0 && !status.isEmpty()) {
-                    UserDAO.updateStatus(id, status);
-                    setFlashMessage(request.getSession(), "success", "Cập nhật trạng thái thành công.");
+                    // Luôn trả về JSON cho POST request từ dashboard/users page
+                    boolean isAjaxRequest = true;
+                    
+                    try {
+                        // Kiểm tra xem user có phải admin không
+                        if (isUserAdmin(id)) {
+                            String errorMessage = "Không thể khóa/mở khóa tài khoản admin.";
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            response.getWriter().write("{\"success\": false, \"message\": \"" + errorMessage + "\"}");
+                            response.getWriter().flush();
+                            return;
+                        }
+                        
+                        // Chỉ cho phép khóa/mở khóa tài khoản
+                        boolean isActive = "active".equalsIgnoreCase(status);
+                        toggleUserAccountStatus(id, isActive);
+                        
+                        // Trả về JSON response
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        
+                        String message = isActive ? "Đã mở khóa tài khoản thành công." : "Đã khóa tài khoản thành công.";
+                        String jsonResponse = String.format(
+                            "{\"success\": true, \"message\": \"%s\", \"newStatus\": \"%s\"}", 
+                            message, status
+                        );
+                        System.out.println("Sending JSON response: " + jsonResponse);
+                        response.getWriter().write(jsonResponse);
+                        response.getWriter().flush();
+                        return;
+                    } catch (SQLException e) {
+                        String errorMessage = "Có lỗi xảy ra khi cập nhật trạng thái tài khoản: " + e.getMessage();
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"success\": false, \"message\": \"" + errorMessage + "\"}");
+                        response.getWriter().flush();
+                        return;
+                    }
                 } else {
-                    setFlashMessage(request.getSession(), "error", "Dữ liệu không hợp lệ.");
-                }
-            } else if ("updateRole".equals(action)) {
-                // Xử lý cập nhật vai trò người dùng
-                int id = parseIntSafe(getParam(request, "id", ""), -1);
-                String role = getParam(request, "role", "");
-                if (id > 0 && !role.isEmpty()) {
-                    UserDAO.updateRole(id, role);
-                    setFlashMessage(request.getSession(), "success", "Cập nhật vai trò thành công.");
-                } else {
-                    setFlashMessage(request.getSession(), "error", "Dữ liệu không hợp lệ.");
+                    // Trả về JSON error
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("{\"success\": false, \"message\": \"Dữ liệu không hợp lệ.\"}");
+                    response.getWriter().flush();
+                    return;
                 }
             } else {
-                setFlashMessage(request.getSession(), "error", "Hành động không hợp lệ.");
+                // Trả về JSON error
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"success\": false, \"message\": \"Hành động không hợp lệ.\"}");
+                response.getWriter().flush();
+                return;
             }
         } catch (Exception e) {
-            // Xử lý lỗi và đặt thông báo lỗi vào session
-            setFlashMessage(request.getSession(), "error", "Đã xảy ra lỗi khi xử lý yêu cầu.");
+            // Trả về JSON error
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"success\": false, \"message\": \"Đã xảy ra lỗi khi xử lý yêu cầu.\"}");
+            response.getWriter().flush();
+            return;
         }
 
-        // Chuyển hướng về trang danh sách người dùng với các tham số truy vấn cũ
-        String queryString = String.format("?q=%s&status=%s&role=%s&page=%d&size=%d",
-                getParam(request, "q", ""),
-                getParam(request, "status", ""),
-                getParam(request, "role", ""),
-                parseIntSafe(getParam(request, "page", "1"), 1),
-                parseIntSafe(getParam(request, "size", "10"), 10));
-        response.sendRedirect(request.getContextPath() + "/admin/users" + queryString);
+        // Không cần redirect vì luôn trả về JSON
     }
 
     // Phương thức trợ giúp để lấy tham số từ request với giá trị mặc định
@@ -116,5 +156,62 @@ public class AdminUserController extends HttpServlet {
     // Phương thức trợ giúp để đặt thông báo flash vào session
     private void setFlashMessage(HttpSession session, String type, String message) {
         session.setAttribute("flash_" + type, message);
+    }
+    
+    // Kiểm tra xem user có phải admin không
+    private boolean isUserAdmin(int userId) throws SQLException {
+        // Thử SQL Server schema trước
+        String sqlServerSql = "SELECT IsAdmin FROM Users WHERE UserID = ?";
+        String mySqlSql = "SELECT role FROM users WHERE id = ?";
+        
+        try (Connection con = DBConnection.getConnection()) {
+            // Thử SQL Server schema trước
+            try (PreparedStatement ps = con.prepareStatement(sqlServerSql)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getBoolean("IsAdmin");
+                    }
+                }
+            } catch (SQLException e) {
+                // Nếu SQL Server schema không tồn tại, thử MySQL schema
+                try (PreparedStatement ps = con.prepareStatement(mySqlSql)) {
+                    ps.setInt(1, userId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            String role = rs.getString("role");
+                            return "admin".equalsIgnoreCase(role);
+                        }
+                    }
+                }
+            }
+        }
+        return false; // Mặc định không phải admin
+    }
+
+    // Phương thức khóa/mở khóa tài khoản người dùng
+    private void toggleUserAccountStatus(int userId, boolean isActive) throws SQLException {
+        // Thử SQL Server schema trước
+        String sqlServerSql = "UPDATE Users SET IsActive = ? WHERE UserID = ?";
+        String mySqlSql = "UPDATE users SET status = ? WHERE id = ?";
+        
+        try (Connection con = DBConnection.getConnection()) {
+            // Thử SQL Server schema trước
+            try (PreparedStatement ps = con.prepareStatement(sqlServerSql)) {
+                ps.setBoolean(1, isActive);
+                ps.setInt(2, userId);
+                int rowsAffected = ps.executeUpdate();
+                if (rowsAffected > 0) {
+                    return; // Thành công với SQL Server schema
+                }
+            } catch (SQLException e) {
+                // Nếu SQL Server schema không tồn tại, thử MySQL schema
+                try (PreparedStatement ps = con.prepareStatement(mySqlSql)) {
+                    ps.setString(1, isActive ? "active" : "blocked");
+                    ps.setInt(2, userId);
+                    ps.executeUpdate();
+                }
+            }
+        }
     }
 }
