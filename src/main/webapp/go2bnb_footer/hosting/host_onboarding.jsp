@@ -9,13 +9,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
     <style>
+        body {
+            background: linear-gradient(180deg, #fff9f9 0%, #fffdfd 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #333;
+            margin: 0;
+        }
+
         main.container {
-            max-width: 1100px;
-            margin: 50px auto;
-            padding: 50px 30px;
-            background: #fff8f5; /* màu kem nhạt */
-            border-radius: 15px;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+            max-width: 1150px;
+            margin: 60px auto;
+            padding: 50px 45px;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        main.container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 45px rgba(0, 0, 0, 0.12);
         }
 
         nav.breadcrumb {
@@ -26,96 +39,127 @@
         nav.breadcrumb a {
             color: #d46a6a;
             text-decoration: none;
+            font-weight: 600;
+        }
+        nav.breadcrumb a:hover {
+            text-decoration: underline;
         }
 
+        /* Header */
         header.hero {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 60px;
         }
         header.hero h1 {
             font-size: 2.8rem;
             color: #d46a6a;
+            font-weight: 800;
             margin-bottom: 15px;
         }
         header.hero p {
             font-size: 1.2rem;
             color: #555;
-            margin-bottom: 20px;
-        }
-        header.hero .btn {
-            background-color: #d46a6a;
-            color: #fff;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
-        header.hero .btn:hover {
-            background-color: #ff7a7a;
-            transform: scale(1.05);
+            margin-bottom: 25px;
+            line-height: 1.6;
         }
 
-        section {
-            margin-bottom: 40px;
+        header.hero .btn {
+            background: linear-gradient(90deg, #d46a6a, #e78989);
+            color: #fff;
+            padding: 14px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(212, 106, 106, 0.25);
         }
+        header.hero .btn:hover {
+            background: linear-gradient(90deg, #e78989, #d46a6a);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(212, 106, 106, 0.35);
+        }
+
+        /* Section */
+        section {
+            margin-bottom: 45px;
+        }
+
         section h2 {
             color: #d46a6a;
             font-size: 1.8rem;
+            font-weight: 700;
             margin-bottom: 15px;
         }
+
         section p, section li {
             color: #555;
             font-size: 1rem;
-            line-height: 1.6;
+            line-height: 1.7;
         }
 
         section ol, section ul {
             padding-left: 20px;
         }
 
+        section ol li {
+            margin-bottom: 8px;
+        }
+
         section details summary {
             font-weight: 600;
+            color: #d46a6a;
             cursor: pointer;
             margin-bottom: 5px;
+            font-size: 1rem;
+        }
+        section details summary:hover {
+            text-decoration: underline;
         }
         section details p {
             margin-left: 15px;
             margin-bottom: 10px;
         }
 
-        /* CTA buttons */
+        /* CTA Buttons */
         .cta {
             text-align: center;
-            margin-top: 50px;
+            margin-top: 60px;
         }
+
         .cta .btn {
             display: inline-block;
             margin: 10px;
-            padding: 12px 25px;
-            border-radius: 8px;
+            padding: 14px 32px;
+            border-radius: 50px;
             font-weight: 600;
             text-decoration: none;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
-        .cta .btn-primary {
-            background-color: #d46a6a;
-            color: #fff;
-        }
-        .cta .btn-primary:hover {
-            background-color: #ff7a7a;
-            transform: scale(1.05);
-        }
-        .cta .btn {
-            background-color: #ffd9c3;
-            color: #d46a6a;
-        }
-        .cta .btn:hover {
-            background-color: #ffc4a8;
-            transform: scale(1.05);
+            transition: all 0.3s ease;
         }
 
-        /* Animation fade in */
+        .cta .btn-primary {
+            background: linear-gradient(90deg, #d46a6a, #e78989);
+            color: #fff;
+            box-shadow: 0 6px 15px rgba(212, 106, 106, 0.25);
+        }
+        .cta .btn-primary:hover {
+            background: linear-gradient(90deg, #e78989, #d46a6a);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(212, 106, 106, 0.35);
+        }
+
+        .cta .btn-secondary {
+            background-color: #fff5f5;
+            color: #d46a6a;
+            border: 1.5px solid #f3c2c2;
+            box-shadow: 0 4px 10px rgba(212, 106, 106, 0.1);
+        }
+        .cta .btn-secondary:hover {
+            background-color: #ffe9e9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(212, 106, 106, 0.2);
+        }
+
+        /* Animation fade-in */
         section, header.hero, .cta {
             opacity: 0;
             transform: translateY(20px);
@@ -159,22 +203,22 @@
 
         <header class="hero">
             <h1>Cho thuê nhà trên GO2BNB</h1>
-            <p>Biến không gian của bạn thành thu nhập một cách an toàn, minh bạch và linh hoạt.</p>
-            <a class="btn btn-primary" href="${pageContext.request.contextPath}/host/create-listing.jsp">Bắt đầu đăng nhà</a>
+            <p>Biến không gian của bạn thành thu nhập — an toàn, minh bạch và linh hoạt cùng GO2BNB.</p>
+            <a class="btn" href="${pageContext.request.contextPath}/host/create-listing.jsp">Bắt đầu đăng nhà</a>
         </header>
 
         <section>
             <h2>Tổng quan</h2>
-            <p>GO2BNB kết nối chủ nhà với khách thuê. Bạn kiểm soát giá, lịch, quy tắc nhà và nhận hỗ trợ 24/7.</p>
+            <p>GO2BNB giúp chủ nhà kết nối với khách thuê trên toàn quốc. Bạn toàn quyền kiểm soát giá, lịch, quy tắc nhà và nhận hỗ trợ 24/7 từ đội ngũ GO2BNB.</p>
         </section>
 
         <section>
             <h2>Cách hoạt động</h2>
             <ol>
-                <li><strong>Tạo hồ sơ host:</strong> xác minh danh tính, thông tin thanh toán.</li>
-                <li><strong>Đăng nhà:</strong> thêm ảnh, mô tả, tiện nghi, đặt giá cơ bản & phụ phí.</li>
-                <li><strong>Thiết lập lịch & quy tắc:</strong> tối thiểu đêm, giờ check-in/out, nội quy.</li>
-                <li><strong>Xuất bản & nhận đặt:</strong> nhận thông báo tức thì qua email/app.</li>
+                <li><strong>Tạo hồ sơ Host:</strong> xác minh danh tính và thêm thông tin thanh toán.</li>
+                <li><strong>Đăng nhà:</strong> thêm ảnh, mô tả, tiện nghi, đặt giá và các phụ phí.</li>
+                <li><strong>Thiết lập lịch & quy tắc:</strong> đặt tối thiểu đêm, giờ check-in/out, nội quy.</li>
+                <li><strong>Xuất bản & nhận đặt:</strong> nhận thông báo tức thì qua email hoặc ứng dụng.</li>
                 <li><strong>Thanh toán:</strong> hệ thống tự động chuyển tiền sau khi khách check-in.</li>
             </ol>
         </section>
@@ -182,44 +226,43 @@
         <section>
             <h2>Yêu cầu tối thiểu đối với Chủ nhà</h2>
             <ul>
-                <li>Cung cấp thông tin chính xác, tuân thủ pháp luật địa phương.</li>
-                <li>Đáp ứng tiêu chuẩn vệ sinh, an toàn, giao tiếp kịp thời.</li>
-                <li>Có chính sách hoàn hủy minh bạch.</li>
+                <li>Cung cấp thông tin chính xác và tuân thủ quy định địa phương.</li>
+                <li>Đảm bảo tiêu chuẩn vệ sinh, an toàn, giao tiếp nhanh chóng.</li>
+                <li>Chính sách hoàn hủy rõ ràng, minh bạch.</li>
             </ul>
         </section>
 
         <section>
             <h2>Phí & Thanh toán</h2>
-            <p>GO2BNB có thể thu phí dịch vụ cho mỗi đặt chỗ (hiển thị rõ trước khi xác nhận). Tiền được chuyển theo
-                phương thức bạn chọn.</p>
+            <p>GO2BNB có thể thu phí dịch vụ cho mỗi đặt chỗ (hiển thị rõ trước khi xác nhận). Tiền được chuyển đến bạn theo phương thức thanh toán đã đăng ký.</p>
         </section>
 
         <section>
             <h2>An toàn & Bảo vệ</h2>
-            <p>Mọi đặt chỗ đều được bảo vệ bởi <a
-                    href="${pageContext.request.contextPath}/go2bnb_footer/hosting/aircover.jsp">AirCover cho Host</a> với các
-                hỗ trợ về thiệt hại, trách nhiệm và hỗ trợ khẩn cấp.</p>
+            <p>Mọi đặt chỗ đều được bảo vệ bởi 
+                <a href="${pageContext.request.contextPath}/go2bnb_footer/hosting/aircover.jsp" style="color:#d46a6a; font-weight:600;">
+                AirCover cho Host</a> — hỗ trợ thiệt hại, trách nhiệm và khẩn cấp 24/7.</p>
         </section>
 
         <section>
             <h2>Câu hỏi thường gặp</h2>
             <details>
                 <summary>Tôi có thể tự đặt giá không?</summary>
-                <p>Có. Bạn có thể dùng giá cố định hoặc bật gợi ý giá linh hoạt.</p>
+                <p>Có. Bạn có thể chọn giá cố định hoặc bật chế độ gợi ý giá linh hoạt dựa trên nhu cầu thị trường.</p>
             </details>
             <details>
                 <summary>Khi nào tôi nhận tiền?</summary>
-                <p>Sau khi khách check-in, hệ thống bắt đầu chuyển tiền theo cài đặt của bạn.</p>
+                <p>Sau khi khách check-in, hệ thống sẽ tự động chuyển tiền cho bạn theo lịch trình cài đặt.</p>
             </details>
             <details>
                 <summary>Tôi có thể từ chối đặt chỗ?</summary>
-                <p>Có, miễn tuân thủ quy tắc cộng đồng và pháp luật.</p>
+                <p>Có, miễn là tuân thủ các quy tắc cộng đồng và pháp luật hiện hành.</p>
             </details>
         </section>
 
         <div class="cta">
             <a class="btn btn-primary" href="${pageContext.request.contextPath}/host/create-listing.jsp">Tạo danh sách cho thuê</a>
-            <a class="btn" href="${pageContext.request.contextPath}/go2bnb_footer/hosting/hosting_resources.jsp">Xem tài nguyên cho Host</a>
+            <a class="btn btn-secondary" href="${pageContext.request.contextPath}/go2bnb_footer/hosting/hosting_resources.jsp">Xem tài nguyên cho Host</a>
         </div>
     </main>
 
