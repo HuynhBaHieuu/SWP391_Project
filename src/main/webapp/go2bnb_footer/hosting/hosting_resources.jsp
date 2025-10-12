@@ -1,7 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8" />
     <title>Tài nguyên về đón tiếp khách</title>
@@ -9,15 +8,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
     <style>
-        main.container {
-            max-width: 1100px;
-            margin: 50px auto;
-            padding: 50px 30px;
-            background: #fff8f5; /* Màu kem nhạt */
-            border-radius: 15px;
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            background: linear-gradient(180deg, #fff9f9 0%, #fffdfd 100%);
+            color: #333;
         }
 
+        main.container {
+            max-width: 1150px;
+            margin: 60px auto;
+            padding: 50px 45px;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        main.container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 45px rgba(0,0,0,0.12);
+        }
+
+        /* Breadcrumb */
         nav.breadcrumb {
             font-size: 0.9rem;
             color: #888;
@@ -26,95 +39,100 @@
         nav.breadcrumb a {
             color: #d46a6a;
             text-decoration: none;
+            font-weight: 600;
+        }
+        nav.breadcrumb a:hover {
+            text-decoration: underline;
         }
 
+        /* Hero section */
         header.hero {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 60px;
         }
         header.hero h1 {
             font-size: 2.8rem;
             color: #d46a6a;
+            font-weight: 800;
             margin-bottom: 15px;
         }
         header.hero p {
             font-size: 1.2rem;
             color: #555;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            line-height: 1.6;
         }
         header.hero .btn {
-            background-color: #d46a6a;
+            background: linear-gradient(90deg, #d46a6a, #e78989);
             color: #fff;
-            padding: 12px 25px;
-            border-radius: 8px;
+            padding: 14px 30px;
+            border-radius: 50px;
             font-weight: 600;
             text-decoration: none;
-            transition: transform 0.3s ease, background-color 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(212, 106, 106, 0.25);
         }
         header.hero .btn:hover {
-            background-color: #ff7a7a;
-            transform: scale(1.05);
+            background: linear-gradient(90deg, #e78989, #d46a6a);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(212, 106, 106, 0.35);
         }
 
+        /* Section */
         section {
-            margin-bottom: 40px;
+            margin-bottom: 45px;
         }
         section h2 {
             color: #d46a6a;
             font-size: 1.8rem;
+            font-weight: 700;
             margin-bottom: 15px;
         }
         section p, section li {
             color: #555;
             font-size: 1rem;
-            line-height: 1.6;
+            line-height: 1.7;
         }
 
-        section ol, section ul {
-            padding-left: 20px;
-        }
-
-        section details summary {
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 5px;
-        }
-        section details p {
-            margin-left: 15px;
-            margin-bottom: 10px;
-        }
-
+        /* CTA buttons */
         .cta {
             text-align: center;
-            margin-top: 50px;
+            margin-top: 60px;
         }
         .cta .btn {
             display: inline-block;
             margin: 10px;
-            padding: 12px 25px;
-            border-radius: 8px;
+            padding: 14px 32px;
+            border-radius: 50px;
             font-weight: 600;
             text-decoration: none;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
-        .cta .btn-primary {
-            background-color: #d46a6a;
-            color: #fff;
-        }
-        .cta .btn-primary:hover {
-            background-color: #ff7a7a;
-            transform: scale(1.05);
-        }
-        .cta .btn {
-            background-color: #ffd9c3;
-            color: #d46a6a;
-        }
-        .cta .btn:hover {
-            background-color: #ffc4a8;
-            transform: scale(1.05);
+            transition: all 0.3s ease;
         }
 
-        /* Animation fade in */
+        .cta .btn-primary {
+            background: linear-gradient(90deg, #d46a6a, #e78989);
+            color: #fff;
+            box-shadow: 0 6px 15px rgba(212, 106, 106, 0.25);
+        }
+        .cta .btn-primary:hover {
+            background: linear-gradient(90deg, #e78989, #d46a6a);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(212, 106, 106, 0.35);
+        }
+
+        .cta .btn-secondary {
+            background-color: #fff5f5;
+            color: #d46a6a;
+            border: 1.5px solid #f3c2c2;
+            box-shadow: 0 4px 10px rgba(212, 106, 106, 0.1);
+        }
+        .cta .btn-secondary:hover {
+            background-color: #ffe9e9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(212, 106, 106, 0.2);
+        }
+
+        /* Animation */
         section, header.hero, .cta {
             opacity: 0;
             transform: translateY(20px);
@@ -124,7 +142,6 @@
         section:nth-of-type(2) { animation-delay: 0.4s; }
         section:nth-of-type(3) { animation-delay: 0.6s; }
         section:nth-of-type(4) { animation-delay: 0.8s; }
-        section:nth-of-type(5) { animation-delay: 1s; }
 
         @keyframes fadeInUp {
             to {
@@ -151,49 +168,44 @@
     <jsp:include page="/design/header.jsp" />
 
     <main class="container">
-        <!-- Breadcrumb Navigation -->
         <nav aria-label="breadcrumb" class="breadcrumb">
             <a href="${pageContext.request.contextPath}/index.jsp">Trang chủ</a> ›
             <span>Đón tiếp khách</span> ›
             <strong>Tài nguyên về đón tiếp khách</strong>
         </nav>
 
-        <!-- Hero Section -->
         <header class="hero">
             <h1>Tài nguyên về đón tiếp khách</h1>
-            <p>Chúng tôi cung cấp các tài nguyên giúp bạn trở thành một chủ nhà chuyên nghiệp và đón tiếp khách hiệu quả.</p>
-            <a class="btn btn-primary" href="#">Xem tài nguyên</a>
+            <p>Khám phá các bài viết, hướng dẫn và video được tuyển chọn giúp bạn trở thành chủ nhà chuyên nghiệp, tự tin đón tiếp khách hàng.</p>
+            <a class="btn" href="#">Xem tài nguyên</a>
         </header>
 
-        <!-- Tài nguyên về đón tiếp khách -->
         <section>
-            <h2>Hướng dẫn về đón tiếp khách</h2>
-            <p>Khám phá các bài viết chi tiết giúp bạn chuẩn bị tốt nhất khi đón tiếp khách, từ quy trình check-in đến các mẹo tạo ấn tượng tốt.</p>
+            <h2>Hướng dẫn chi tiết</h2>
+            <p>Khám phá các bước cụ thể về quy trình check-in, chăm sóc khách trong thời gian lưu trú và cách tạo ấn tượng khó quên khi họ rời đi.</p>
         </section>
 
         <section>
             <h2>Video hướng dẫn</h2>
-            <p>Xem các video hữu ích hướng dẫn từng bước về cách thức quản lý chỗ ở, giao tiếp với khách hàng và giữ gìn tài sản.</p>
+            <p>Xem video minh họa các tình huống thực tế, cách xử lý chuyên nghiệp và bí quyết để quản lý chỗ ở hiệu quả hơn.</p>
         </section>
 
         <section>
-            <h2>Mẹo vặt cho chủ nhà</h2>
-            <p>Khám phá những mẹo nhỏ giúp bạn dễ dàng quản lý công việc đón tiếp khách, tạo ra những trải nghiệm tuyệt vời cho khách hàng của bạn.</p>
+            <h2>Mẹo nhỏ dành cho Host</h2>
+            <p>Tổng hợp các tips nhỏ nhưng hữu ích giúp bạn tối ưu thời gian, nâng cao trải nghiệm và tăng lượng đánh giá 5 sao.</p>
         </section>
 
         <section>
-            <h2>Tài liệu tham khảo</h2>
-            <p>Tìm hiểu các tài liệu chuyên sâu về pháp lý, an ninh và các quy định cần tuân thủ khi làm chủ nhà trên nền tảng GO2BNB.</p>
+            <h2>Tài liệu tham khảo & quy định</h2>
+            <p>Tìm hiểu các hướng dẫn về pháp lý, an toàn và quy tắc nền tảng giúp bạn đảm bảo hoạt động cho thuê minh bạch, hợp pháp và bền vững.</p>
         </section>
 
-        <!-- Call-to-Action -->
         <div class="cta">
-            <a class="btn btn-primary" href="#">Tạo danh sách cho thuê</a>
-            <a class="btn" href="#">Xem thêm tài nguyên cho Host</a>
+            <a class="btn btn-primary" href="${pageContext.request.contextPath}/host/create-listing.jsp">Tạo danh sách cho thuê</a>
+            <a class="btn btn-secondary" href="${pageContext.request.contextPath}/go2bnb_footer/hosting/hosting_resources.jsp">Xem thêm tài nguyên cho Host</a>
         </div>
     </main>
 
     <jsp:include page="/design/footer.jsp" />
 </body>
-
 </html>
