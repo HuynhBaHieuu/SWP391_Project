@@ -60,14 +60,19 @@
                 border-radius: 16px;
                 overflow: hidden;
                 margin-bottom: 30px;
+                height: 510px; /* Cố định chiều cao tổng */
             }
 
             .gallery img {
                 width: 100%;
                 height: 100%;
+                min-height: 250px;
+                max-height: 250px;
                 object-fit: cover;
+                object-position: center;
                 cursor: pointer;
                 transition: transform 0.3s ease;
+                display: block;
             }
 
             .gallery img:hover {
@@ -238,7 +243,12 @@
                 }
                 .gallery {
                     grid-template-columns: 1fr 1fr;
-                    grid-template-rows: auto;
+                    grid-template-rows: 200px 200px;
+                    height: 410px; /* Cố định chiều cao cho mobile */
+                }
+                .gallery img {
+                    min-height: 200px;
+                    max-height: 200px;
                 }
                 .gallery img:first-child {
                     grid-row: span 1;
@@ -252,6 +262,18 @@
                 .actions .book-btn {
                     text-align: center;
                     justify-content: center;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                .gallery {
+                    grid-template-columns: 1fr;
+                    grid-template-rows: 250px 250px 250px;
+                    height: 750px; /* Cố định chiều cao cho mobile nhỏ */
+                }
+                .gallery img {
+                    min-height: 250px;
+                    max-height: 250px;
                 }
             }
         </style>

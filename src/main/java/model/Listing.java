@@ -16,6 +16,7 @@ public class Listing {
     private Date createdAt;
     private String status;
     private String firstImage;
+    private boolean isDeleted;
 
     public int getListingID() {
         return listingID;
@@ -104,5 +105,13 @@ public class Listing {
 
 public void setFirstImage(String firstImage) {
     this.firstImage = firstImage;
+}
+
+public boolean isDeleted() {
+    return isDeleted;
+}
+
+public void setDeleted(boolean deleted) {
+    isDeleted = deleted;
 }
 }

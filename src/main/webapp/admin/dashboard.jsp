@@ -294,11 +294,17 @@
               <td><%= rs.getDate("created_at") %></td>
               <td>
                 <div class="action-buttons">
-                  <button class="action-btn action-btn-view" onclick="viewUser(<%= rs.getInt("id") %>)">Xem</button>
-                  <button class="action-btn action-btn-edit" onclick="editUser(<%= rs.getInt("id") %>)">Sửa</button>
-                  <button class="action-btn action-btn-delete" onclick="toggleUserStatus(<%= rs.getInt("id") %>)">
-                    <%= rs.getString("status").equals("active") ? "Khóa" : "Mở khóa" %>
-                  </button>
+                  <% if (!"admin".equalsIgnoreCase(rs.getString("role"))) { %>
+                    <button class="action-btn action-btn-delete" 
+                            data-action="toggle-status"
+                            data-user-id="<%= rs.getInt("id") %>"
+                            data-current-status="<%= rs.getString("status") %>"
+                            onclick="toggleUserStatus(<%= rs.getInt("id") %>, '<%= rs.getString("status") %>')">
+                      <%= rs.getString("status").equals("active") ? "Khóa" : "Đã khóa" %>
+                    </button>
+                  <% } else { %>
+                    <span style="color: #6c757d; font-style: italic;"></span>
+                  <% } %>
                 </div>
               </td>
             </tr>
@@ -757,19 +763,183 @@
     }
     
     // Action functions
-    function viewUser(id) {
-      console.log('[v0] View user:', id);
-      // Implement view user logic
+    function toggleUserStatus(id, currentStatus) {
+      console.log('[v0] Toggle user status:', id, 'current:', currentStatus);
+      
+      const newStatus = currentStatus === 'active' ? 'blocked' : 'active';
+      const actionText = currentStatus === 'active' ? 'khóa' : 'mở khóa';
+      
+      console.log('Status change: ', currentStatus, '->', newStatus, 'Action:', actionText);
+      
+      if (confirm(`Bạn có chắc muốn ${actionText} tài khoản này?`)) {
+        // Gửi AJAX request để toggle status
+        const formData = new URLSearchParams();
+        formData.append('action', 'toggleStatus');
+        formData.append('id', id);
+        formData.append('status', newStatus);
+        
+        fetch('<%=request.getContextPath()%>/admin/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData
+        })
+        .then(response => {
+          console.log('Response status:', response.status);
+          console.log('Response headers:', response.headers);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          return response.text().then(text => {
+            console.log('Raw response text:', text);
+            try {
+              return JSON.parse(text);
+            } catch (e) {
+              console.error('JSON parse error:', e);
+              console.error('Response text:', text);
+              throw new Error('Invalid JSON response from server');
+            }
+          });
+        })
+        .then(data => {
+          console.log('Parsed server response:', data);
+          console.log('Current status:', currentStatus, 'New status:', newStatus);
+          if (data.success) {
+            // Hiển thị thông báo thành công
+            showSuccessMessage(data.message);
+            
+            // Tự động reload trang sau 1.5 giây để đảm bảo UI được cập nhật
+            setTimeout(() => {
+              console.log('Auto reloading page after successful status update');
+              window.location.reload();
+            }, 1500);
+            
+            console.log('Status updated successfully, page will reload in 1.5 seconds');
+          } else {
+            console.error('Server returned error:', data.message);
+            showErrorMessage(data.message || 'Có lỗi xảy ra khi cập nhật trạng thái.');
+          }
+        })
+        .catch(error => {
+          console.error('Fetch error:', error);
+          showErrorMessage('Có lỗi xảy ra khi cập nhật trạng thái tài khoản: ' + error.message);
+        });
+      }
     }
     
-    function editUser(id) {
-      console.log('[v0] Edit user:', id);
-      // Implement edit user logic
+    // Cập nhật UI trực tiếp
+    function updateUserStatusUI(userId, newStatus) {
+      console.log('Updating UI for userId:', userId, 'newStatus:', newStatus);
+      
+      // Tìm button bằng data attributes
+      const selector = `button[data-user-id="${userId}"][data-action="toggle-status"]`;
+      console.log('Looking for button with selector:', selector);
+      const button = document.querySelector(selector);
+      console.log('Found button:', button);
+      
+      // Debug: kiểm tra tất cả buttons có data-user-id
+      const allButtons = document.querySelectorAll('button[data-user-id]');
+      console.log('All buttons with data-user-id:', allButtons);
+      allButtons.forEach((btn, index) => {
+        console.log(`Button ${index}:`, btn.getAttribute('data-user-id'), btn.textContent);
+      });
+      
+      if (button) {
+        console.log('Button before update - text:', button.textContent, 'data-current-status:', button.getAttribute('data-current-status'));
+        
+        if (newStatus === 'active') {
+          button.textContent = 'Khóa';
+          button.className = 'action-btn action-btn-delete';
+          button.setAttribute('data-current-status', 'active');
+          button.setAttribute('onclick', `toggleUserStatus(${userId}, 'active')`);
+          console.log('Set button to ACTIVE state - text: Khóa');
+        } else {
+          button.textContent = 'Đã khóa';
+          button.className = 'action-btn action-btn-delete';
+          button.setAttribute('data-current-status', 'blocked');
+          button.setAttribute('onclick', `toggleUserStatus(${userId}, 'blocked')`);
+          console.log('Set button to BLOCKED state - text: Đã khóa');
+        }
+        
+        console.log('Button after update - text:', button.textContent, 'data-current-status:', button.getAttribute('data-current-status'));
+      } else {
+        console.error('Button not found for userId:', userId);
+      }
+      
+      // Tìm status badge và cập nhật
+      const row = button ? button.closest('tr') : null;
+      if (row) {
+        // Tìm status badge trong cột thứ 3 (index 2)
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 3) {
+          const statusCell = cells[2]; // Cột status
+          const statusBadge = statusCell.querySelector('.badge');
+          if (statusBadge) {
+            if (newStatus === 'active') {
+              statusBadge.textContent = 'active';
+              statusBadge.className = 'badge badge-success';
+            } else {
+              statusBadge.textContent = 'blocked';
+              statusBadge.className = 'badge badge-danger';
+            }
+            console.log('Updated status badge:', statusBadge.textContent, statusBadge.className);
+          }
+        }
+      }
     }
     
-    function toggleUserStatus(id) {
-      console.log('[v0] Toggle user status:', id);
-      // Implement toggle user status logic
+    // Hiển thị thông báo thành công
+    function showSuccessMessage(message) {
+      showFlashMessage('success', message);
+    }
+    
+    // Hiển thị thông báo lỗi
+    function showErrorMessage(message) {
+      showFlashMessage('error', message);
+    }
+    
+    // Hiển thị flash message
+    function showFlashMessage(type, message) {
+      // Tạo flash message element
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.style.cssText = `
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        border: 1px solid transparent;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        min-width: 300px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      `;
+      
+      if (type === 'success') {
+        alertDiv.style.backgroundColor = '#d4edda';
+        alertDiv.style.borderColor = '#c3e6cb';
+        alertDiv.style.color = '#155724';
+      } else {
+        alertDiv.style.backgroundColor = '#f8d7da';
+        alertDiv.style.borderColor = '#f5c6cb';
+        alertDiv.style.color = '#721c24';
+      }
+      
+      alertDiv.textContent = message;
+      
+      // Thêm vào body
+      document.body.appendChild(alertDiv);
+      
+      // Tự động xóa sau 3 giây
+      setTimeout(() => {
+        if (alertDiv.parentNode) {
+          alertDiv.remove();
+        }
+      }, 3000);
     }
     
     function viewListing(id) {

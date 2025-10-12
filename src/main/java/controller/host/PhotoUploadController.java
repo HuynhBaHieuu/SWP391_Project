@@ -61,11 +61,12 @@ public class PhotoUploadController extends HttpServlet {
 
             int listingId = Integer.parseInt(listingIdParam);
             
-            // Tạo thư mục upload nếu chưa có
+            // Tạo thư mục upload trong webapp/uploads (vĩnh viễn)
             String uploadPath = req.getServletContext().getRealPath("/") + UPLOAD_DIR + "/" + listingId;
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
+                System.out.println("Created upload directory: " + uploadPath);
             }
 
             int uploadedCount = 0;

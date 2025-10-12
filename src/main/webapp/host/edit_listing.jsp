@@ -6,14 +6,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Chỉnh sửa bài đăng</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/listings.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css">
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #f7f7f7;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
         }
         
         .edit-container {
@@ -24,10 +27,11 @@
         /* Sidebar */
         .edit-sidebar {
             width: 350px;
-            background: white;
-            border-right: 1px solid #e0e0e0;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-right: 1px solid #e8f4f8;
             padding: 20px;
             overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
         
         .sidebar-header {
@@ -77,13 +81,54 @@
             color: #000;
         }
         
-        .settings-icon {
+        .settings-dropdown {
+            position: relative;
             margin-left: auto;
+        }
+        
+        .settings-icon {
             background: none;
             border: none;
             cursor: pointer;
             font-size: 16px;
             color: #666;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .settings-icon:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .settings-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            min-width: 150px;
+            margin-top: 4px;
+        }
+        
+        .delete-listing-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 12px 16px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            color: #dc3545;
+            transition: background-color 0.3s ease;
+            border-radius: 8px;
+        }
+        
+        .delete-listing-btn:hover {
+            background-color: #f8f9fa;
         }
         
         .completion-card {
@@ -125,16 +170,35 @@
         }
         
         .section-card {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 16px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid #e8f4f8;
+            border-radius: 15px;
+            padding: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .section-card:hover::before {
+            left: 100%;
         }
         
         .section-card:hover {
-            border-color: #000;
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
         }
         
         .section-title {
@@ -325,12 +389,15 @@
         }
         
         .btn-primary {
-            background: #000;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
         
         .btn-primary:hover {
-            background: #333;
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
         
         .btn-secondary {
@@ -363,9 +430,7 @@
     </style>
 </head>
 <body>
-    <jsp:include page="/design/host_header.jsp">
-        <jsp:param name="active" value="listings" />
-    </jsp:include>
+    <jsp:include page="/design/header.jsp" />
     
     <div class="edit-container">
         <!-- Sidebar -->
@@ -378,15 +443,20 @@
             <div class="sidebar-tabs">
                 <button class="tab-btn active" onclick="switchTab('property')">Chỗ ở cho thuê của bạn</button>
                 <button class="tab-btn" onclick="switchTab('guide')">Hướng dẫn khi khách đến</button>
-                <button class="settings-icon">⚙️</button>
+                <div class="settings-dropdown">
+                    <button class="settings-icon" onclick="toggleSettingsDropdown()">⚙️</button>
+                    <div id="settings-dropdown" class="settings-dropdown-menu" style="display: none;">
+                        <button class="delete-listing-btn" onclick="deleteListing()">🗑️ Xóa bài đăng</button>
+                    </div>
+                </div>
             </div>
             
             <div class="completion-card">
                 <div class="completion-header">
                     <div class="completion-dot"></div>
-                    <span class="completion-title">Hoàn thành các bước bắt buộc</span>
+                    <span class="completion-title">Mục chỉnh sửa</span>
                 </div>
-                <p class="completion-text">Vui lòng hoàn tất các nhiệm vụ cuối cùng này để đăng bài đăng và bắt đầu nhận yêu cầu đặt.</p>
+                <p class="completion-text">Vui lòng chọn các mục dưới đây để chỉnh sửa.</p>
             </div>
             
             <div class="sidebar-section">
@@ -844,6 +914,52 @@
             setTimeout(() => { t.remove(); }, 2500);
         }
 
+        // Toggle settings dropdown
+        function toggleSettingsDropdown() {
+            const dropdown = document.getElementById('settings-dropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('settings-dropdown');
+            const settingsIcon = event.target.closest('.settings-icon');
+            
+            if (!settingsIcon && dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // Delete listing function (soft delete)
+        function deleteListing() {
+            if (!confirm('Bạn có chắc muốn xóa bài đăng này? Bài đăng sẽ bị ẩn khỏi trang web nhưng vẫn có thể khôi phục bởi Admin.')) {
+                return;
+            }
+            
+            const listingId = '${listing.listingID}';
+            
+            fetch('${pageContext.request.contextPath}/host/listing/soft-delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: 'listingId=' + listingId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Bài đăng đã được xóa thành công!');
+                    window.location.href = '${pageContext.request.contextPath}/host/listings';
+                } else {
+                    alert('Không thể xóa bài đăng: ' + (data.message || 'Lỗi không xác định'));
+                }
+            })
+            .catch(error => {
+                console.error('Delete listing error:', error);
+                alert('Lỗi khi xóa bài đăng');
+            });
+        }
+
         // Delete image function: call server to delete DB record and file, then remove from UI
         function deleteImage(listingId, imageUrl, elementId) {
             if (!confirm('Bạn có chắc muốn xoá ảnh này?')) return;
@@ -877,5 +993,7 @@
             });
         }
     </script>
+    
+    <jsp:include page="/design/footer.jsp" />
 </body>
 </html>

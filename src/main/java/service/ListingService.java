@@ -31,7 +31,7 @@ public class ListingService implements IListingService {
 
     @Override
     public List<Listing> getListingsByHostId(int hostId) throws SQLException {
-        return listingDAO.getListingsByHostId(hostId);
+        return listingDAO.getActiveListingsByHostId(hostId);
     }
 
     @Override

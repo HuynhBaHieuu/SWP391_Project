@@ -1,85 +1,100 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8" />
     <title>Tìm host hỗ trợ</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
-            padding: 0;
-            background-color: #f4f7f6;
+            background: linear-gradient(180deg, #fff9f9 0%, #fffdfd 100%);
+            color: #333;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 40px;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        main.container {
+            max-width: 1100px;
+            margin: 60px auto;
+            padding: 50px 40px;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        main.container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 45px rgba(0,0,0,0.12);
         }
 
         h1 {
-            font-size: 2.5rem;
-            color: #2c3e50;
-            margin-bottom: 20px;
+            font-size: 2.8rem;
+            color: #d46a6a;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-align: center;
         }
 
-        p {
+        p.intro {
             font-size: 1.2rem;
             color: #555;
             margin-bottom: 40px;
+            text-align: center;
+            line-height: 1.6;
         }
 
-        .btn {
-            display: inline-block;
-            padding: 15px 25px;
+        /* Nút chính */
+        .button {
+            display: block;
+            width: fit-content;
+            margin: 0 auto 50px;
+            padding: 14px 35px;
             font-size: 1.1rem;
-            font-weight: bold;
+            font-weight: 600;
             color: #fff;
-            background-color: #28a745;
-            border-radius: 8px;
+            background: linear-gradient(90deg, #d46a6a, #e78989);
+            border-radius: 50px;
             text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(212, 106, 106, 0.25);
         }
 
-        .btn:hover {
-            background-color: #218838;
-            transform: scale(1.05);
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(212, 106, 106, 0.35);
+            background: linear-gradient(90deg, #e78989, #d46a6a);
         }
 
         /* Danh sách các loại hỗ trợ */
         .support-categories {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 30px;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
         .support-item {
-            background: #f1f8ff;
-            padding: 20px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            color: #333;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
+            background: #fff7f7;
+            border-left: 4px solid #d46a6a;
+            padding: 25px;
+            border-radius: 14px;
+            text-align: left;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
         }
 
         .support-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-6px);
+            box-shadow: 0 10px 25px rgba(212, 106, 106, 0.2);
+            background: #fff2f2;
         }
 
         .support-item h3 {
-            font-size: 1.4rem;
-            color: #00796b;
-            margin-bottom: 15px;
+            font-size: 1.35rem;
+            color: #d46a6a;
+            margin-bottom: 12px;
+            font-weight: 700;
         }
 
         .support-item p {
@@ -90,14 +105,54 @@
 
         /* Banner chú ý */
         .highlight-banner {
-            background-color: #fff5e6;
-            padding: 20px;
+            background: linear-gradient(90deg, #d46a6a, #e78989);
+            padding: 22px 25px;
             text-align: center;
-            border-radius: 12px;
-            font-size: 1.15rem;
-            font-weight: bold;
-            margin-top: 40px;
-            color: #f79c42;
+            border-radius: 14px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+            margin-top: 50px;
+            box-shadow: 0 10px 25px rgba(212, 106, 106, 0.25);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .highlight-banner:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 35px rgba(212, 106, 106, 0.35);
+        }
+
+        /* Animation */
+        .support-item, .highlight-banner, h1, p.intro, .btn {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s forwards;
+        }
+
+        .support-item:nth-child(1) { animation-delay: 0.2s; }
+        .support-item:nth-child(2) { animation-delay: 0.4s; }
+        .support-item:nth-child(3) { animation-delay: 0.6s; }
+        .support-item:nth-child(4) { animation-delay: 0.8s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            main.container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .support-item {
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -107,43 +162,37 @@
 
     <main class="container">
         <h1>Tìm host hỗ trợ</h1>
-        <p>Kết nối với các host giàu kinh nghiệm để nhận tư vấn và hỗ trợ về việc quản lý chỗ ở, xử lý tình huống khó khăn và các kỹ năng làm chủ nhà khác.</p>
+        <p class="intro">Kết nối với các host giàu kinh nghiệm để nhận tư vấn, chia sẻ và hướng dẫn trong hành trình làm chủ nhà của bạn.</p>
 
-        <a class="btn" href="#">Tìm host hỗ trợ</a>
+        <a class="button" href="#">Tìm host hỗ trợ</a>
 
         <div class="support-categories">
-            <!-- Hỗ trợ quản lý chỗ ở -->
             <div class="support-item">
                 <h3>Hỗ trợ quản lý chỗ ở</h3>
-                <p>Nhận tư vấn về cách quản lý chỗ ở hiệu quả, từ việc tối ưu hóa không gian đến việc đảm bảo sự sạch sẽ và tiện nghi cho khách.</p>
+                <p>Nhận tư vấn cách tối ưu hóa không gian, nâng cấp tiện nghi và duy trì trải nghiệm tuyệt vời cho khách hàng.</p>
             </div>
 
-            <!-- Hỗ trợ xử lý tình huống khó khăn -->
             <div class="support-item">
                 <h3>Xử lý tình huống khó khăn</h3>
-                <p>Nhận lời khuyên từ các host có kinh nghiệm trong việc giải quyết các tình huống bất ngờ với khách thuê, bao gồm tranh chấp và sự cố khẩn cấp.</p>
+                <p>Học hỏi từ những host đã từng đối mặt và giải quyết hiệu quả các tình huống bất ngờ với khách thuê.</p>
             </div>
 
-            <!-- Hỗ trợ giao tiếp với khách -->
             <div class="support-item">
-                <h3>Giao tiếp với khách</h3>
-                <p>Cải thiện kỹ năng giao tiếp với khách hàng để xây dựng mối quan hệ tốt đẹp và đảm bảo khách hàng luôn hài lòng với dịch vụ của bạn.</p>
+                <h3>Kỹ năng giao tiếp với khách</h3>
+                <p>Cải thiện kỹ năng phản hồi, cách xử lý phàn nàn và tạo thiện cảm với khách hàng ngay từ lần đầu.</p>
             </div>
 
-            <!-- Hỗ trợ về bảo vệ tài sản -->
             <div class="support-item">
-                <h3>Bảo vệ tài sản</h3>
-                <p>Hướng dẫn về các biện pháp bảo vệ tài sản của bạn khỏi những rủi ro, bao gồm bảo hiểm và các cách thức bảo vệ khác.</p>
+                <h3>Bảo vệ tài sản và uy tín</h3>
+                <p>Được hướng dẫn về biện pháp bảo vệ tài sản, bảo hiểm và cách xử lý các rủi ro phát sinh.</p>
             </div>
         </div>
 
-        <!-- Banner chú ý -->
         <div class="highlight-banner">
-            Kết nối với các host giàu kinh nghiệm và nhận sự hỗ trợ ngay hôm nay để làm chủ nhà tốt hơn!
+            Kết nối ngay với các host hỗ trợ để cùng phát triển và trở thành chủ nhà chuyên nghiệp trên GO2BNB!
         </div>
     </main>
 
     <jsp:include page="/design/footer.jsp" />
 </body>
-
 </html>

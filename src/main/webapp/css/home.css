@@ -160,7 +160,7 @@ body{
   color: white;
   border-radius: 50%;
   cursor: pointer;
-  margin-left: 10px;
+  margin-left: 66px;
 }
 
 .search-button:hover {
@@ -246,14 +246,22 @@ h1 {
 .image-container {
     position: relative;
     overflow: hidden;
+    width: 100%;
+    height: 230px;
+    min-height: 230px;
+    max-height: 230px;
 }
 
 .listing-image {
     width: 100%;
     height: 230px;
+    min-height: 230px;
+    max-height: 230px;
     object-fit: cover;
+    object-position: center;
     transition: transform 0.5s ease;
     background-color: #f3f3f3;
+    display: block;
 }
 
 .listing-card:hover .listing-image {
@@ -342,6 +350,14 @@ h1 {
     }
     .listing-image {
         height: 200px;
+        min-height: 200px;
+        max-height: 200px;
+    }
+    
+    .image-container {
+        height: 200px;
+        min-height: 200px;
+        max-height: 200px;
     }
 }
 

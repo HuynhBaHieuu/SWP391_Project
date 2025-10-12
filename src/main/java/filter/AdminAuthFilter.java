@@ -11,8 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import model.User;
 
-// @WebFilter(urlPatterns = {"/admin/*"})  // Tạm thời comment để test
+@WebFilter(urlPatterns = {"/admin/*"})
 public class AdminAuthFilter implements Filter {
 
     @Override
@@ -31,7 +32,8 @@ public class AdminAuthFilter implements Filter {
         HttpSession session = httpRequest.getSession(false);
 
         // Kiểm tra vai trò của người dùng
-        if (session != null && "admin".equals(session.getAttribute("userRole"))) {
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
+        if (user != null && user.isAdmin()) {
             // Thiết lập các header để ngăn trình duyệt cache nội dung
             httpResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1
             httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
@@ -40,9 +42,9 @@ public class AdminAuthFilter implements Filter {
             // Tiếp tục chuỗi lọc
             chain.doFilter(request, response);
         } else {
-            // Người dùng không có quyền admin, chuyển hướng đến trang login
+            // Người dùng không có quyền admin, chuyển hướng đến trang unauthorized
             String contextPath = httpRequest.getContextPath();
-            httpResponse.sendRedirect(contextPath + "/login.jsp");
+            httpResponse.sendRedirect(contextPath + "/unauthorized.jsp");
         }
     }
 

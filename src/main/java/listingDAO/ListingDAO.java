@@ -127,6 +127,14 @@ public class ListingDAO {
         listing.setMaxGuests(rs.getInt("MaxGuests"));
         listing.setCreatedAt(rs.getTimestamp("CreatedAt"));
         listing.setStatus(rs.getString("Status"));
+        
+        // Handle IsDeleted field (may not exist in older database schemas)
+        try {
+            listing.setDeleted(rs.getBoolean("IsDeleted"));
+        } catch (SQLException e) {
+            // If IsDeleted column doesn't exist, default to false
+            listing.setDeleted(false);
+        }
 
         // ✅ Lấy ảnh đầu tiên từ ListingImages
         listing.setFirstImage(new ListingImageDAO().getFirstImage(listing.getListingID()));
@@ -293,5 +301,91 @@ public class ListingDAO {
             e.printStackTrace();
         }
         return false;
+    }
+    
+    // ====== SOFT DELETE METHODS ======
+    
+    // Soft delete a listing
+    public boolean softDeleteListing(int listingId) {
+        String sql = "UPDATE Listings SET IsDeleted = 1 WHERE ListingID = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, listingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    // Restore a soft deleted listing
+    public boolean restoreListing(int listingId) {
+        String sql = "UPDATE Listings SET IsDeleted = 0 WHERE ListingID = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, listingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    // Get listings by host (excluding soft deleted)
+    public List<Listing> getActiveListingsByHostId(int hostId) {
+        List<Listing> listings = new ArrayList<>();
+        String sql = "SELECT * FROM Listings WHERE HostID = ? AND (IsDeleted = 0 OR IsDeleted IS NULL) ORDER BY CreatedAt DESC";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, hostId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    listings.add(mapResultSetToListing(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return listings;
+    }
+    
+    // Get all active listings (excluding soft deleted)
+    public List<Listing> getAllActiveListings() {
+        List<Listing> listings = new ArrayList<>();
+        String sql = "SELECT * FROM Listings WHERE Status='Active' AND (IsDeleted = 0 OR IsDeleted IS NULL) ORDER BY CreatedAt DESC";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                listings.add(mapResultSetToListing(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return listings;
+    }
+    
+    // Search listings (excluding soft deleted)
+    public List<Listing> searchActiveListings(String keyword) {
+        List<Listing> listings = new ArrayList<>();
+        String sql = "SELECT * FROM Listings WHERE Status='Active' AND (IsDeleted = 0 OR IsDeleted IS NULL) AND "
+                   + "(Title LIKE ? OR City LIKE ? OR Address LIKE ? OR Description LIKE ?) "
+                   + "ORDER BY CreatedAt DESC";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            String key = "%" + keyword + "%";
+            ps.setString(1, key);
+            ps.setString(2, key);
+            ps.setString(3, key);
+            ps.setString(4, key);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    listings.add(mapResultSetToListing(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return listings;
     }
 }

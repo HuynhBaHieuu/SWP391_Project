@@ -181,8 +181,13 @@ img{
     inset:0;
     background-size:cover;
     background-position:center;
+    background-repeat:no-repeat;
     opacity:0;
-    transition:opacity .28s ease
+    transition:opacity .28s ease;
+    width:100%;
+    height:100%;
+    min-height:380px;
+    max-height:380px;
 }
 .bigcard-slide.on{
     opacity:1
