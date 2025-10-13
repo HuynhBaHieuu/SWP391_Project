@@ -1,4 +1,4 @@
-<%@ page import="listingDAO.ListingDAO, listingDAO.ListingImageDAO, model.Listing" %>
+<%@ page import="listingDAO.ListingDAO, listingDAO.ListingImageDAO, model.Listing, model.User" %>
 <%
     String idParam = request.getParameter("id");
     Listing listing = null;
@@ -19,7 +19,10 @@
     <head>
         <meta charset="UTF-8">
         <title><%= (listing != null) ? listing.getTitle() : "Chi tiết nơi lưu trú" %></title>
+        <link rel="icon" type="image/jpg" href="../image/logo.jpg">
         <link rel="stylesheet" href="../css/home.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
         <style>
             body {
                 font-family: 'Airbnb Cereal VF', Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
@@ -138,14 +141,20 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                gap: 15px;
             }
 
-            .back-btn, .book-btn {
+            .back-btn, .book-btn, .message-btn {
                 text-decoration: none;
                 padding: 12px 22px;
                 border-radius: 10px;
                 font-weight: bold;
                 transition: 0.3s ease;
+                border: none;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
             }
 
             .back-btn {
@@ -158,12 +167,24 @@
                 color: white;
             }
 
+            .message-btn {
+                background: #667eea;
+                color: white;
+            }
+
             .book-btn:hover {
                 background: #e31c5f;
+                color: white;
             }
 
             .back-btn:hover {
                 background: #ddd;
+                color: #333;
+            }
+
+            .message-btn:hover {
+                background: #5a67d8;
+                color: white;
             }
 
             /* --- MAP --- */
@@ -179,9 +200,46 @@
                 border: none;
             }
 
+            /* --- HOST INFO --- */
+            .host-info {
+                margin-top: 30px;
+                padding: 20px;
+                background: #f8f9fa;
+                border-radius: 12px;
+                border: 1px solid #e9ecef;
+            }
+
+            .host-avatar {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 24px;
+                margin-bottom: 15px;
+            }
+
+            .host-name {
+                font-size: 20px;
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: #333;
+            }
+
+            .host-title {
+                color: #666;
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+
             @media (max-width: 768px) {
                 main {
                     padding: 20px;
+                    margin: 100px 10px 60px;
                 }
                 .gallery {
                     grid-template-columns: 1fr 1fr;
@@ -194,6 +252,16 @@
                 }
                 .gallery img:first-child {
                     grid-row: span 1;
+                }
+                .actions {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .actions .back-btn,
+                .actions .message-btn,
+                .actions .book-btn {
+                    text-align: center;
+                    justify-content: center;
                 }
             }
             
@@ -220,9 +288,22 @@
 
             <!-- Gallery -->
             <div class="gallery">
-                <% for (int i = 0; i < Math.min(images.size(), 5); i++) { %>
-                <img src="<%= images.get(i) %>" alt="Ảnh nơi lưu trú">
-                <% } %>
+                <% 
+                if (images.isEmpty()) {
+                    // Fallback images if no images in database
+                    for (int i = 0; i < 5; i++) {
+                %>
+                    <img src="https://images.unsplash.com/photo-1594873604892-b599f847e859?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfHx8fDE3NTk3NzE0OTF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="Hình ảnh nơi lưu trú">
+                <%
+                    }
+                } else {
+                    for (int i = 0; i < Math.min(images.size(), 5); i++) {
+                %>
+                    <img src="<%= images.get(i) %>" alt="Ảnh nơi lưu trú">
+                <%
+                    }
+                }
+                %>
             </div>
 
             <div class="price">₫<%= listing.getPricePerNight() %> / đêm</div>
@@ -231,11 +312,28 @@
                 <%= listing.getDescription() %>
             </div>
 
+            <!-- Host Information -->
+            <div class="host-info">
+                <h3><i class="bi bi-person-circle"></i> Thông tin Host</h3>
+                <div class="d-flex align-items-center">
+                    <div class="host-avatar">
+                        H
+                    </div>
+                    <div>
+                        <div class="host-name">GO2BNB Host Team</div>
+                        <div class="host-title">Chủ nhà siêu cấp • Đã tham gia từ 2020</div>
+                        <div class="text-muted">
+                            <i class="bi bi-star-fill text-warning"></i> 4.9 • 127 đánh giá • 
+                            <i class="bi bi-patch-check-fill text-primary"></i> Đã xác minh danh tính
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="info-box">
                 <p><b>Địa chỉ:</b> <%= listing.getAddress() %></p>
                 <p><b>Số khách tối đa:</b> <%= listing.getMaxGuests() %></p>
                 <p><b>Trạng thái:</b> <%= listing.getStatus() %></p>
-                <p><b>Host:</b> GO2BNB Host Team</p>
             </div>
 
             <div class="amenities">
@@ -257,14 +355,131 @@
             </div>
 
             <div class="actions">
-                <a href="${pageContext.request.contextPath}/search" class="back-btn">← Quay lại</a>
-                <a href="#" class="book-btn">Đặt phòng ngay</a>
+                <a href="${pageContext.request.contextPath}/search" class="back-btn">
+                    <i class="bi bi-arrow-left"></i> Quay lại
+                </a>
+                
+                <% if (currentUser != null && currentUser.getUserID() != listing.getHostID()) { %>
+                <button class="message-btn" onclick="startConversation(<%= listing.getHostID() %>)">
+                    <i class="bi bi-chat-dots"></i> Nhắn tin cho host
+                </button>
+                <% } %>
+                
+                <a href="#" class="book-btn">
+                    <i class="bi bi-calendar-check"></i> Đặt phòng ngay
+                </a>
             </div>
 
             <% } else { %>
-            <p>Không tìm thấy nơi lưu trú này.</p>
+            <div class="text-center">
+                <h3>Không tìm thấy nơi lưu trú này</h3>
+                <p>Nơi lưu trú có thể đã bị xóa hoặc không tồn tại.</p>
+                <a href="${pageContext.request.contextPath}/search" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Quay lại trang chủ
+                </a>
+            </div>
             <% } %>
         </main>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            function startConversation(hostId) {
+                <% if (currentUser == null) { %>
+                    Swal.fire({
+                        title: 'Vui lòng đăng nhập',
+                        text: 'Bạn cần đăng nhập để có thể nhắn tin với host.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Đăng nhập',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '${pageContext.request.contextPath}/login.jsp';
+                        }
+                    });
+                    return;
+                <% } %>
+
+                // Show loading
+                Swal.fire({
+                    title: 'Đang khởi tạo cuộc hội thoại...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Start conversation
+                fetch('${pageContext.request.contextPath}/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=startConversation&hostId=' + hostId
+                })
+                .then(response => response.json())
+                .then(data => {
+                    Swal.close();
+                    
+                    if (data.success) {
+                        // Redirect to chat
+                        window.location.href = '${pageContext.request.contextPath}/chat?action=view&conversationId=' + data.conversationId;
+                    } else {
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: data.message || 'Không thể khởi tạo cuộc hội thoại. Vui lòng thử lại.',
+                            icon: 'error'
+                        });
+                    }
+                })
+                .catch(error => {
+                    Swal.close();
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: 'Đã xảy ra lỗi khi khởi tạo cuộc hội thoại. Vui lòng thử lại.',
+                        icon: 'error'
+                    });
+                });
+            }
+
+            // Image gallery functionality
+            document.querySelectorAll('.gallery img').forEach(img => {
+                img.addEventListener('click', function() {
+                    // Simple image modal (you can enhance this)
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.9);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 9999;
+                        cursor: pointer;
+                    `;
+                    
+                    const modalImg = document.createElement('img');
+                    modalImg.src = this.src;
+                    modalImg.style.cssText = `
+                        max-width: 90%;
+                        max-height: 90%;
+                        object-fit: contain;
+                    `;
+                    
+                    modal.appendChild(modalImg);
+                    document.body.appendChild(modal);
+                    
+                    modal.addEventListener('click', () => {
+                        document.body.removeChild(modal);
+                    });
+                });
+            });
+        </script>
 
         <%@ include file="../design/footer.jsp" %>
     </body>
