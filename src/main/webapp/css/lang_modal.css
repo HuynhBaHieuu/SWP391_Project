@@ -1,0 +1,159 @@
+/* --- Language Modal (Airbnb-like) --- */
+.lang-modal.hidden{
+    display:none !important;
+}
+
+.lang-modal{
+    position:fixed;
+    inset:0;
+    z-index:10000; /* trên cả footer/icon chat */
+    pointer-events:auto;
+    box-sizing:border-box;
+    font-family: inherit;
+}
+
+.lang-modal__backdrop{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.45);
+}
+
+.lang-modal__panel{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:min(920px, calc(100vw - 32px));
+    max-height:min(720px, calc(100vh - 96px));
+    overflow:auto;
+    background:#fff;
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 24px 60px rgba(0,0,0,.25);
+    -webkit-font-smoothing:antialiased;
+}
+
+.lang-modal__close{
+    position:absolute;
+    top:12px;
+    right:12px;
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:#fff;
+    border:1px solid #e5e7eb;
+    cursor:pointer;
+    font-size:20px;
+    line-height:1;
+    appearance:none;
+    -webkit-appearance:none;
+}
+.lang-modal__close:hover{
+    background:#f7f7f7;
+}
+
+.lang-modal__header{
+    margin-bottom:12px;
+}
+.lang-modal__title{
+    font-size:22px;
+    font-weight:700;
+    margin:0 0 8px;
+}
+.lang-modal__auto{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:#111;
+    margin-bottom:6px;
+}
+.lang-modal__auto-help{
+    color:#6b7280;
+    font-size:14px;
+}
+
+.lang-modal__grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:12px;
+    margin-top:10px;
+}
+
+/* Button reset (đè Bootstrap) */
+.lang-option{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 16px;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    background:#fff;
+    cursor:pointer;
+    text-align:left;
+    appearance:none;
+    -webkit-appearance:none;
+    box-shadow:none;
+    font: inherit;
+    color:#111;
+}
+.lang-option:hover{
+    border-color:#111;
+}
+
+.lang-option__flag{
+    font-size:18px;
+}
+
+/* Toggle switch */
+.lang-switch{
+    position:relative;
+    display:inline-block;
+    width:48px;
+    height:28px;
+}
+.lang-switch input{
+    display:none;
+}
+.lang-switch__slider{
+    position:absolute;
+    inset:0;
+    background:#e5e7eb;
+    transition:.2s;
+    border-radius:999px;
+}
+.lang-switch__slider:before{
+    content:"";
+    position:absolute;
+    height:22px;
+    width:22px;
+    left:3px;
+    bottom:3px;
+    background:white;
+    transition:.2s;
+    border-radius:50%;
+    box-shadow:0 1px 2px rgba(0,0,0,.2);
+}
+.lang-switch input:checked + .lang-switch__slider{
+    background:#111;
+}
+.lang-switch input:checked + .lang-switch__slider:before{
+    transform:translateX(20px);
+}
+
+/* Badge (nút ở footer) */
+#lang-badge.lang-badge, #lang-badge.inline-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 12px;
+    border:1px solid #e5e7eb;
+    border-radius:20px;
+    background:#fff;
+    color:#111;
+}
+#lang-badge.lang-badge:hover, #lang-badge.inline-btn:hover{
+    border-color:#111;
+}
