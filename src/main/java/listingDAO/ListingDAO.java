@@ -11,12 +11,11 @@ public class ListingDAO {
     // ====== CREATE LISTING ======
     public Integer createListing(
             int hostId, String title, String description,
-            String address, String city, java.math.BigDecimal pricePerNight, int maxGuests
-    ) {
+            String address, String city, java.math.BigDecimal pricePerNight, int maxGuests) {
         String sql = "INSERT INTO Listings (HostID, Title, Description, Address, City, PricePerNight, MaxGuests, Status) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Active')";
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Active')";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, hostId);
             ps.setString(2, title);
             ps.setString(3, description);
@@ -40,11 +39,12 @@ public class ListingDAO {
 
     // ====== ADD LISTING IMAGES ======
     public void addListingImages(int listingId, List<String> urls) {
-        if (urls == null || urls.isEmpty()) return;
+        if (urls == null || urls.isEmpty())
+            return;
 
         String sql = "INSERT INTO ListingImages (ListingID, ImageUrl) VALUES (?, ?)";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             for (String u : urls) {
                 ps.setInt(1, listingId);
                 ps.setString(2, u);
@@ -61,7 +61,7 @@ public class ListingDAO {
         List<Listing> listings = new ArrayList<>();
         String sql = "SELECT * FROM Listings WHERE HostID = ? ORDER BY CreatedAt DESC";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, hostId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -78,7 +78,7 @@ public class ListingDAO {
     public Listing getListingById(int listingId) {
         String sql = "SELECT * FROM Listings WHERE ListingID = ?";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, listingId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -93,12 +93,12 @@ public class ListingDAO {
 
     // ====== UPDATE LISTING ======
     public boolean updateListing(int listingId, String title, String description,
-                                 String address, String city, java.math.BigDecimal pricePerNight,
-                                 int maxGuests, String status) {
+            String address, String city, java.math.BigDecimal pricePerNight,
+            int maxGuests, String status) {
         String sql = "UPDATE Listings SET Title=?, Description=?, Address=?, City=?, "
-                   + "PricePerNight=?, MaxGuests=?, Status=? WHERE ListingID=?";
+                + "PricePerNight=?, MaxGuests=?, Status=? WHERE ListingID=?";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, title);
             ps.setString(2, description);
             ps.setString(3, address);
@@ -127,7 +127,7 @@ public class ListingDAO {
         listing.setMaxGuests(rs.getInt("MaxGuests"));
         listing.setCreatedAt(rs.getTimestamp("CreatedAt"));
         listing.setStatus(rs.getString("Status"));
-        
+
         // Handle IsDeleted field (may not exist in older database schemas)
         try {
             listing.setDeleted(rs.getBoolean("IsDeleted"));
@@ -146,10 +146,10 @@ public class ListingDAO {
     public List<Listing> searchListings(String keyword) {
         List<Listing> listings = new ArrayList<>();
         String sql = "SELECT * FROM Listings WHERE Status='Active' AND "
-                   + "(Title LIKE ? OR City LIKE ? OR Address LIKE ? OR Description LIKE ?) "
-                   + "ORDER BY CreatedAt DESC";
+                + "(Title LIKE ? OR City LIKE ? OR Address LIKE ? OR Description LIKE ?) "
+                + "ORDER BY CreatedAt DESC";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             String key = "%" + keyword + "%";
             ps.setString(1, key);
             ps.setString(2, key);
@@ -171,8 +171,8 @@ public class ListingDAO {
         List<Listing> listings = new ArrayList<>();
         String sql = "SELECT * FROM Listings WHERE Status='Active' ORDER BY CreatedAt DESC";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 listings.add(mapResultSetToListing(rs));
             }
@@ -183,12 +183,12 @@ public class ListingDAO {
     }
 
     // ====== ADMIN METHODS ======
-    
+
     // Count all listings with search and status filter
     public int countAll(String search, String status) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Listings WHERE 1=1");
         List<Object> params = new ArrayList<>();
-        
+
         if (search != null && !search.trim().isEmpty()) {
             sql.append(" AND (Title LIKE ? OR Description LIKE ? OR City LIKE ? OR Address LIKE ?)");
             String searchPattern = "%" + search.trim() + "%";
@@ -197,19 +197,19 @@ public class ListingDAO {
             params.add(searchPattern);
             params.add(searchPattern);
         }
-        
+
         if (status != null && !status.trim().isEmpty()) {
             sql.append(" AND Status = ?");
             params.add(status.trim());
         }
-        
+
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
-            
+                PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1);
@@ -220,13 +220,13 @@ public class ListingDAO {
         }
         return 0;
     }
-    
+
     // Find all listings with search, status filter, and pagination
     public List<Listing> findAll(String search, String status, int offset, int limit) {
         List<Listing> listings = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM Listings WHERE 1=1");
         List<Object> params = new ArrayList<>();
-        
+
         if (search != null && !search.trim().isEmpty()) {
             sql.append(" AND (Title LIKE ? OR Description LIKE ? OR City LIKE ? OR Address LIKE ?)");
             String searchPattern = "%" + search.trim() + "%";
@@ -235,23 +235,23 @@ public class ListingDAO {
             params.add(searchPattern);
             params.add(searchPattern);
         }
-        
+
         if (status != null && !status.trim().isEmpty()) {
             sql.append(" AND Status = ?");
             params.add(status.trim());
         }
-        
+
         sql.append(" ORDER BY CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
         params.add(offset);
         params.add(limit);
-        
+
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
-            
+                PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     listings.add(mapResultSetToListing(rs));
@@ -262,12 +262,12 @@ public class ListingDAO {
         }
         return listings;
     }
-    
+
     // Approve a listing
     public boolean approve(int listingId) {
         String sql = "UPDATE Listings SET Status = 'approved' WHERE ListingID = ?";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, listingId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -275,12 +275,12 @@ public class ListingDAO {
         }
         return false;
     }
-    
+
     // Reject a listing
     public boolean reject(int listingId) {
         String sql = "UPDATE Listings SET Status = 'rejected' WHERE ListingID = ?";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, listingId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -288,12 +288,12 @@ public class ListingDAO {
         }
         return false;
     }
-    
+
     // Toggle listing status
     public boolean toggleStatus(int listingId, String newStatus) {
         String sql = "UPDATE Listings SET Status = ? WHERE ListingID = ?";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, newStatus);
             ps.setInt(2, listingId);
             return ps.executeUpdate() > 0;
@@ -302,14 +302,14 @@ public class ListingDAO {
         }
         return false;
     }
-    
+
     // ====== SOFT DELETE METHODS ======
-    
+
     // Soft delete a listing
     public boolean softDeleteListing(int listingId) {
         String sql = "UPDATE Listings SET IsDeleted = 1 WHERE ListingID = ?";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, listingId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -317,12 +317,12 @@ public class ListingDAO {
         }
         return false;
     }
-    
+
     // Restore a soft deleted listing
     public boolean restoreListing(int listingId) {
         String sql = "UPDATE Listings SET IsDeleted = 0 WHERE ListingID = ?";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, listingId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -330,13 +330,13 @@ public class ListingDAO {
         }
         return false;
     }
-    
+
     // Get listings by host (excluding soft deleted)
     public List<Listing> getActiveListingsByHostId(int hostId) {
         List<Listing> listings = new ArrayList<>();
         String sql = "SELECT * FROM Listings WHERE HostID = ? AND (IsDeleted = 0 OR IsDeleted IS NULL) ORDER BY CreatedAt DESC";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, hostId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -348,14 +348,14 @@ public class ListingDAO {
         }
         return listings;
     }
-    
+
     // Get all active listings (excluding soft deleted)
     public List<Listing> getAllActiveListings() {
         List<Listing> listings = new ArrayList<>();
         String sql = "SELECT * FROM Listings WHERE Status='Active' AND (IsDeleted = 0 OR IsDeleted IS NULL) ORDER BY CreatedAt DESC";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 listings.add(mapResultSetToListing(rs));
             }
@@ -364,15 +364,15 @@ public class ListingDAO {
         }
         return listings;
     }
-    
+
     // Search listings (excluding soft deleted)
     public List<Listing> searchActiveListings(String keyword) {
         List<Listing> listings = new ArrayList<>();
         String sql = "SELECT * FROM Listings WHERE Status='Active' AND (IsDeleted = 0 OR IsDeleted IS NULL) AND "
-                   + "(Title LIKE ? OR City LIKE ? OR Address LIKE ? OR Description LIKE ?) "
-                   + "ORDER BY CreatedAt DESC";
+                + "(Title LIKE ? OR City LIKE ? OR Address LIKE ? OR Description LIKE ?) "
+                + "ORDER BY CreatedAt DESC";
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
             String key = "%" + keyword + "%";
             ps.setString(1, key);
             ps.setString(2, key);
@@ -388,4 +388,48 @@ public class ListingDAO {
         }
         return listings;
     }
+
+    // ====== SEARCH LISTINGS BY KEYWORD + GUESTS ======
+    public List<Listing> searchActiveListings(String keyword, int guests) {
+        List<Listing> listings = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM Listings WHERE Status='Active' AND (IsDeleted = 0 OR IsDeleted IS NULL)");
+        List<Object> params = new ArrayList<>();
+
+        // Tìm theo từ khóa
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (Title LIKE ? OR City LIKE ? OR Address LIKE ? OR Description LIKE ?)");
+            String key = "%" + keyword.trim() + "%";
+            params.add(key);
+            params.add(key);
+            params.add(key);
+            params.add(key);
+        }
+
+        // Lọc theo số khách
+        if (guests > 0) {
+            sql.append(" AND MaxGuests >= ?");
+            params.add(guests);
+        }
+
+        sql.append(" ORDER BY CreatedAt DESC");
+
+        try (Connection con = DBConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    listings.add(mapResultSetToListing(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return listings;
+    }
+
 }
