@@ -81,7 +81,7 @@
                 background: #f8f9fa;
                 border-radius: 10px;
                 padding: 20px;
-                margin-bottom: 20px;
+margin-bottom: 20px;
             }
         </style>
     </head>
@@ -139,7 +139,7 @@
                                     <label for="fullName" class="form-label">
                                         <i class="fas fa-user me-2"></i><span data-i18n="host.become_host.full_name">Họ và tên</span> <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control" id="fullName" name="fullName" required>
+<input type="text" class="form-control" id="fullName" name="fullName" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -183,8 +183,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="row">
+<div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="bankName" class="form-label">
@@ -227,7 +226,7 @@
                             <label for="motivation" class="form-label">
                                 <i class="fas fa-heart me-2"></i>Reason for becoming a host <span class="text-danger">*</span>
                             </label>
-                            <textarea class="form-control" id="motivation" name="motivation" rows="3" required
+<textarea class="form-control" id="motivation" name="motivation" rows="3" required
                                       placeholder="Share your reasons and motivation for wanting to become a host..."></textarea>
                         </div>
 
@@ -274,7 +273,7 @@
 
                         <div class="message-box">
                             <label for="message" class="form-label">
-                                <i class="fas fa-comment me-2"></i>Message for admin (optional)
+<i class="fas fa-comment me-2"></i>Message for admin (optional)
                             </label>
                             <textarea class="form-control" id="message" name="message" rows="3" 
                                       placeholder="Please share more about your experience or reasons for wanting to become a host..."></textarea>
@@ -293,221 +292,71 @@
             </c:if>
         </div>
 
-    <c:if test="${status != 'pending'}">
-      <div class="content-card">
-        <h2 class="text-center mb-4"><i class="fas fa-user-plus me-2"></i>Đăng ký trở thành Host</h2>
-      
-      <!-- Bước 1: Thông tin xác minh danh tính -->
-      <div id="step1" class="step-content">
-        <h4 class="mb-3">Bước 1: Thông tin xác minh danh tính</h4>
-        <p class="text-muted mb-4">Vui lòng cung cấp thông tin chi tiết để admin có thể xác minh danh tính của bạn.</p>
-        
-        <form method="post" action="${pageContext.request.contextPath}/become-host" id="detailForm">
-          <input type="hidden" name="action" value="next">
-          
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label for="fullName" class="form-label">
-                  <i class="fas fa-user me-2"></i>Họ và tên <span class="text-danger">*</span>
-                </label>
-                <input type="text" class="form-control" id="fullName" name="fullName" required>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label for="phoneNumber" class="form-label">
-                  <i class="fas fa-phone me-2"></i>Số điện thoại <span class="text-danger">*</span>
-                </label>
-                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required>
-              </div>
-            </div>
-          </div>
-          
-          <div class="mb-3">
-            <label for="address" class="form-label">
-              <i class="fas fa-map-marker-alt me-2"></i>Địa chỉ thường trú <span class="text-danger">*</span>
-            </label>
-            <textarea class="form-control" id="address" name="address" rows="2" required
-                      placeholder="Nhập địa chỉ đầy đủ bao gồm số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"></textarea>
-          </div>
-          
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label for="idType" class="form-label">
-                  <i class="fas fa-id-card me-2"></i>Loại giấy tờ tùy thân <span class="text-danger">*</span>
-                </label>
-                <select class="form-select" id="idType" name="idType" required>
-                  <option value="">Chọn loại giấy tờ</option>
-                  <option value="CCCD">Căn cước công dân</option>
-                  <option value="CMND">Chứng minh nhân dân</option>
-                  <option value="PASSPORT">Hộ chiếu</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label for="idNumber" class="form-label">
-                  <i class="fas fa-hashtag me-2"></i>Số giấy tờ tùy thân <span class="text-danger">*</span>
-                </label>
-                <input type="text" class="form-control" id="idNumber" name="idNumber" required>
-              </div>
-            </div>
-          </div>
-          
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label for="bankName" class="form-label">
-                  <i class="fas fa-university me-2"></i>Tên ngân hàng <span class="text-danger">*</span>
-                </label>
-                <select class="form-select" id="bankName" name="bankName" required>
-                  <option value="">Chọn ngân hàng</option>
-                  <option value="Vietcombank">Vietcombank</option>
-                  <option value="VietinBank">VietinBank</option>
-                  <option value="BIDV">BIDV</option>
-                  <option value="Agribank">Agribank</option>
-                  <option value="Techcombank">Techcombank</option>
-                  <option value="ACB">ACB</option>
-                  <option value="Sacombank">Sacombank</option>
-                  <option value="MB">MB Bank</option>
-                  <option value="VPBank">VPBank</option>
-                  <option value="SHB">SHB</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label for="bankAccount" class="form-label">
-                  <i class="fas fa-credit-card me-2"></i>Số tài khoản ngân hàng <span class="text-danger">*</span>
-                </label>
-                <input type="text" class="form-control" id="bankAccount" name="bankAccount" required>
-              </div>
-            </div>
-          </div>
-          
-          <div class="mb-3">
-            <label for="experience" class="form-label">
-              <i class="fas fa-briefcase me-2"></i>Kinh nghiệm làm việc <span class="text-danger">*</span>
-            </label>
-            <textarea class="form-control" id="experience" name="experience" rows="3" required
-                      placeholder="Mô tả kinh nghiệm làm việc, nghề nghiệp hiện tại của bạn..."></textarea>
-          </div>
-          
-          <div class="mb-3">
-            <label for="motivation" class="form-label">
-              <i class="fas fa-heart me-2"></i>Lý do muốn trở thành host <span class="text-danger">*</span>
-            </label>
-            <textarea class="form-control" id="motivation" name="motivation" rows="3" required
-                      placeholder="Chia sẻ lý do và động lực của bạn khi muốn trở thành host..."></textarea>
-          </div>
-          
-          <div class="d-flex justify-content-end">
-            <button type="submit" class="btn btn-primary">
-              <i class="fas fa-arrow-right me-2"></i>Tiếp theo
-            </button>
-          </div>
-        </form>
-      </div>
-      
-      <!-- Bước 2: Chọn dịch vụ -->
-      <div id="step2" class="step-content" style="display: none;">
-        <h4 class="mb-3">Bước 2: Chọn dịch vụ bạn muốn cung cấp</h4>
-        <form method="post" action="${pageContext.request.contextPath}/become-host" id="serviceForm">
-          <input type="hidden" name="action" value="submit">
-          <input type="hidden" name="fullName" id="savedFullName">
-          <input type="hidden" name="phoneNumber" id="savedPhoneNumber">
-          <input type="hidden" name="address" id="savedAddress">
-          <input type="hidden" name="idNumber" id="savedIdNumber">
-          <input type="hidden" name="idType" id="savedIdType">
-          <input type="hidden" name="bankAccount" id="savedBankAccount">
-          <input type="hidden" name="bankName" id="savedBankName">
-          <input type="hidden" name="experience" id="savedExperience">
-          <input type="hidden" name="motivation" id="savedMotivation">
-          
-    <div class="grid" id="options">
-      <label class="card">
-        <div class="emoji">🏠</div>
-        <div><strong>Nơi lưu trú</strong></div>
-        <input class="hide" type="radio" name="serviceType" value="ACCOMMODATION">
-      </label>
-      <label class="card">
-        <div class="emoji">🎈</div>
-        <div><strong>Trải nghiệm</strong></div>
-        <input class="hide" type="radio" name="serviceType" value="EXPERIENCE">
-      </label>
-      <label class="card">
-        <div class="emoji">🛎️</div>
-        <div><strong>Dịch vụ</strong></div>
-        <input class="hide" type="radio" name="serviceType" value="SERVICE">
-      </label>
-    </div>
-          
-          <div class="message-box">
-            <label for="message" class="form-label">
-              <i class="fas fa-comment me-2"></i>Tin nhắn cho admin (tùy chọn)
-            </label>
-            <textarea class="form-control" id="message" name="message" rows="3" 
-                      placeholder="Hãy chia sẻ thêm về kinh nghiệm hoặc lý do bạn muốn trở thành host..."></textarea>
-          </div>
-          
-          <div class="d-flex justify-content-between">
-            <button type="button" class="btn btn-outline-secondary" onclick="goBackToStep1()">
-              <i class="fas fa-arrow-left me-2"></i>Quay lại
-            </button>
-            <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
-              <i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu
-            </button>
-    </div>
-  </form>
-      </div>
-    </c:if>
-      </div>
-  </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+                                // Xử lý form bước 1 (thông tin xác minh)
+                                document.getElementById('detailForm').addEventListener('submit', function (e) {
+                                    e.preventDefault();
 
-  <jsp:include page="/design/footer.jsp" />
+                                    // Validate form
+                                    const requiredFields = ['fullName', 'phoneNumber', 'address', 'idNumber', 'idType', 'bankAccount', 'bankName', 'experience', 'motivation'];
+                                    let isValid = true;
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Xử lý form bước 1 (thông tin xác minh)
-    document.getElementById('detailForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      // Validate form
-      const requiredFields = ['fullName', 'phoneNumber', 'address', 'idNumber', 'idType', 'bankAccount', 'bankName', 'experience', 'motivation'];
-      let isValid = true;
-      
-      requiredFields.forEach(field => {
-        const input = document.getElementById(field);
-        if (!input.value.trim()) {
-          isValid = false;
-          input.classList.add('is-invalid');
-        } else {
-          input.classList.remove('is-invalid');
-        }
-      });
-      
-      if (!isValid) {
-        alert('Vui lòng điền đầy đủ thông tin bắt buộc.');
-        return;
-      }
-      
-      // Lưu thông tin vào hidden fields của bước 2
-      document.getElementById('savedFullName').value = document.getElementById('fullName').value;
-      document.getElementById('savedPhoneNumber').value = document.getElementById('phoneNumber').value;
-      document.getElementById('savedAddress').value = document.getElementById('address').value;
-      document.getElementById('savedIdNumber').value = document.getElementById('idNumber').value;
-      document.getElementById('savedIdType').value = document.getElementById('idType').value;
-      document.getElementById('savedBankAccount').value = document.getElementById('bankAccount').value;
-      document.getElementById('savedBankName').value = document.getElementById('bankName').value;
-      document.getElementById('savedExperience').value = document.getElementById('experience').value;
-      document.getElementById('savedMotivation').value = document.getElementById('motivation').value;
-      
-      // Chuyển sang bước 2
-      document.getElementById('step1').style.display = 'none';
-      document.getElementById('step2').style.display = 'block';
-    });
+                                    requiredFields.forEach(field => {
+                                        const input = document.getElementById(field);
+                                        if (!input.value.trim()) {
+                                            isValid = false;
+                                            input.classList.add('is-invalid');
+                                        } else {
+                                            input.classList.remove('is-invalid');
+                                        }
+                                    });
+
+                                    if (!isValid) {
+                                        alert('Please fill in all required information.');
+                                        return;
+                                    }
+
+                                    // Lưu thông tin vào hidden fields của bước 2
+                                    document.getElementById('savedFullName').value = document.getElementById('fullName').value;
+                                    document.getElementById('savedPhoneNumber').value = document.getElementById('phoneNumber').value;
+                                    document.getElementById('savedAddress').value = document.getElementById('address').value;
+document.getElementById('savedIdNumber').value = document.getElementById('idNumber').value;
+                                    document.getElementById('savedIdType').value = document.getElementById('idType').value;
+                                    document.getElementById('savedBankAccount').value = document.getElementById('bankAccount').value;
+                                    document.getElementById('savedBankName').value = document.getElementById('bankName').value;
+                                    document.getElementById('savedExperience').value = document.getElementById('experience').value;
+                                    document.getElementById('savedMotivation').value = document.getElementById('motivation').value;
+
+                                    // Chuyển sang bước 2
+                                    document.getElementById('step1').style.display = 'none';
+                                    document.getElementById('step2').style.display = 'block';
+                                });
+
+                                // Xử lý chọn dịch vụ ở bước 2
+                                const cards = document.querySelectorAll('#step2 .card');
+                                const submitBtn = document.getElementById('submitBtn');
+
+                                cards.forEach(c => c.addEventListener('click', () => {
+                                        cards.forEach(x => x.classList.remove('selected'));
+                                        c.classList.add('selected');
+                                        c.querySelector('input[type=radio]').checked = true;
+                                        submitBtn.disabled = false;
+                                    }));
+
+                                // Hàm quay lại bước 1
+                                function goBackToStep1() {
+                                    document.getElementById('step2').style.display = 'none';
+                                    document.getElementById('step1').style.display = 'block';
+                                }
+        </script>
+
+        <!-- Language Selector Button -->
+        <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+            <button data-open-lang-modal style="background: #ff5a5f; color: white; border: none; padding: 12px 16px; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; font-weight: 500;">
+                🌐 <span data-lang-label>English</span>
+            </button>
+        </div>
 
         <script>
             // Update language button text
@@ -516,7 +365,7 @@
                     const langLabel = document.querySelector('[data-lang-label]');
                     if (langLabel && window.I18N) {
                         const currentLang = window.I18N.lang || 'en';
-                        langLabel.textContent = currentLang === 'vi' ? 'Tiếng Việt' : 'English';
+langLabel.textContent = currentLang === 'vi' ? 'Tiếng Việt' : 'English';
                     }
                 }
 
