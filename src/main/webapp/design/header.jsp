@@ -56,11 +56,11 @@
                 border-radius: 10px;
                 padding: 15px;
                 width: 14%;
-                box-shadow: 0 4px 10px rgba(0,0,0,.1);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
                 z-index: 1000;
                 margin-top: 5px;
                 margin-left: -13.5%;
-                animation: fadeIn .3s ease-in-out;
+                animation: fadeIn 0.3s ease-in-out;
             }
             @keyframes fadeIn {
                 from{
@@ -85,7 +85,7 @@
                 background:#f0f0f0;
                 padding-left:20px;
                 cursor:pointer;
-                box-shadow:0 2px 6px rgba(0,0,0,.15);
+                box-shadow:0 2px 6px rgba(0,0,0,0.15);
             }
             .profile-icon {
                 cursor:pointer;
@@ -95,12 +95,14 @@
             }
             .profile-icon svg {
                 fill:#333;
-                transition: fill .3s ease;
+                transition: fill 0.3s ease;
             }
             .profile-icon:hover svg {
                 fill:#f43f5e;
             }
-
+            .menu-item:hover {
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Bóng nhẹ khi hover */
+            }
             /* Badge thông báo tin nhắn */
             .message-badge-1 {
                 background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
@@ -243,55 +245,56 @@
                     
                         <!-- Dropdown menu -->
                         <div id="dropdown-menu" style="display:none; position:absolute; background:#fff; border:1px solid #ddd; border-radius:8px; padding:10px;">
-                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/WishlistServlet") : (request.getContextPath() + "/login.jsp")%>" class="menu-item user-profile" data-i18n="header.dropdown.wishlist">Danh sách yêu thích</a>
-                            <a href="#" class="menu-item user-profile" data-i18n="header.dropdown.trips">Chuyến đi</a>
-                            <a href="#" class="menu-item user-profile" data-i18n="header.dropdown.messages">Tin nhắn</a>
-                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>" class="menu-item user-profile" data-i18n="header.dropdown.profile">Hồ sơ</a>
-                            <a href="#" class="menu-item user-profile" data-i18n="header.dropdown.notifications">Thông báo</a>
-                            <a href="#" class="menu-item user-profile" data-i18n="header.dropdown.settings">Cài đặt tài khoản</a>
-                            <a href="#" class="menu-item user-profile" data-i18n="header.dropdown.language" data-open-lang-modal>Ngôn ngữ</a>
-                            <a href="#" class="menu-item user-profile" data-i18n="header.dropdown.help_center">Trung tâm trợ giúp</a>
-                            <a href="#" class="menu-item"
-                               data-i18n="header.dropdown.logout"
-                               onclick="document.getElementById('logoutForm').submit(); return false;">Log Out</a>
-                        <div id="dropdown-menu" style="display: none; position: absolute; background-color: white; border: 1px solid #ddd; border-radius: 8px; padding: 10px;">
-                            <!-- Đổi id trùng lặp thành class để tránh lỗi DOM -->
-                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/WishlistServlet") : (request.getContextPath() + "/login.jsp")%>" class="menu-item user-profile">
-                                <i class="bi bi-heart"></i> Danh sách yêu thích
-                            </a>
-                            <a href="#" class="menu-item user-profile">
-                                <i class="bi bi-suitcase"></i> Chuyến đi
-                            </a>
-                            
-                            <!-- Tin nhắn với thông báo -->
-                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/chat") : (request.getContextPath() + "/login.jsp")%>" 
-                               class="menu-item user-profile <%= (unreadMessageCount > 0) ? "has-unread" : "" %>">
-                                <i class="bi bi-chat-dots"></i> Tin nhắn
-                                <% if (unreadMessageCount > 0) { %>
-                                    <span class="message-badge-2"><%= unreadMessageCount %></span>
-                                <% } %>
-                            </a>
-                            
-                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>" class="menu-item user-profile">
-                                <i class="bi bi-person"></i> Hồ sơ
-                            </a>
-                            <a href="#" class="menu-item user-profile">
-                                <i class="bi bi-bell"></i> Thông báo
-                            </a>
-                            <a href="#" class="menu-item user-profile">
-                                <i class="bi bi-gear"></i> Cài đặt tài khoản
-                            </a>
-                            <a href="#" class="menu-item user-profile">
-                                <i class="bi bi-globe"></i> Ngôn ngữ và loại tiền tệ
-                            </a>
-                            <a href="<%=request.getContextPath()%>/Support/support_center.jsp" class="menu-item user-profile">
-                                <i class="bi bi-question-circle"></i> Trung tâm trợ giúp
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/WishlistServlet") : (request.getContextPath() + "/login.jsp")%>" 
+                               class="menu-item user-profile">
+                                <i class="bi bi-heart"></i>
+                                <span data-i18n="header.dropdown.wishlist">Danh sách yêu thích</span>
                             </a>
 
-                            <!-- Log Out: dùng form POST ẩn (giữ nguyên CSS hover) -->
-                            <a href="#" class="menu-item" onclick="document.getElementById('logoutForm').submit(); return false;">
-                                <i class="bi bi-box-arrow-right"></i> Log Out
+                            <a href="#" class="menu-item user-profile">
+                                <i class="bi bi-suitcase"></i>
+                                <span data-i18n="header.dropdown.trips">Chuyến đi</span>
                             </a>
+
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/chat") : (request.getContextPath() + "/login.jsp")%>" 
+                               class="menu-item user-profile <%= (unreadMessageCount > 0) ? "has-unread" : ""%>">
+                                <i class="bi bi-chat-dots"></i>
+                                <span data-i18n="header.dropdown.messages">Tin nhắn</span>
+                                <% if (unreadMessageCount > 0) {%>
+                                <span class="message-badge-2"><%= unreadMessageCount%></span>
+                                <% }%>
+                            </a>
+
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>" 
+                               class="menu-item user-profile">
+                                <i class="bi bi-person"></i>
+                                <span data-i18n="header.dropdown.profile">Hồ sơ</span>
+                            </a>
+
+                            <a href="#" class="menu-item user-profile">
+                                <i class="bi bi-bell"></i>
+                                <span data-i18n="header.dropdown.notifications">Thông báo</span>
+                            </a>
+
+                            <a href="#" class="menu-item user-profile">
+                                <i class="bi bi-gear"></i>
+                                <span data-i18n="header.dropdown.settings">Cài đặt tài khoản</span>
+                            </a>
+
+                            <a href="#" class="menu-item user-profile" data-open-lang-modal>
+                                <i class="bi bi-globe"></i>
+                                <span data-i18n="header.dropdown.language">Ngôn ngữ</span>
+                            </a>
+
+                            <a href="<%=request.getContextPath()%>/Support/support_center.jsp" class="menu-item user-profile">
+                                <i class="bi bi-question-circle"></i>
+                                <span data-i18n="header.dropdown.help_center">Trung tâm trợ giúp</span>
+                            </a>
+
+                            <a href="#" class="menu-item" onclick="document.getElementById('logoutForm').submit(); return false;">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span data-i18n="header.dropdown.logout">Log Out</span>
+                            </a>                       
                             <form id="logoutForm" action="<%= request.getContextPath()%>/logout" method="post" style="display:none;"></form>
                         </div>
                     </div>
