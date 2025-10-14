@@ -5,6 +5,8 @@
 --%>
 <%@page import="model.User"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/lang_modal.css?v=2">
+<script src="<%=request.getContextPath()%>/js/i18n.js?v=13"></script>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%
     User currentUser = (User) session.getAttribute("user");
@@ -185,7 +187,7 @@
                             <a href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>" class="menu-item user-profile" data-i18n="header.dropdown.profile">Hồ sơ</a>
                             <a href="#" class="menu-item user-profile" data-i18n="header.dropdown.notifications">Thông báo</a>
                             <a href="#" class="menu-item user-profile" data-i18n="header.dropdown.settings">Cài đặt tài khoản</a>
-                            <a href="#" class="menu-item user-profile" data-i18n="header.dropdown.language_currency">Ngôn ngữ và loại tiền tệ</a>
+                            <a href="#" class="menu-item user-profile" data-i18n="header.dropdown.language" data-open-lang-modal>Ngôn ngữ</a>
                             <a href="#" class="menu-item user-profile" data-i18n="header.dropdown.help_center">Trung tâm trợ giúp</a>
                             <a href="#" class="menu-item"
                                data-i18n="header.dropdown.logout"
@@ -259,5 +261,22 @@
             const dropdownMenu = document.getElementById('dropdown-menu');
             dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
         }
+        
+        // Đóng dropdown khi click vào nút ngôn ngữ
+        document.addEventListener('DOMContentLoaded', function() {
+            const langMenuItem = document.querySelector('[data-open-lang-modal]');
+            if (langMenuItem) {
+                langMenuItem.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Đóng dropdown menu
+                    const dropdownMenu = document.getElementById('dropdown-menu');
+                    dropdownMenu.style.display = 'none';
+                    // Mở modal ngôn ngữ
+                    if (window.I18N && window.I18N.showModal) {
+                        window.I18N.showModal();
+                    }
+                });
+            }
+        });
     </script>
 </html>

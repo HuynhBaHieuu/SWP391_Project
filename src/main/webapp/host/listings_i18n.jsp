@@ -1,25 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
     <head>
         <meta charset="UTF-8">
-        <title>Listings</title>
+        <title data-i18n="host.listings.title">Danh sách bài đăng</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css?v=7">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/lang_modal.css">
         <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
-        <script>
-            // Enable translation for host pages
-            document.addEventListener('DOMContentLoaded', function() {
-                // Let I18N work normally for host pages
-                if (window.I18N) {
-                    // Apply translation after a short delay to ensure I18N is loaded
-                    setTimeout(() => {
-                        window.I18N.apply();
-                    }, 100);
-                }
-            });
-        </script>
     </head>
     <body>
         <jsp:include page="/design/host_header.jsp">
@@ -28,11 +15,11 @@
 
         <div class="listing-container">
             <div class="listings-header">
-                <h2 class="page-title" data-i18n="host.listings.title">Your listings</h2>
+                <h2 class="page-title" data-i18n="host.listings.title">Bài đăng của bạn</h2>
                 <div class="listings-actions">
-                    <button type="button" class="icon-btn" id="btnTable" title="Table view">☷</button>
-                    <button type="button" class="icon-btn" id="btnGrid"  title="Grid view">▦</button>
-                    <a class="btn btn-primary add-listing" href="${pageContext.request.contextPath}/host/listing/new" data-i18n="host.listings.add_btn">+ Add accommodation</a>
+                    <button type="button" class="icon-btn" id="btnTable" title="Dạng bảng" data-i18n-attr="title:host.listings.listing_view">☷</button>
+                    <button type="button" class="icon-btn" id="btnGrid"  title="Dạng lưới" data-i18n-attr="title:host.listings.grid_view">▦</button>
+                    <a class="btn btn-primary add-listing" href="${pageContext.request.contextPath}/host/listing/new" data-i18n="host.listings.add_btn">+ Thêm chỗ ở</a>
                 </div>
             </div>
 
@@ -43,8 +30,15 @@
                         <a href="${pageContext.request.contextPath}/host/listing/edit?id=${listing.listingID}" class="bigcard-link">
                             <article class="bigcard">
                                 <div class="bigcard-media">
-                                    <span class="listing-status ${listing.status == 'Active' ? 'status-active' : 'status-inactive'}" data-i18n="${listing.status == 'Active' ? 'host.listings.active' : ''}">
-                                        ${listing.status == 'Active' ? 'Active' : listing.status}
+                                    <span class="listing-status ${listing.status == 'Active' ? 'status-active' : 'status-inactive'}">
+                                        <c:choose>
+                                            <c:when test="${listing.status == 'Active'}">
+                                                <span data-i18n="host.listings.active">Đang thực hiện</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                ${listing.status}
+                                            </c:otherwise>
+                                        </c:choose>
                                     </span>
 
                                     <c:set var="imgKey" value="${'images_'}${listing.listingID}" />
@@ -83,10 +77,10 @@
             <!-- TABLE (có thumbnail ảnh đầu tiên) -->
             <div class="listings-table" id="modeTable" style="display:none;">
                 <div class="lt-head">
-                    <div class="lt-col lt-col-item" data-i18n="host.listings.rental_item">Rental item</div>
-                    <div class="lt-col lt-col-type" data-i18n="host.listings.type">Type</div>
-                    <div class="lt-col lt-col-loc" data-i18n="host.listings.location">Location</div>
-                    <div class="lt-col lt-col-status" data-i18n="host.listings.status">Status</div>
+                    <div class="lt-col lt-col-item" data-i18n="host.listings.rental_item">Mục cho thuê</div>
+                    <div class="lt-col lt-col-type" data-i18n="host.listings.type">Loại</div>
+                    <div class="lt-col lt-col-loc" data-i18n="host.listings.location">Vị trí</div>
+                    <div class="lt-col lt-col-status" data-i18n="host.listings.status">Trạng thái</div>
                 </div>
 
                 <c:forEach var="listing" items="${listings}">
@@ -110,27 +104,38 @@
                                         <div class="lt-thumb"></div>
                                     </c:otherwise>
                                 </c:choose>
-                                <div class="lt-title" data-i18n="host.listings.house_room_created">House/room for rent created on ${listing.createdAt}</div>
+                                <div class="lt-title">
+                                    <span data-i18n="host.listings.house_room_created">Nhà/phòng cho thuê được tạo vào</span> ${listing.createdAt}
+                                </div>
                             </div>
-                            <div class="lt-col lt-col-type" data-i18n="host.listings.house">House</div>
+                            <div class="lt-col lt-col-type" data-i18n="host.listings.house">Nhà</div>
                             <div class="lt-col lt-col-loc">${listing.city}</div>
                             <div class="lt-col lt-col-status">
                                 <span class="dot ${listing.status == 'Active' ? 'dot-on' : ''}"></span>
-                                <span class="lt-status-text" data-i18n="${listing.status == 'Active' ? 'host.listings.active' : ''}">${listing.status == 'Active' ? 'Active' : listing.status}</span>
+                                <span class="lt-status-text">
+                                    <c:choose>
+                                        <c:when test="${listing.status == 'Active'}">
+                                            <span data-i18n="host.listings.active">Đang thực hiện</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            ${listing.status}
+                                        </c:otherwise>
+                                    </c:choose>
+                                </span>
                             </div>
                         </div>
                     </a>
                 </c:forEach>
 
                 <c:if test="${empty listings}">
-                    <div class="lt-empty" data-i18n="host.listings.empty">You have no listings yet.</div>
+                    <div class="lt-empty" data-i18n="host.listings.empty">Bạn chưa có bài đăng nào.</div>
                 </c:if>
             </div>
 
             <c:if test="${empty listings}">
                 <div class="empty-wrap">
-                    <p data-i18n="host.listings.empty">You have no listings yet.</p>
-                    <a class="btn btn-primary add-listing" href="${pageContext.request.contextPath}/host/listing/new" data-i18n="host.listings.add_btn">+ Add accommodation</a>
+                    <p data-i18n="host.listings.empty">Bạn chưa có bài đăng nào.</p>
+                    <a class="btn btn-primary add-listing" href="${pageContext.request.contextPath}/host/listing/new" data-i18n="host.listings.add_btn">+ Thêm chỗ ở</a>
                 </div>
             </c:if>
         </div>
@@ -187,38 +192,6 @@
                     });
                 });
             })();
-        </script>
-        
-        <!-- Language Selector Button -->
-        <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-            <button data-open-lang-modal style="background: #ff5a5f; color: white; border: none; padding: 12px 16px; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; font-weight: 500;">
-                🌐 <span data-lang-label>English</span>
-            </button>
-        </div>
-        
-        <script>
-            // Update language button text
-            document.addEventListener('DOMContentLoaded', function() {
-                function updateLangButton() {
-                    const langLabel = document.querySelector('[data-lang-label]');
-                    if (langLabel && window.I18N) {
-                        const currentLang = window.I18N.lang || 'en';
-                        langLabel.textContent = currentLang === 'vi' ? 'Tiếng Việt' : 'English';
-                    }
-                }
-                
-                // Update on page load
-                updateLangButton();
-                
-                // Listen for language changes
-                const originalSetLang = window.I18N?.setLang;
-                if (originalSetLang) {
-                    window.I18N.setLang = function(lang) {
-                        originalSetLang.call(this, lang);
-                        updateLangButton();
-                    };
-                }
-            });
         </script>
     </body>
 </html>

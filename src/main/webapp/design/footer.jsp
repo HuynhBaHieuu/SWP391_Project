@@ -4,8 +4,8 @@
     <head>
         <meta charset="UTF-8">
         <title>Footer</title>
-        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lang-modal.css?v=1">
-        <script src="<%=request.getContextPath()%>/js/i18n.js?v=12"></script>
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lang_modal.css?v=2">
+        <script src="<%=request.getContextPath()%>/js/i18n.js?v=13"></script>
     </head>
     <body>
 

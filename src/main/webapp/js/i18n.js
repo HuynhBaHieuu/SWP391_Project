@@ -44,7 +44,8 @@
                     profile: {vi: "Hồ sơ", en: "Profile"},
                     notifications: {vi: "Thông báo", en: "Notifications"},
                     settings: {vi: "Cài đặt tài khoản", en: "Account settings"},
-                    language_currency: {vi: "Ngôn ngữ và loại tiền tệ", en: "Language & currency"},
+                    language_currency: {vi: "Ngôn ngữ", en: "Language"},
+                    language: {vi: "Ngôn ngữ", en: "Language"},
                     help_center: {vi: "Trung tâm trợ giúp", en: "Help Center"},
                     logout: {vi: "Đăng xuất", en: "Log out"}
                 },
@@ -108,7 +109,119 @@
                     calendar: {vi: "Lịch", en: "Calendar"},
                     messages: {vi: "Tin nhắn", en: "Messages"},
                     listing_view: {vi: "Chế độ xem danh sách", en: "List view"},
-                    grid_view: {vi: "Chế độ xem lưới", en: "Grid view"}
+                    grid_view: {vi: "Chế độ xem lưới", en: "Grid view"},
+                    rental_item: {vi: "Mục cho thuê", en: "Rental item"},
+                    type: {vi: "Loại", en: "Type"},
+                    location: {vi: "Vị trí", en: "Location"},
+                    status: {vi: "Trạng thái", en: "Status"},
+                    house_room_created: {vi: "Nhà/phòng cho thuê được tạo vào", en: "House/room for rent created on"},
+                    house: {vi: "Nhà", en: "House"},
+                    active: {vi: "Đang thực hiện", en: "Active"}
+                },
+                become_host: {
+                    title: {vi: "Trở thành host", en: "Become a Host"},
+                    register_title: {vi: "Đăng ký trở thành Host", en: "Register to Become a Host"},
+                    notifications: {vi: "Thông báo", en: "Notifications"},
+                    request_pending: {vi: "Yêu cầu đang chờ duyệt", en: "Request Pending Approval"},
+                    pending_title: {vi: "Yêu cầu đang chờ duyệt", en: "Request Pending Approval"},
+                    request_rejected: {vi: "Yêu cầu bị từ chối", en: "Request Rejected"},
+                    step1_title: {vi: "Bước 1: Thông tin xác minh danh tính", en: "Step 1: Identity Verification Information"},
+                    step1_desc: {vi: "Vui lòng cung cấp thông tin chi tiết để admin có thể xác minh danh tính của bạn.", en: "Please provide detailed information so admin can verify your identity."},
+                    full_name: {vi: "Họ và tên", en: "Full Name"},
+                    phone_number: {vi: "Số điện thoại", en: "Phone Number"},
+                    permanent_address: {vi: "Địa chỉ thường trú", en: "Permanent Address"},
+                    address_placeholder: {vi: "Nhập địa chỉ đầy đủ bao gồm số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố", en: "Enter full address including house number, street, ward/commune, district, province/city"},
+                    id_type: {vi: "Loại giấy tờ tùy thân", en: "ID Type"},
+                    select_id_type: {vi: "Chọn loại giấy tờ", en: "Select ID type"},
+                    citizen_id: {vi: "Căn cước công dân", en: "Citizen ID Card"},
+                    national_id: {vi: "Chứng minh nhân dân", en: "National ID Card"},
+                    passport: {vi: "Hộ chiếu", en: "Passport"},
+                    id_number: {vi: "Số giấy tờ tùy thân", en: "ID Number"},
+                    bank_name: {vi: "Tên ngân hàng", en: "Bank Name"},
+                    select_bank: {vi: "Chọn ngân hàng", en: "Select Bank"},
+                    bank_account: {vi: "Số tài khoản ngân hàng", en: "Bank Account Number"},
+                    work_experience: {vi: "Kinh nghiệm làm việc", en: "Work Experience"},
+                    experience_placeholder: {vi: "Mô tả kinh nghiệm làm việc, nghề nghiệp hiện tại của bạn...", en: "Describe your work experience, current profession..."},
+                    motivation: {vi: "Lý do muốn trở thành host", en: "Reason for becoming a host"},
+                    motivation_placeholder: {vi: "Chia sẻ lý do và động lực của bạn khi muốn trở thành host...", en: "Share your reasons and motivation for wanting to become a host..."},
+                    next: {vi: "Tiếp theo", en: "Next"},
+                    step2_title: {vi: "Bước 2: Chọn dịch vụ bạn muốn cung cấp", en: "Step 2: Select the service you want to provide"},
+                    accommodation: {vi: "Nơi lưu trú", en: "Accommodation"},
+                    experience: {vi: "Trải nghiệm", en: "Experience"},
+                    service: {vi: "Dịch vụ", en: "Service"},
+                    message_admin: {vi: "Tin nhắn cho admin (tùy chọn)", en: "Message for admin (optional)"},
+                    message_placeholder: {vi: "Hãy chia sẻ thêm về kinh nghiệm hoặc lý do bạn muốn trở thành host...", en: "Please share more about your experience or reasons for wanting to become a host..."},
+                    back: {vi: "Quay lại", en: "Back"},
+                    submit_request: {vi: "Gửi yêu cầu", en: "Submit Request"},
+                    fill_required: {vi: "Vui lòng điền đầy đủ thông tin bắt buộc.", en: "Please fill in all required information."}
+                },
+                edit_listing: {
+                    title: {vi: "Chỉnh sửa bài đăng", en: "Edit Listing"},
+                    editor_title: {vi: "Trình chỉnh sửa bài đăng", en: "Listing Editor"},
+                    your_rental: {vi: "Chỗ ở cho thuê của bạn", en: "Your rental property"},
+                    guest_guide: {vi: "Hướng dẫn khi khách đến", en: "Guest arrival guide"},
+                    delete_listing: {vi: "Xóa bài đăng", en: "Delete listing"},
+                    edit_sections: {vi: "Mục chỉnh sửa", en: "Edit sections"},
+                    edit_sections_desc: {vi: "Vui lòng chọn các mục dưới đây để chỉnh sửa.", en: "Please select the sections below to edit."},
+                    photo_tour: {vi: "Tour tham quan qua ảnh", en: "Photo tour"},
+                    bedroom_bed_bath: {vi: "1 phòng ngủ - 1 giường - 1 phòng tắm", en: "1 bedroom - 1 bed - 1 bathroom"},
+                    photos: {vi: "ảnh", en: "photos"},
+                    title_label: {vi: "Tiêu đề", en: "Title"},
+                    property_type: {vi: "Loại chỗ ở", en: "Property type"},
+                    entire_home: {vi: "Toàn bộ nhà - Nhà", en: "Entire home - House"},
+                    pricing: {vi: "Định giá", en: "Pricing"},
+                    per_night: {vi: "/đêm", en: "/night"},
+                    view: {vi: "Xem", en: "View"},
+                    save: {vi: "Lưu", en: "Save"},
+                    photo_tour_desc: {vi: "Quản lý ảnh và bổ sung thông tin. Khách sẽ chỉ thấy tour tham quan của bạn nếu mỗi phòng đều đã có ảnh.", en: "Manage photos and add information. Guests will only see your photo tour if each room has photos."},
+                    all_photos: {vi: "Tất cả ảnh", en: "All photos"},
+                    add_photo: {vi: "Thêm ảnh", en: "Add photo"},
+                    add_new_photo: {vi: "Thêm ảnh mới", en: "Add new photo"},
+                    select_photos: {vi: "Chọn ảnh:", en: "Select photos:"},
+                    selected_photos: {vi: "Ảnh đã chọn:", en: "Selected photos:"},
+                    cancel: {vi: "Hủy", en: "Cancel"},
+                    upload: {vi: "Tải lên", en: "Upload"},
+                    edit_title: {vi: "Chỉnh sửa tiêu đề", en: "Edit title"},
+                    title_label_form: {vi: "Tiêu đề:", en: "Title:"},
+                    edit_pricing: {vi: "Chỉnh sửa định giá", en: "Edit pricing"},
+                    price_per_night: {vi: "Giá mỗi đêm (VND):", en: "Price per night (VND):"},
+                    weekend_price: {vi: "Giá cuối tuần (VND):", en: "Weekend price (VND):"},
+                    weekly_discount: {vi: "Giảm giá theo tuần (%):", en: "Weekly discount (%):"},
+                    photo_tour_feature: {vi: "Tính năng tạo tour tham quan qua ảnh sẽ được phát triển trong tương lai!", en: "Photo tour creation feature will be developed in the future!"},
+                    select_photos_alert: {vi: "Vui lòng chọn ít nhất một ảnh!", en: "Please select at least one photo!"},
+                    photos_added: {vi: "Ảnh đã được thêm vào danh sách. Nhấn \"Lưu\" để xác nhận thay đổi.", en: "Photos have been added to the list. Click \"Save\" to confirm changes."},
+                    no_photos_save: {vi: "Không có ảnh mới để lưu!", en: "No new photos to save!"},
+                    photos_saved: {vi: "Ảnh đã được lưu thành công!", en: "Photos saved successfully!"},
+                    error_saving: {vi: "Có lỗi xảy ra khi lưu ảnh: ", en: "Error saving photos: "},
+                    edit_photo_feature: {vi: "Chỉnh sửa ảnh số", en: "Edit photo"},
+                    edit_photo_will_develop: {vi: " - Tính năng này sẽ được phát triển!", en: " - This feature will be developed!"},
+                    save_successful: {vi: "Lưu thành công", en: "Save successful"},
+                    save_failed: {vi: "Lưu không thành công", en: "Save failed"},
+                    confirm_delete: {vi: "Bạn có chắc muốn xóa bài đăng này? Bài đăng sẽ bị ẩn khỏi trang web nhưng vẫn có thể khôi phục bởi Admin.", en: "Are you sure you want to delete this listing? The listing will be hidden from the website but can be restored by Admin."},
+                    listing_deleted: {vi: "Bài đăng đã được xóa thành công!", en: "Listing deleted successfully!"},
+                    cannot_delete: {vi: "Không thể xóa bài đăng: ", en: "Cannot delete listing: "},
+                    unknown_error: {vi: "Lỗi không xác định", en: "Unknown error"},
+                    error_deleting: {vi: "Lỗi khi xóa bài đăng", en: "Error deleting listing"},
+                    confirm_delete_photo: {vi: "Bạn có chắc muốn xoá ảnh này?", en: "Are you sure you want to delete this photo?"},
+                    photo_deleted: {vi: "Đã xoá ảnh", en: "Photo deleted"},
+                    cannot_delete_photo: {vi: "Không thể xoá ảnh: ", en: "Cannot delete photo: "},
+                    error: {vi: "Lỗi", en: "Error"},
+                    error_deleting_photo: {vi: "Lỗi khi xoá ảnh", en: "Error deleting photo"}
+                },
+                create_listing: {
+                    title: {vi: "Tạo nơi lưu trú", en: "Create Accommodation"},
+                    title_label: {vi: "Tiêu đề", en: "Title"},
+                    title_placeholder: {vi: "Căn hộ 2 phòng ngủ trung tâm", en: "2-bedroom apartment downtown"},
+                    city: {vi: "Thành phố", en: "City"},
+                    city_placeholder: {vi: "Đà Nẵng", en: "Da Nang"},
+                    address: {vi: "Địa chỉ", en: "Address"},
+                    address_placeholder: {vi: "12 Trần Phú, Hải Châu", en: "12 Tran Phu, Hai Chau"},
+                    price_per_night: {vi: "Giá/đêm (VND)", en: "Price/night (VND)"},
+                    max_guests: {vi: "Số khách tối đa", en: "Maximum guests"},
+                    description_placeholder: {vi: "Mô tả chỗ ở, tiện nghi, nội quy...", en: "Describe the accommodation, amenities, rules..."},
+                    photos_optional: {vi: "Ảnh (tùy chọn, có thể chọn nhiều ảnh)", en: "Photos (optional, can select multiple photos)"},
+                    cancel: {vi: "Hủy", en: "Cancel"},
+                    post_accommodation: {vi: "Đăng nơi lưu trú", en: "Post accommodation"}
                 }
             },
 
@@ -188,9 +301,13 @@
             if (!badge)
                 return;
             const label = badge.querySelector("[data-lang-label]");
-            const text = I18N.lang === "vi" ? "Tiếng Việt (VN)" : "English (EN)";
+            const flag = badge.querySelector("[data-lang-flag]");
+            const text = I18N.lang === "vi" ? "Tiếng Việt" : "English";
+            const flagEmoji = I18N.lang === "vi" ? "🇻🇳" : "🇺🇸";
             if (label)
                 label.textContent = text;
+            if (flag)
+                flag.textContent = flagEmoji;
         },
 
         // áp text vào DOM
@@ -234,20 +351,31 @@
             modal.innerHTML = `
         <div class="lang-modal__backdrop" data-close="1"></div>
         <div class="lang-modal__panel" role="dialog" aria-modal="true" aria-labelledby="lang-modal-title">
-          <button class="lang-modal__close" aria-label="${I18N.t("common.close")}" data-close="1">×</button>
+          <button class="lang-modal__close" aria-label="${I18N.t("common.close")}" data-close="1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
           <div class="lang-modal__header">
+            <h2 id="lang-modal-title" class="lang-modal__title" data-i18n="common.choose_language"></h2>
             <div class="lang-modal__auto">
               <span class="lang-modal__auto-title">Bản dịch</span>
               <label class="lang-switch">
                 <input type="checkbox" id="auto-vi"><span class="lang-switch__slider"></span>
               </label>
-              <div class="lang-modal__auto-help" data-i18n="common.translation_autoswitch_help"></div>
             </div>
-            <h2 id="lang-modal-title" class="lang-modal__title" data-i18n="common.choose_language"></h2>
+            <div class="lang-modal__auto-help" data-i18n="common.translation_autoswitch_help"></div>
           </div>
           <div class="lang-modal__grid">
-            <button class="lang-option" data-lang="vi"><span class="lang-option__flag">🌐</span><span>Tiếng Việt (VN)</span></button>
-            <button class="lang-option" data-lang="en"><span class="lang-option__flag">🌐</span><span>English (EN)</span></button>
+            <button class="lang-option" data-lang="vi">
+              <span class="lang-option__flag">🌐</span>
+              <span>Tiếng Việt (VN)</span>
+            </button>
+            <button class="lang-option" data-lang="en">
+              <span class="lang-option__flag">🌐</span>
+              <span>English (EN)</span>
+            </button>
           </div>
         </div>`;
 
@@ -273,19 +401,30 @@
         },
 
         // mở/đóng modal + khóa cuộn
+        // mở modal
         showModal() {
             I18N.ensureModal();
             const el = document.getElementById("lang-modal");
             el.style.display = "block";
             document.documentElement.style.overflow = "hidden";
+
+            // Thêm hiệu ứng fade in
+            requestAnimationFrame(() => {
+                el.classList.add('show');
+            });
         },
 
         hideModal() {
             const el = document.getElementById("lang-modal");
             if (!el)
                 return;
+
+            // Thêm hiệu ứng fade out
+            el.classList.remove('show');
+            setTimeout(() => {
             el.style.display = "none";
             document.documentElement.style.overflow = "";
+            }, 300);
         },
 
         // init
