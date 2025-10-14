@@ -18,7 +18,7 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title><%= (listing != null) ? listing.getTitle() : "Chi tiết nơi lưu trú" %></title>
+        <title><%= (listing != null) ? listing.getTitle() : "Chi tiết nơi lưu trú"%></title>
         <link rel="icon" type="image/jpg" href="../image/logo.jpg">
         <link rel="stylesheet" href="../css/home.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -264,7 +264,7 @@
                     justify-content: center;
                 }
             }
-            
+
             @media (max-width: 480px) {
                 .gallery {
                     grid-template-columns: 1fr;
@@ -282,34 +282,34 @@
         <%@ include file="../design/header.jsp" %>
 
         <main>
-            <% if (listing != null) { %>
-            <h1><%= listing.getTitle() %></h1>
-            <div class="city"><%= listing.getCity() %></div>
+            <% if (listing != null) {%>
+            <h1><%= listing.getTitle()%></h1>
+            <div class="city"><%= listing.getCity()%></div>
 
             <!-- Gallery -->
             <div class="gallery">
-                <% 
-                if (images.isEmpty()) {
-                    // Fallback images if no images in database
-                    for (int i = 0; i < 5; i++) {
+                <%
+                    if (images.isEmpty()) {
+                        // Fallback images if no images in database
+                        for (int i = 0; i < 5; i++) {
                 %>
-                    <img src="https://images.unsplash.com/photo-1594873604892-b599f847e859?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfHx8fDE3NTk3NzE0OTF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="Hình ảnh nơi lưu trú">
+                <img src="https://images.unsplash.com/photo-1594873604892-b599f847e859?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfHx8fDE3NTk3NzE0OTF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="Hình ảnh nơi lưu trú">
                 <%
                     }
                 } else {
                     for (int i = 0; i < Math.min(images.size(), 5); i++) {
                 %>
-                    <img src="<%= images.get(i) %>" alt="Ảnh nơi lưu trú">
+                <img src="<%= images.get(i)%>" alt="Ảnh nơi lưu trú">
                 <%
+                        }
                     }
-                }
                 %>
             </div>
 
-            <div class="price">₫<%= listing.getPricePerNight() %> / đêm</div>
+            <div class="price">₫<%= listing.getPricePerNight()%> / đêm</div>
 
             <div class="desc">
-                <%= listing.getDescription() %>
+                <%= listing.getDescription()%>
             </div>
 
             <!-- Host Information -->
@@ -331,9 +331,9 @@
             </div>
 
             <div class="info-box">
-                <p><b>Địa chỉ:</b> <%= listing.getAddress() %></p>
-                <p><b>Số khách tối đa:</b> <%= listing.getMaxGuests() %></p>
-                <p><b>Trạng thái:</b> <%= listing.getStatus() %></p>
+                <p><b>Địa chỉ:</b> <%= listing.getAddress()%></p>
+                <p><b>Số khách tối đa:</b> <%= listing.getMaxGuests()%></p>
+                <p><b>Trạng thái:</b> <%= listing.getStatus()%></p>
             </div>
 
             <div class="amenities">
@@ -351,21 +351,21 @@
             <div class="map-box">
                 <h2>Vị trí</h2>
                 <!-- Bản đồ tĩnh giả lập -->
-                <iframe src="https://maps.google.com/maps?q=<%= listing.getAddress() %>&output=embed"></iframe>
+                <iframe src="https://maps.google.com/maps?q=<%= listing.getAddress()%>&output=embed"></iframe>
             </div>
 
             <div class="actions">
                 <a href="${pageContext.request.contextPath}/search" class="back-btn">
                     <i class="bi bi-arrow-left"></i> Quay lại
                 </a>
-                
-                <% if (currentUser != null && currentUser.getUserID() != listing.getHostID()) { %>
-                <button class="message-btn" onclick="startConversation(<%= listing.getHostID() %>)">
+
+                <% if (currentUser != null && currentUser.getUserID() != listing.getHostID()) {%>
+                <button class="message-btn" onclick="startConversation(<%= listing.getHostID()%>)">
                     <i class="bi bi-chat-dots"></i> Nhắn tin cho host
                 </button>
-                <% } %>
-                
-                <a href="#" class="book-btn">
+                <% }%>
+
+                <a href="${pageContext.request.contextPath}/booking?action=create&listingId=<%= listing.getListingID()%>" class="book-btn">
                     <i class="bi bi-calendar-check"></i> Đặt phòng ngay
                 </a>
             </div>
@@ -384,72 +384,72 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-            function startConversation(hostId) {
-                <% if (currentUser == null) { %>
-                    Swal.fire({
-                        title: 'Vui lòng đăng nhập',
-                        text: 'Bạn cần đăng nhập để có thể nhắn tin với host.',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Đăng nhập',
-                        cancelButtonText: 'Hủy'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '${pageContext.request.contextPath}/login.jsp';
-                        }
-                    });
-                    return;
-                <% } %>
-
-                // Show loading
-                Swal.fire({
-                    title: 'Đang khởi tạo cuộc hội thoại...',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                // Start conversation
-                fetch('${pageContext.request.contextPath}/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'action=startConversation&hostId=' + hostId
-                })
-                .then(response => response.json())
-                .then(data => {
-                    Swal.close();
-                    
-                    if (data.success) {
-                        // Redirect to chat
-                        window.location.href = '${pageContext.request.contextPath}/chat?action=view&conversationId=' + data.conversationId;
-                    } else {
+                    function startConversation(hostId) {
+            <% if (currentUser == null) { %>
                         Swal.fire({
-                            title: 'Lỗi!',
-                            text: data.message || 'Không thể khởi tạo cuộc hội thoại. Vui lòng thử lại.',
-                            icon: 'error'
+                            title: 'Vui lòng đăng nhập',
+                            text: 'Bạn cần đăng nhập để có thể nhắn tin với host.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Đăng nhập',
+                            cancelButtonText: 'Hủy'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '${pageContext.request.contextPath}/login.jsp';
+                            }
                         });
-                    }
-                })
-                .catch(error => {
-                    Swal.close();
-                    console.error('Error:', error);
-                    Swal.fire({
-                        title: 'Lỗi!',
-                        text: 'Đã xảy ra lỗi khi khởi tạo cuộc hội thoại. Vui lòng thử lại.',
-                        icon: 'error'
-                    });
-                });
-            }
+                        return;
+            <% }%>
 
-            // Image gallery functionality
-            document.querySelectorAll('.gallery img').forEach(img => {
-                img.addEventListener('click', function() {
-                    // Simple image modal (you can enhance this)
-                    const modal = document.createElement('div');
-                    modal.style.cssText = `
+                        // Show loading
+                        Swal.fire({
+                            title: 'Đang khởi tạo cuộc hội thoại...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Start conversation
+                        fetch('${pageContext.request.contextPath}/chat', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: 'action=startConversation&hostId=' + hostId
+                        })
+                                .then(response => response.json())
+                                .then(data => {
+                                    Swal.close();
+
+                                    if (data.success) {
+                                        // Redirect to chat
+                                        window.location.href = '${pageContext.request.contextPath}/chat?action=view&conversationId=' + data.conversationId;
+                                    } else {
+                                        Swal.fire({
+                                            title: 'Lỗi!',
+                                            text: data.message || 'Không thể khởi tạo cuộc hội thoại. Vui lòng thử lại.',
+                                            icon: 'error'
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    Swal.close();
+                                    console.error('Error:', error);
+                                    Swal.fire({
+                                        title: 'Lỗi!',
+                                        text: 'Đã xảy ra lỗi khi khởi tạo cuộc hội thoại. Vui lòng thử lại.',
+                                        icon: 'error'
+                                    });
+                                });
+                    }
+
+                    // Image gallery functionality
+                    document.querySelectorAll('.gallery img').forEach(img => {
+                        img.addEventListener('click', function () {
+                            // Simple image modal (you can enhance this)
+                            const modal = document.createElement('div');
+                            modal.style.cssText = `
                         position: fixed;
                         top: 0;
                         left: 0;
@@ -462,23 +462,23 @@
                         z-index: 9999;
                         cursor: pointer;
                     `;
-                    
-                    const modalImg = document.createElement('img');
-                    modalImg.src = this.src;
-                    modalImg.style.cssText = `
+
+                            const modalImg = document.createElement('img');
+                            modalImg.src = this.src;
+                            modalImg.style.cssText = `
                         max-width: 90%;
                         max-height: 90%;
                         object-fit: contain;
                     `;
-                    
-                    modal.appendChild(modalImg);
-                    document.body.appendChild(modal);
-                    
-                    modal.addEventListener('click', () => {
-                        document.body.removeChild(modal);
+
+                            modal.appendChild(modalImg);
+                            document.body.appendChild(modal);
+
+                            modal.addEventListener('click', () => {
+                                document.body.removeChild(modal);
+                            });
+                        });
                     });
-                });
-            });
         </script>
 
         <%@ include file="../design/footer.jsp" %>
