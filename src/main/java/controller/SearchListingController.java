@@ -17,29 +17,43 @@ public class SearchListingController extends HttpServlet {
         listingDAO = new ListingDAO();
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String keyword = request.getParameter("keyword");
-        String checkin = request.getParameter("checkin");
-        String checkout = request.getParameter("checkout");
-        String guests = request.getParameter("guests");
+   @Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-        List<Listing> listings;
-        if (keyword == null || keyword.trim().isEmpty()) {
-            // Nếu không có keyword, redirect về trang chủ
-            response.sendRedirect(request.getContextPath() + "/home");
-            return;
-        } else {
-            // Tìm kiếm với keyword (loại trừ soft deleted)
-            listings = listingDAO.searchActiveListings(keyword.trim());
+    String keyword = request.getParameter("keyword");
+    String checkin = request.getParameter("checkin");
+    String checkout = request.getParameter("checkout");
+    String guestsStr = request.getParameter("guests");
+
+    int guests = 0;
+    try {
+        if (guestsStr != null && !guestsStr.trim().isEmpty()) {
+            guests = Integer.parseInt(guestsStr);
         }
-
-        request.setAttribute("listings", listings);
-        request.setAttribute("keyword", keyword);
-        request.setAttribute("checkin", checkin);
-        request.setAttribute("checkout", checkout);
-        request.setAttribute("guests", guests);
-        request.getRequestDispatcher("home.jsp").forward(request, response);
+    } catch (NumberFormatException e) {
+        guests = 0;
     }
+
+    List<Listing> listings;
+
+    // Không nhập gì => về home
+    if ((keyword == null || keyword.trim().isEmpty()) && guests == 0) {
+        response.sendRedirect(request.getContextPath() + "/home");
+        return;
+    } else {
+        // Gọi DAO với cả keyword và guests
+        listings = listingDAO.searchActiveListings(keyword, guests);
+    }
+
+    // Gửi dữ liệu sang JSP
+    request.setAttribute("listings", listings);
+    request.setAttribute("keyword", keyword);
+    request.setAttribute("checkin", checkin);
+    request.setAttribute("checkout", checkout);
+    request.setAttribute("guests", guests);
+
+    request.getRequestDispatcher("home.jsp").forward(request, response);
+}
+
 }

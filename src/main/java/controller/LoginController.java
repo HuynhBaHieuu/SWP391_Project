@@ -67,6 +67,7 @@ public class LoginController extends HttpServlet {
             // Login success
             HttpSession session = request.getSession(true);
             session.setAttribute("user", user);
+            session.setAttribute("userRole", user.getRole()); // Set userRole for filter compatibility
             // Mặc định sau khi login, luôn vào chế độ Guest trên UI
             session.setAttribute("mode", "Guest");
 

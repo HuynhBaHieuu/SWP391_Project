@@ -4,6 +4,7 @@
     Author     : Administrator
 --%>
 <%@page import="model.User"%>
+<%@page import="userDAO.ConversationDAO"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lang_modal.css?v=2">
 <script src="<%=request.getContextPath()%>/js/i18n.js?v=13"></script>
@@ -11,6 +12,9 @@
 <%
     User currentUser = (User) session.getAttribute("user");
     String imagePath = null;
+    
+    // Lấy số tin nhắn chưa đọc
+    int unreadMessageCount = new ConversationDAO().getTotalUnreadCount(currentUser.getUserID()); 
 
     if (currentUser != null && currentUser.getProfileImage() != null) {
         String profileImage = currentUser.getProfileImage();
@@ -67,14 +71,15 @@
                 }
             }
             .menu-item {
-                display:block;
-                padding:10px 15px;
-                text-decoration:none;
-                color:#333;
-                font-size:16px;
-                font-weight:600;
-                border-radius:6px;
-                transition: background-color .3s ease, padding-left .3s ease;
+                display: block;
+                padding: 10px 15px;
+                text-decoration: none;
+                color: #333;
+                font-size: 16px; /* Kích thước font dễ đọc */
+                font-weight: 600; /* Làm cho chữ đậm hơn */
+                border-radius: 6px; /* Bo tròn các góc của mục */
+                transition: background-color 0.3s ease, padding-left 0.3s ease; /* Hiệu ứng chuyển động khi hover */
+                position: relative;
             }
             .menu-item:hover {
                 background:#f0f0f0;
@@ -94,6 +99,60 @@
             }
             .profile-icon:hover svg {
                 fill:#f43f5e;
+            }
+
+            /* Badge thông báo tin nhắn */
+            .message-badge-1 {
+                background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+                color: white;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: bold;
+                height: 1.2rem;
+                width: 1.2rem;
+                text-align: center;
+                margin-bottom: 1rem;
+                animation: pulse 2s ease-in-out infinite;
+            }
+            .message-badge-2 {
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+                color: white;
+                border-radius: 12px;
+                padding: 2px 8px;
+                font-size: 11px;
+                font-weight: bold;
+                min-width: 20px;
+                text-align: center;
+                animation: pulse 2s ease-in-out infinite;
+            }
+
+            @keyframes pulse {
+                0%, 100% {
+                    box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.7);
+                }
+                50% {
+                    box-shadow: 0 0 0 5px rgba(255, 65, 108, 0);
+                }
+            }
+
+            /* Icon tin nhắn với animation */
+            .menu-item.has-unread {
+                background: linear-gradient(90deg, #fff 0%, #fff6f6 100%);
+            }
+
+            .menu-item.has-unread i {
+                color: #ff416c;
+                animation: shake 0.5s ease-in-out;
+            }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
             }
         </style>
     </head>
@@ -177,8 +236,11 @@
                             <path d="M2 16h28M2 24h28M2 8h28"></path>
                             </g>
                             </svg>
-                        </button>
-
+                            <% if (unreadMessageCount > 0) { %>
+                                <span class="message-badge-1"><%= unreadMessageCount %></span>
+                            <% } %>
+                        </button>   
+                    
                         <!-- Dropdown menu -->
                         <div id="dropdown-menu" style="display:none; position:absolute; background:#fff; border:1px solid #ddd; border-radius:8px; padding:10px;">
                             <a href="<%= (currentUser != null) ? (request.getContextPath() + "/WishlistServlet") : (request.getContextPath() + "/login.jsp")%>" class="menu-item user-profile" data-i18n="header.dropdown.wishlist">Danh sách yêu thích</a>
@@ -192,6 +254,44 @@
                             <a href="#" class="menu-item"
                                data-i18n="header.dropdown.logout"
                                onclick="document.getElementById('logoutForm').submit(); return false;">Log Out</a>
+                        <div id="dropdown-menu" style="display: none; position: absolute; background-color: white; border: 1px solid #ddd; border-radius: 8px; padding: 10px;">
+                            <!-- Đổi id trùng lặp thành class để tránh lỗi DOM -->
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/WishlistServlet") : (request.getContextPath() + "/login.jsp")%>" class="menu-item user-profile">
+                                <i class="bi bi-heart"></i> Danh sách yêu thích
+                            </a>
+                            <a href="#" class="menu-item user-profile">
+                                <i class="bi bi-suitcase"></i> Chuyến đi
+                            </a>
+                            
+                            <!-- Tin nhắn với thông báo -->
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/chat") : (request.getContextPath() + "/login.jsp")%>" 
+                               class="menu-item user-profile <%= (unreadMessageCount > 0) ? "has-unread" : "" %>">
+                                <i class="bi bi-chat-dots"></i> Tin nhắn
+                                <% if (unreadMessageCount > 0) { %>
+                                    <span class="message-badge-2"><%= unreadMessageCount %></span>
+                                <% } %>
+                            </a>
+                            
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>" class="menu-item user-profile">
+                                <i class="bi bi-person"></i> Hồ sơ
+                            </a>
+                            <a href="#" class="menu-item user-profile">
+                                <i class="bi bi-bell"></i> Thông báo
+                            </a>
+                            <a href="#" class="menu-item user-profile">
+                                <i class="bi bi-gear"></i> Cài đặt tài khoản
+                            </a>
+                            <a href="#" class="menu-item user-profile">
+                                <i class="bi bi-globe"></i> Ngôn ngữ và loại tiền tệ
+                            </a>
+                            <a href="<%=request.getContextPath()%>/Support/support_center.jsp" class="menu-item user-profile">
+                                <i class="bi bi-question-circle"></i> Trung tâm trợ giúp
+                            </a>
+
+                            <!-- Log Out: dùng form POST ẩn (giữ nguyên CSS hover) -->
+                            <a href="#" class="menu-item" onclick="document.getElementById('logoutForm').submit(); return false;">
+                                <i class="bi bi-box-arrow-right"></i> Log Out
+                            </a>
                             <form id="logoutForm" action="<%= request.getContextPath()%>/logout" method="post" style="display:none;"></form>
                         </div>
                     </div>
@@ -278,5 +378,33 @@
                 });
             }
         });
+
+        // Đóng dropdown khi click bên ngoài
+        document.addEventListener('click', function(event) {
+            const dropdownMenu = document.getElementById('dropdown-menu');
+            const profileIcon = event.target.closest('.profile-icon');
+            
+            if (!profileIcon && dropdownMenu.style.display === 'block') {
+                dropdownMenu.style.display = 'none';
+            }
+        });
+
+        // Auto-refresh số tin nhắn chưa đọc mỗi 30 giây
+        <% if (currentUser != null) { %>
+        setInterval(function() {
+            fetch('${pageContext.request.contextPath}/chat?action=getUnreadCount')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const currentCount = <%= unreadMessageCount %>;
+                        if (data.unreadCount !== currentCount && data.unreadCount > 0) {
+                            // Có tin nhắn mới, refresh để cập nhật badge
+                            location.reload();
+                        }
+                    }
+                })
+                .catch(error => console.log('Error checking messages:', error));
+        }, 30000); // 30 giây
+        <% } %>
     </script>
 </html>
