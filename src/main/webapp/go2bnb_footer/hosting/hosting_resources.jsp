@@ -3,7 +3,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8" />
-    <title>Tài nguyên về đón tiếp khách</title>
+    <title data-i18n="footer.hosting.hosting_resources">Tài nguyên về đón tiếp khách</title>
     <meta name="description" content="Các tài nguyên giúp bạn trở thành một host chuyên nghiệp trên GO2BNB." />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
@@ -169,9 +169,9 @@
 
     <main class="container">
         <nav aria-label="breadcrumb" class="breadcrumb">
-            <a href="${pageContext.request.contextPath}/index.jsp">Trang chủ</a> ›
-            <span>Đón tiếp khách</span> ›
-            <strong>Tài nguyên về đón tiếp khách</strong>
+            <a href="${pageContext.request.contextPath}/index.jsp" data-i18n="header.nav.home">Trang chủ</a> ›
+            <span data-i18n="footer.hosting.title">Đón tiếp khách</span> ›
+            <strong data-i18n="footer.hosting.hosting_resources">Tài nguyên về đón tiếp khách</strong>
         </nav>
 
         <header class="hero">

@@ -2,26 +2,13 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Listing</title>
+    <title data-i18n="host.edit_listing.title">Chỉnh sửa bài đăng</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/listings.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/lang_modal.css">
     <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
-    <script>
-        // Enable translation for host pages
-        document.addEventListener('DOMContentLoaded', function() {
-            // Let I18N work normally for host pages
-            if (window.I18N) {
-                // Apply translation after a short delay to ensure I18N is loaded
-                setTimeout(() => {
-                    window.I18N.apply();
-                }, 100);
-            }
-        });
-    </script>
     <style>
         body {
             margin: 0;
@@ -427,16 +414,16 @@
         <div class="edit-sidebar">
             <div class="sidebar-header">
                 <button class="back-btn" onclick="history.back()">←</button>
-                <h2 class="sidebar-title" data-i18n="host.edit_listing.editor_title">Listing Editor</h2>
+                <h2 class="sidebar-title" data-i18n="host.edit_listing.editor_title">Trình chỉnh sửa bài đăng</h2>
             </div>
             
             <div class="sidebar-tabs">
-                <button class="tab-btn active" onclick="switchTab('property')" data-i18n="host.edit_listing.your_rental">Your rental property</button>
-                <button class="tab-btn" onclick="switchTab('guide')" data-i18n="host.edit_listing.guest_guide">Guest arrival guide</button>
+                <button class="tab-btn active" onclick="switchTab('property')" data-i18n="host.edit_listing.your_rental">Chỗ ở cho thuê của bạn</button>
+                <button class="tab-btn" onclick="switchTab('guide')" data-i18n="host.edit_listing.guest_guide">Hướng dẫn khi khách đến</button>
                 <div class="settings-dropdown">
                     <button class="settings-icon" onclick="toggleSettingsDropdown()">⚙️</button>
                     <div id="settings-dropdown" class="settings-dropdown-menu" style="display: none;">
-                        <button class="delete-listing-btn" onclick="deleteListing()" data-i18n="host.edit_listing.delete_listing">🗑️ Delete listing</button>
+                        <button class="delete-listing-btn" onclick="deleteListing()" data-i18n="host.edit_listing.delete_listing">🗑️ Xóa bài đăng</button>
                     </div>
                 </div>
             </div>
@@ -444,15 +431,15 @@
             <div class="completion-card">
                 <div class="completion-header">
                     <div class="completion-dot"></div>
-                    <span class="completion-title">Edit sections</span>
+                    <span class="completion-title" data-i18n="host.edit_listing.edit_sections">Mục chỉnh sửa</span>
                 </div>
-                <p class="completion-text">Please select the sections below to edit.</p>
+                <p class="completion-text" data-i18n="host.edit_listing.edit_sections_desc">Vui lòng chọn các mục dưới đây để chỉnh sửa.</p>
             </div>
             
             <div class="sidebar-section">
                 <div class="section-card active" onclick="showSection('photos')" style="border: 2px solid #000; background: #f8f9fa;">
-                    <div class="section-title">Photo tour</div>
-                    <div class="section-content">1 bedroom - 1 bed - 1 bathroom</div>
+                    <div class="section-title" data-i18n="host.edit_listing.photo_tour">Tour tham quan qua ảnh</div>
+                    <div class="section-content" data-i18n="host.edit_listing.bedroom_bed_bath">1 phòng ngủ - 1 giường - 1 phòng tắm</div>
                     <div style="position: relative; margin-top: 8px;">
                         <div style="display: flex; position: relative; height: 40px;">
                             <c:forEach var="image" items="${images}" varStatus="status" end="4">
@@ -476,7 +463,7 @@
                             </c:forEach>
                         </div>
                         <div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px;">
-                            ${fn:length(images)} photos
+                            ${fn:length(images)} <span data-i18n="host.edit_listing.photos">ảnh</span>
                         </div>
                     </div>
                     <span class="section-arrow">></span>
@@ -485,7 +472,7 @@
             
             <div class="sidebar-section">
                 <div class="section-card" onclick="showSection('title')">
-                    <div class="section-title">Title</div>
+                    <div class="section-title" data-i18n="host.edit_listing.title_label">Tiêu đề</div>
                     <div class="section-content">${listing.title}</div>
                     <span class="section-arrow">></span>
                 </div>
@@ -493,22 +480,22 @@
             
             <div class="sidebar-section">
                 <div class="section-card" onclick="showSection('type')">
-                    <div class="section-title">Property type</div>
-                    <div class="section-content">Entire home - House</div>
+                    <div class="section-title" data-i18n="host.edit_listing.property_type">Loại chỗ ở</div>
+                    <div class="section-content" data-i18n="host.edit_listing.entire_home">Toàn bộ nhà - Nhà</div>
                     <span class="section-arrow">></span>
                 </div>
             </div>
             
             <div class="sidebar-section">
                 <div class="section-card" onclick="showSection('pricing')">
-                    <div class="section-title">Pricing</div>
-                    <div class="section-content">₫${listing.pricePerNight}/night</div>
+                    <div class="section-title" data-i18n="host.edit_listing.pricing">Định giá</div>
+                    <div class="section-content">₫${listing.pricePerNight}<span data-i18n="host.edit_listing.per_night">/đêm</span></div>
                     <span class="section-arrow">></span>
                 </div>
             </div>
             
             <button class="view-btn" onclick="window.open('${pageContext.request.contextPath}/host/listing/view?id=${listing.listingID}', '_blank')">
-                👁️ View
+                👁️ <span data-i18n="host.edit_listing.view">Xem</span>
             </button>
         </div>
         
@@ -517,17 +504,17 @@
             <!-- Photos Section -->
             <div id="photos-content" class="content-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 class="content-title">Photo tour</h3>
-                    <button id="save-photos-btn" class="btn btn-primary" style="background: #000; color: white; border: none; padding: 8px 16px; border-radius: 6px;" onclick="savePhotos()">Save</button>
+                    <h3 class="content-title" data-i18n="host.edit_listing.photo_tour">Tour tham quan qua ảnh</h3>
+                    <button id="save-photos-btn" class="btn btn-primary" style="background: #000; color: white; border: none; padding: 8px 16px; border-radius: 6px;" onclick="savePhotos()" data-i18n="host.edit_listing.save">Lưu</button>
                 </div>
                 
-                <p style="color: #666; margin-bottom: 30px; line-height: 1.5;">
-                    Manage photos and add information. Guests will only see your photo tour if each room has photos.
+                <p style="color: #666; margin-bottom: 30px; line-height: 1.5;" data-i18n="host.edit_listing.photo_tour_desc">
+                    Quản lý ảnh và bổ sung thông tin. Khách sẽ chỉ thấy tour tham quan của bạn nếu mỗi phòng đều đã có ảnh.
                 </p>
                 
                 <div style="display: flex; gap: 12px; margin-bottom: 30px;">
-                    <button class="tour-btn" style="background: white; border: 1px solid #ddd; padding: 12px 20px; border-radius: 8px; display: flex; align-items: center; gap: 8px;">
-                        📷 All photos
+                    <button class="tour-btn" style="background: white; border: 1px solid #ddd; padding: 12px 20px; border-radius: 8px; display: flex; align-items: center; gap: 8px;" data-i18n="host.edit_listing.all_photos">
+                        📷 Tất cả ảnh
                     </button>
                     <button class="tour-btn" style="background: #000; color: white; border: none; padding: 12px; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
                         +
@@ -553,81 +540,58 @@
                     <!-- Add Photo Button -->
                     <div class="add-photo-btn" onclick="addNewPhoto()" style="border: 2px dashed #ddd; border-radius: 8px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; background: #f8f9fa; transition: all 0.3s ease;">
                         <div style="font-size: 24px; color: #666; margin-bottom: 8px;">+</div>
-                        <div style="font-size: 12px; color: #666;">Add photo</div>
+                        <div style="font-size: 12px; color: #666;" data-i18n="host.edit_listing.add_photo">Thêm ảnh</div>
                     </div>
-                </div>
-                
-                <!-- Photo Upload Form (Hidden by default) -->
-                <div id="photo-upload-form" style="display: none; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-top: 20px;">
-                    <h4 style="margin-bottom: 15px;">Add new photo</h4>
-                    <form id="uploadForm" enctype="multipart/form-data">
-                        <input type="hidden" id="listingIdInput" name="listingId" value="${listing.listingID}">
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Select photos:</label>
-                            <input type="file" id="photoInput" name="photo" accept="image/*" multiple style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" onchange="previewImages()">
-                        </div>
-                        
-                        <!-- Preview Area -->
-                        <div id="image-preview-area" style="display: none; margin-bottom: 15px;">
-                            <h5 style="margin-bottom: 10px;">Selected photos:</h5>
-                            <div id="preview-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;"></div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                            <button type="button" class="btn btn-secondary" onclick="cancelUpload()">Cancel</button>
-                            <button type="button" class="btn btn-primary" onclick="uploadImages()">Upload</button>
-                        </div>
-                    </form>
                 </div>
             </div>
             
             <!-- Title Form -->
             <div id="title-content" class="form-content">
-                <h3 class="content-title">Edit title</h3>
+                <h3 class="content-title" data-i18n="host.edit_listing.edit_title">Chỉnh sửa tiêu đề</h3>
                 <form method="post" action="${pageContext.request.contextPath}/host/listing/edit">
                     <input type="hidden" name="listingId" value="${listing.listingID}">
                     <input type="hidden" name="section" value="title">
                     
                     <div class="form-group">
-                        <label for="title">Title:</label>
+                        <label for="title" data-i18n="host.edit_listing.title_label_form">Tiêu đề:</label>
                         <input type="text" id="title" name="title" value="${listing.title}" required>
                     </div>
                     
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="showSection('photos')">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" onclick="showSection('photos')" data-i18n="host.edit_listing.cancel">Hủy</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="host.edit_listing.save">Lưu</button>
                     </div>
                 </form>
             </div>
             
             <!-- Pricing Form -->
             <div id="pricing-content" class="form-content">
-                <h3 class="content-title">Edit pricing</h3>
+                <h3 class="content-title" data-i18n="host.edit_listing.edit_pricing">Chỉnh sửa định giá</h3>
                 <form method="post" action="${pageContext.request.contextPath}/host/listing/edit">
                     <input type="hidden" name="listingId" value="${listing.listingID}">
                     <input type="hidden" name="section" value="pricing">
                     
                     <div class="form-group">
-                        <label for="pricePerNight">Price per night (VND):</label>
+                        <label for="pricePerNight" data-i18n="host.edit_listing.price_per_night">Giá mỗi đêm (VND):</label>
                         <input type="number" id="pricePerNight" name="pricePerNight" 
                                value="${listing.pricePerNight}" min="0" step="1000" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="weekendPrice">Weekend price (VND):</label>
+                        <label for="weekendPrice" data-i18n="host.edit_listing.weekend_price">Giá cuối tuần (VND):</label>
                         <input type="number" id="weekendPrice" name="weekendPrice" 
                                value="${listing.pricePerNight}" min="0" step="1000">
                     </div>
                     
                     <div class="form-group">
-                        <label for="weeklyDiscount">Weekly discount (%):</label>
+                        <label for="weeklyDiscount" data-i18n="host.edit_listing.weekly_discount">Giảm giá theo tuần (%):</label>
                         <input type="number" id="weeklyDiscount" name="weeklyDiscount" 
                                value="10" min="0" max="100" step="1">
                     </div>
                     
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="showSection('photos')">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" onclick="showSection('photos')" data-i18n="host.edit_listing.cancel">Hủy</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="host.edit_listing.save">Lưu</button>
                     </div>
                 </form>
             </div>
@@ -656,7 +620,7 @@
         }
         
         function createPhotoTour() {
-            alert('Photo tour creation feature will be developed in the future!');
+            alert(I18N.t('host.edit_listing.photo_tour_feature'));
         }
         
         let selectedFiles = [];
@@ -709,7 +673,7 @@
         
         function uploadImages() {
             if (selectedFiles.length === 0) {
-                alert('Please select at least one photo!');
+                alert(I18N.t('host.edit_listing.select_photos_alert'));
                 return;
             }
             
@@ -723,7 +687,7 @@
             document.getElementById('image-preview-area').style.display = 'none';
             document.getElementById('preview-container').innerHTML = '';
             
-            alert('Photos have been added to the list. Click "Save" to confirm changes.');
+            alert(I18N.t('host.edit_listing.photos_added'));
         }
         
         function storeTemporaryImages() {
@@ -811,14 +775,14 @@
                 
                 uploadToServer(formData, uploadUrl);
             } else {
-                alert('No new photos to save!');
+                alert(I18N.t('host.edit_listing.no_photos_save'));
             }
         }
         
         function uploadToServer(formData, uploadUrl) {
             const saveBtn = document.getElementById('save-photos-btn');
             const originalText = saveBtn.textContent;
-            saveBtn.textContent = 'Đang lưu...';
+            saveBtn.textContent = I18N.t('host.edit_listing.save');
             saveBtn.disabled = true;
             
             fetch(uploadUrl, {
@@ -848,7 +812,7 @@
             .then(data => {
                 console.log('Response data:', data);
                 if (data.success) {
-                    alert('Photos saved successfully!');
+                    alert(I18N.t('host.edit_listing.photos_saved'));
                     window.tempImages = [];
                     window.location.reload();
                 } else {
@@ -857,14 +821,14 @@
             })
             .catch(error => {
                 console.error('Upload error:', error);
-                alert('Error saving photos: ' + error.message);
+                alert(I18N.t('host.edit_listing.error_saving') + error.message);
                 saveBtn.textContent = originalText;
                 saveBtn.disabled = false;
             });
         }
         
         function editPhoto(index) {
-            alert('Edit photo ' + (parseInt(index) + 1) + ' - This feature will be developed!');
+            alert(I18N.t('host.edit_listing.edit_photo_feature') + ' ' + (parseInt(index) + 1) + I18N.t('host.edit_listing.edit_photo_will_develop'));
         }
         
         // Initialize with photos section
@@ -881,7 +845,7 @@
 
             if (updated !== null) {
                 const success = updated === 'true';
-                showToast(success ? 'Save successful' : 'Save failed', success ? 'success' : 'error');
+                showToast(success ? I18N.t('host.edit_listing.save_successful') : I18N.t('host.edit_listing.save_failed'), success ? 'success' : 'error');
                 // remove query params from URL to avoid repeating toast on reload
                 history.replaceState(null, '', window.location.pathname + '?id=' + params.get('id'));
             }
@@ -922,7 +886,7 @@
         
         // Delete listing function (soft delete)
         function deleteListing() {
-            if (!confirm('Are you sure you want to delete this listing? The listing will be hidden from the website but can be restored by Admin.')) {
+            if (!confirm(I18N.t('host.edit_listing.confirm_delete'))) {
                 return;
             }
             
@@ -938,21 +902,21 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Listing deleted successfully!');
+                    alert(I18N.t('host.edit_listing.listing_deleted'));
                     window.location.href = '${pageContext.request.contextPath}/host/listings';
                 } else {
-                    alert('Cannot delete listing: ' + (data.message || 'Unknown error'));
+                    alert(I18N.t('host.edit_listing.cannot_delete') + (data.message || I18N.t('host.edit_listing.unknown_error')));
                 }
             })
             .catch(error => {
                 console.error('Delete listing error:', error);
-                alert('Error deleting listing');
+                alert(I18N.t('host.edit_listing.error_deleting'));
             });
         }
 
         // Delete image function: call server to delete DB record and file, then remove from UI
         function deleteImage(listingId, imageUrl, elementId) {
-            if (!confirm('Are you sure you want to delete this photo?')) return;
+            if (!confirm(I18N.t('host.edit_listing.confirm_delete_photo'))) return;
 
             // Send as application/x-www-form-urlencoded so servlet can read req.getParameter(...)
             const params = new URLSearchParams();
@@ -972,48 +936,16 @@
                     // remove element from DOM
                     const el = document.getElementById(elementId);
                     if (el) el.remove();
-                    alert('Photo deleted');
+                    alert(I18N.t('host.edit_listing.photo_deleted'));
                 } else {
-                    alert('Cannot delete photo: ' + (data.message || 'Error'));
+                    alert(I18N.t('host.edit_listing.cannot_delete_photo') + (data.message || I18N.t('host.edit_listing.error')));
                 }
             })
             .catch(err => {
                 console.error('Delete error', err);
-                alert('Error deleting photo');
+                alert(I18N.t('host.edit_listing.error_deleting_photo'));
             });
         }
-    </script>
-    
-    <!-- Language Selector Button -->
-    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-        <button data-open-lang-modal style="background: #ff5a5f; color: white; border: none; padding: 12px 16px; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; font-weight: 500;">
-            🌐 <span data-lang-label>English</span>
-        </button>
-    </div>
-    
-    <script>
-        // Update language button text
-        document.addEventListener('DOMContentLoaded', function() {
-            function updateLangButton() {
-                const langLabel = document.querySelector('[data-lang-label]');
-                if (langLabel && window.I18N) {
-                    const currentLang = window.I18N.lang || 'en';
-                    langLabel.textContent = currentLang === 'vi' ? 'Tiếng Việt' : 'English';
-                }
-            }
-            
-            // Update on page load
-            updateLangButton();
-            
-            // Listen for language changes
-            const originalSetLang = window.I18N?.setLang;
-            if (originalSetLang) {
-                window.I18N.setLang = function(lang) {
-                    originalSetLang.call(this, lang);
-                    updateLangButton();
-                };
-            }
-        });
     </script>
 </body>
 </html>
