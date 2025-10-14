@@ -485,7 +485,6 @@
       </div>
     </c:if>
       </div>
-    </c:if>
   </div>
 
   <jsp:include page="/design/footer.jsp" />

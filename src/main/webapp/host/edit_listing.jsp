@@ -6,17 +6,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Chỉnh sửa bài đăng</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/listings.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css">
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background-color: #f7f7f7;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
         }
         
         .edit-container {
@@ -27,11 +24,10 @@
         /* Sidebar */
         .edit-sidebar {
             width: 350px;
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            border-right: 1px solid #e8f4f8;
+            background: white;
+            border-right: 1px solid #e0e0e0;
             padding: 20px;
             overflow-y: auto;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
         
         .sidebar-header {
@@ -170,35 +166,16 @@
         }
         
         .section-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            border: 2px solid #e8f4f8;
-            border-radius: 15px;
-            padding: 20px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .section-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-        
-        .section-card:hover::before {
-            left: 100%;
         }
         
         .section-card:hover {
-            border-color: #667eea;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+            border-color: #000;
         }
         
         .section-title {
@@ -389,15 +366,12 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #000;
             color: white;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
         
         .btn-primary:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            background: #333;
         }
         
         .btn-secondary {
@@ -430,7 +404,9 @@
     </style>
 </head>
 <body>
-    <jsp:include page="/design/header.jsp" />
+    <jsp:include page="/design/host_header.jsp">
+        <jsp:param name="active" value="listings" />
+    </jsp:include>
     
     <div class="edit-container">
         <!-- Sidebar -->
@@ -993,7 +969,5 @@
             });
         }
     </script>
-    
-    <jsp:include page="/design/footer.jsp" />
 </body>
 </html>
