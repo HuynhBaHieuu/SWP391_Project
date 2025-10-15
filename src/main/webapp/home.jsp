@@ -63,10 +63,10 @@
                                 <div class="listing-body">
                                     <div class="listing-title"><c:out value="${item.title}" /></div>
                                     <div class="listing-city"><c:out value="${item.city}" /></div>
-                                    <div class="listing-price">
-                                        ₫<c:out value="${item.pricePerNight}" />
-                                        <span data-i18n="home.card.per_night">/ đêm</span>
-                                    </div>
+                                     <div class="listing-price">
+                                         <span data-price="${item.pricePerNight}"></span>
+                                         <span data-i18n="home.card.per_night">/ đêm</span>
+                                     </div>
                                 </div>
                             </div>
                         </c:forEach>
@@ -105,9 +105,8 @@
         <script src="chatbot/script.js"></script>
 
         <!-- Nếu trang này không include footer có import i18n, hãy đảm bảo 2 dòng dưới tồn tại ở 1 nơi dùng chung -->
-        <!--
-        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lang-modal.css?v=1">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lang_modal.css?v=1">
         <script src="<%=request.getContextPath()%>/js/i18n.js?v=1"></script>
-        -->
+        
     </body>
 </html>

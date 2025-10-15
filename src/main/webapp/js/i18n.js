@@ -30,7 +30,14 @@
                 },
                 host: {
                     hosting_btn: {vi: "Đón tiếp khách", en: "Hosting"},
-                    become_host: {vi: "Trở thành host", en: "Become a Host"}
+                    become_host: {vi: "Trở thành host", en: "Become a Host"},
+                    nav: {
+                        today: {vi: "Hôm nay", en: "Today"},
+                        calendar: {vi: "Lịch", en: "Calendar"},
+                        listings: {vi: "Bài đăng", en: "Listings"},
+                        inbox: {vi: "Tin nhắn", en: "Inbox"}
+                    },
+                    switch_to_guest: {vi: "Chuyển sang chế độ du lịch", en: "Switch to guest mode"}
                 },
                 profile: {
                     "aria-label": {vi: "Hồ sơ", en: "Profile"},
@@ -62,10 +69,18 @@
 
             // ===== HOME =====
             home: {
+                page_title: {vi: "Trang chủ", en: "Home"},
                 title: {vi: "Trang chủ", en: "Home"},
                 featured: {
                     title: {vi: "Các nơi lưu trú nổi bật", en: "Featured Stays"},
                     empty: {vi: "Không tìm thấy kết quả nào.", en: "No results found."}
+                },
+                card: {
+                    image: {
+                        alt: {vi: "Hình ảnh chỗ ở", en: "Accommodation image"}
+                    },
+                    view_detail: {vi: "Xem chi tiết", en: "View details"},
+                    per_night: {vi: "/đêm", en: "/night"}
                 },
                 search: {
                     location_label: {vi: "Địa điểm", en: "Location"},
@@ -74,7 +89,8 @@
                     checkout_label: {vi: "Trả phòng", en: "Check out"},
                     guests_label: {vi: "Khách", en: "Guests"},
                     guests: {placeholder: {vi: "Thêm khách", en: "Add guests"}},
-                    button: {"aria-label": {vi: "Tìm kiếm", en: "Search"}}
+                    button: {"aria-label": {vi: "Tìm kiếm", en: "Search"}},
+                    results_for: {vi: "Kết quả tìm kiếm cho", en: "Search results for"}
                 }
             },
 
@@ -310,6 +326,23 @@
                 flag.textContent = flagEmoji;
         },
 
+        // Format giá tiền theo chuẩn Việt Nam
+        formatPrice(price) {
+            if (typeof price !== 'number') {
+                price = parseFloat(price) || 0;
+            }
+            
+            if (I18N.lang === 'vi') {
+                // Format theo chuẩn Việt Nam: 5.000.000 ₫
+                return new Intl.NumberFormat('vi-VN').format(price) + ' ₫';
+            } else {
+                // Chuyển đổi VND sang USD (tỷ giá khoảng 25.450 VND = 1 USD)
+                const usdPrice = Math.round(price / 25450);
+                // Format theo chuẩn quốc tế: $500
+                return '$' + new Intl.NumberFormat('en-US').format(usdPrice);
+            }
+        },
+
         // áp text vào DOM
         apply(root) {
             const scope = root || document;
@@ -321,6 +354,13 @@
                     el.value = txt;
                 else
                     el.textContent = txt;
+            });
+
+            // Format giá tiền cho các element có data-price
+            scope.querySelectorAll("[data-price]").forEach((el) => {
+                const price = el.getAttribute("data-price");
+                const formattedPrice = I18N.formatPrice(price);
+                el.textContent = formattedPrice;
             });
 
             scope.querySelectorAll("[data-i18n-attr]").forEach((el) => {
