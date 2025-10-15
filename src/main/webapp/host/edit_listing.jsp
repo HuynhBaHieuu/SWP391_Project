@@ -10,18 +10,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/lang_modal.css">
     <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
-    <script>
-        // Enable translation for host pages
-        document.addEventListener('DOMContentLoaded', function() {
-            // Let I18N work normally for host pages
-            if (window.I18N) {
-                // Apply translation after a short delay to ensure I18N is loaded
-                setTimeout(() => {
-                    window.I18N.apply();
-                }, 100);
-            }
-        });
-    </script>
     <style>
         body {
             margin: 0;
@@ -502,7 +490,10 @@
             <div class="sidebar-section">
                 <div class="section-card" onclick="showSection('pricing')">
                     <div class="section-title">Pricing</div>
-                    <div class="section-content">₫${listing.pricePerNight}/night</div>
+                    <div class="section-content">
+                        <span data-price="${listing.pricePerNight}"></span>
+                        <span data-i18n="host.edit_listing.per_night">/night</span>
+                    </div>
                     <span class="section-arrow">></span>
                 </div>
             </div>
@@ -992,7 +983,7 @@
     </div>
     
     <script>
-        // Update language button text
+        // Update language button text and apply translation
         document.addEventListener('DOMContentLoaded', function() {
             function updateLangButton() {
                 const langLabel = document.querySelector('[data-lang-label]');
@@ -1001,6 +992,7 @@
                     langLabel.textContent = currentLang === 'vi' ? 'Tiếng Việt' : 'English';
                 }
             }
+            
             
             // Update on page load
             updateLangButton();

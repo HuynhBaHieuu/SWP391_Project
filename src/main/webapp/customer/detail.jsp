@@ -306,7 +306,10 @@
                 %>
             </div>
 
-            <div class="price">₫<%= listing.getPricePerNight()%> / đêm</div>
+            <div class="price">
+                <span data-price="<%= listing.getPricePerNight()%>"></span>
+                <span data-i18n="home.card.per_night">/ đêm</span>
+            </div>
 
             <div class="desc">
                 <%= listing.getDescription()%>
@@ -482,5 +485,8 @@
         </script>
 
         <%@ include file="../design/footer.jsp" %>
+        
+        <!-- Include i18n for price formatting -->
+        <script src="<%=request.getContextPath()%>/js/i18n.js?v=1"></script>
     </body>
 </html>
