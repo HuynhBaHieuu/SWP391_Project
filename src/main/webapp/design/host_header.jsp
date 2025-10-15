@@ -2,20 +2,20 @@
 <%@page import="model.User"%>
 <%
     User currentUser = (User) session.getAttribute("user");
-    String imagePath = null;
+    String hostImagePath = null;
 
     if (currentUser != null && currentUser.getProfileImage() != null) {
         String profileImage = currentUser.getProfileImage();
         if (profileImage.startsWith("http")) {
             // Ảnh từ Google (đường dẫn tuyệt đối)
-            imagePath = profileImage;
+            hostImagePath = profileImage;
         } else {
             // Ảnh từ thư mục trong server
-            imagePath = request.getContextPath() + "/" + profileImage;
+            hostImagePath = request.getContextPath() + "/" + profileImage;
         }
     } else {
         // Ảnh mặc định
-        imagePath = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
+        hostImagePath = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
     }
 %>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/host-header.css">
@@ -35,7 +35,7 @@
     <div class="host-header-right">
         <a href="${pageContext.request.contextPath}/host/switch-to-guest" class="switch-mode" data-i18n="header.host.switch_to_guest">Chuyển sang chế độ du lịch</a>
         <div class="avatar">
-            <img src="<%= imagePath %>" alt="Host Avatar" class="avatar-img">
+            <img src="<%= hostImagePath %>" alt="Host Avatar" class="avatar-img">
         </div>
     </div>
 </div>

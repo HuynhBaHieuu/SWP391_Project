@@ -98,9 +98,9 @@
                 <div class="container bottom-inner">
                     <div class="left">
                         <span>© <span id="ab-year"></span> GO2BNB, Inc.</span>
-                        <span class="dot">·</span><a data-i18n="footer.bottom.privacy" href="#">Quyền riêng tư</a>
-                        <span class="dot">·</span><a data-i18n="footer.bottom.terms" href="#">Điều khoản</a>
-                        <span class="dot">·</span><a data-i18n="footer.bottom.sitemap" href="#">Sơ đồ trang web</a>
+                        <span class="dot">·</span><a data-i18n="footer.bottom.privacy" href="<%=request.getContextPath()%>/go2bnb_footer/legal/privacy.jsp">Quyền riêng tư</a>
+                        <span class="dot">·</span><a data-i18n="footer.bottom.terms" href="<%=request.getContextPath()%>/go2bnb_footer/legal/terms.jsp">Điều khoản</a>
+                        <span class="dot">·</span><a data-i18n="footer.bottom.sitemap" href="<%=request.getContextPath()%>/go2bnb_footer/legal/sitemap.jsp">Sơ đồ trang web</a>
                     </div>
 
                     <div class="right">

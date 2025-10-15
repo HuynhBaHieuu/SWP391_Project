@@ -2,6 +2,21 @@
 <%@page import="model.User"%>
 <%
     User user = (User) session.getAttribute("user");
+    String profileImagePath = null;
+    
+    if (user != null && user.getProfileImage() != null) {
+        String profileImage = user.getProfileImage();
+        if (profileImage.startsWith("http")) {
+            // Ảnh từ Google (đường dẫn tuyệt đối)
+            profileImagePath = profileImage;
+        } else {
+            // Ảnh từ thư mục trong server
+            profileImagePath = request.getContextPath() + "/" + profileImage;
+        }
+    } else {
+        // Ảnh mặc định
+        profileImagePath = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
+    }
 %>
 <!DOCTYPE html>
 <html>
@@ -110,7 +125,7 @@
             <div class="row align-items-center">
                 <div class="col-md-3 text-center">
                     <div class="avatar-container">
-                        <img src="<%= imagePath%>" 
+                        <img src="<%= profileImagePath%>" 
                              alt="Profile Picture" class="profile-avatar" id="profileImage">
                         <div class="avatar-overlay" onclick="document.getElementById('avatarInput').click()">
                             <i class="fas fa-camera"></i>
@@ -247,13 +262,21 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        // Cập nhật ảnh ngay lập tức với URL mới
+                        if (data.imagePath) {
+                            document.getElementById('profileImage').src = data.imagePath;
+                        }
+                        
                         const toast = new bootstrap.Toast(document.getElementById('avatarToast'));
                         toast.show();
+                        
+                        // Reload sau 2 giây để cập nhật session
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        alert('Lỗi: ' + (data.message || 'Không thể upload ảnh'));
                     }
-                    
-                    setTimeout(() => {
-                      location.reload();
-                     }, 5000);
                 })
                 .catch(error => {
                     console.error('Lỗi tải ảnh đại diện:', error);
