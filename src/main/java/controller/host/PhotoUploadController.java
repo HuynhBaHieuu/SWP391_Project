@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import listingDAO.ListingImageDAO;
 import model.User;
+import utils.FileUploadUtil;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -22,7 +23,7 @@ import java.util.UUID;
 @WebServlet("/host/listing/upload-photo")
 public class PhotoUploadController extends HttpServlet {
     private ListingImageDAO listingImageDAO;
-    private static final String UPLOAD_DIR = "uploads/listings";
+    private static final String UPLOAD_SUBFOLDER = "listings";
 
     @Override
     public void init() {
@@ -61,8 +62,8 @@ public class PhotoUploadController extends HttpServlet {
 
             int listingId = Integer.parseInt(listingIdParam);
             
-            // Tạo thư mục upload trong webapp/uploads (vĩnh viễn)
-            String uploadPath = req.getServletContext().getRealPath("/") + UPLOAD_DIR + "/" + listingId;
+            // Sử dụng FileUploadUtil để lấy đường dẫn an toàn
+            String uploadPath = FileUploadUtil.getSmartUploadPath(req.getServletContext(), UPLOAD_SUBFOLDER + "/" + listingId);
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
@@ -91,7 +92,7 @@ public class PhotoUploadController extends HttpServlet {
                         part.write(filePath);
                         
                         // Lưu URL vào database
-                        String imageUrl = req.getContextPath() + "/" + UPLOAD_DIR + "/" + listingId + "/" + uniqueFileName;
+                        String imageUrl = FileUploadUtil.getSmartImageUrl(req.getServletContext(), UPLOAD_SUBFOLDER + "/" + listingId, uniqueFileName);
                         System.out.println("Image URL: " + imageUrl);
                         
                         boolean success = listingImageDAO.addImageToListing(listingId, imageUrl);

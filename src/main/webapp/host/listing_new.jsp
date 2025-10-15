@@ -8,18 +8,6 @@
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/lang_modal.css">
   <title>Create Accommodation</title>
   <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
-  <script>
-      // Enable translation for host pages
-      document.addEventListener('DOMContentLoaded', function() {
-          // Let I18N work normally for host pages
-          if (window.I18N) {
-              // Apply translation after a short delay to ensure I18N is loaded
-              setTimeout(() => {
-                  window.I18N.apply();
-              }, 100);
-          }
-      });
-  </script>
   <style>
     .wrap{max-width:980px;margin:32px auto;padding:0 16px;}
     form{display:grid;grid-template-columns:1fr 1fr;gap:24px;}

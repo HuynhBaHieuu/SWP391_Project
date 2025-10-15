@@ -6,6 +6,7 @@ package controller;
 
 import userDAO.UserDAO;
 import model.User;
+import utils.FileUploadUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -36,7 +37,7 @@ import java.util.Map;
 public class UploadAvatarServlet extends HttpServlet {
     
     private UserDAO userDAO = new UserDAO();
-    private static final String UPLOAD_DIR = "uploads/avatars";
+    private static final String UPLOAD_SUBFOLDER = "avatars";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -86,9 +87,12 @@ public class UploadAvatarServlet extends HttpServlet {
                 currentUser.setProfileImage(profileImagePath);
                 session.setAttribute("user", currentUser);
                 
+                // Tạo URL đầy đủ cho ảnh
+                String fullImageUrl = request.getContextPath() + "/" + profileImagePath;
+                
                 jsonResponse.put("success", true);
                 jsonResponse.put("message", "Cập nhật ảnh đại diện thành công!");
-                jsonResponse.put("imagePath", profileImagePath);
+                jsonResponse.put("imagePath", fullImageUrl);
             } else {
                 jsonResponse.put("success", false);
                 jsonResponse.put("message", "Không thể cập nhật ảnh đại diện trong database.");
@@ -123,19 +127,15 @@ public class UploadAvatarServlet extends HttpServlet {
             // Tạo tên file unique ngẫu nhiên
             String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
             
-            // Tạo thư mục upload nếu chưa có
-            String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
-            File uploadDir = new File(uploadPath);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
-            }
+            // Sử dụng FileUploadUtil để lấy đường dẫn an toàn
+            String uploadPath = FileUploadUtil.getSmartUploadPath(getServletContext(), UPLOAD_SUBFOLDER);
             
             // Lưu file
             String filePath = uploadPath + File.separator + uniqueFileName;
             filePart.write(filePath);
             
             // Trả về đường dẫn relative để lưu vào database
-            return UPLOAD_DIR + "/" + uniqueFileName;
+            return "uploads/" + UPLOAD_SUBFOLDER + "/" + uniqueFileName;
             
         } catch (Exception e) {
             e.printStackTrace();

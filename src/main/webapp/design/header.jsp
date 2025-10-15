@@ -11,23 +11,26 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%
     User currentUser = (User) session.getAttribute("user");
-    String imagePath = null;
+    String userImagePath = null;
     
     // Lấy số tin nhắn chưa đọc
-    int unreadMessageCount = new ConversationDAO().getTotalUnreadCount(currentUser.getUserID()); 
+    int unreadMessageCount = 0;
+    if (currentUser != null) {
+        unreadMessageCount = new ConversationDAO().getTotalUnreadCount(currentUser.getUserID());
+    }
 
     if (currentUser != null && currentUser.getProfileImage() != null) {
         String profileImage = currentUser.getProfileImage();
         if (profileImage.startsWith("http")) {
             // Ảnh từ Google (đường dẫn tuyệt đối)
-            imagePath = profileImage;
+            userImagePath = profileImage;
         } else {
             // Ảnh từ thư mục trong server
-            imagePath = request.getContextPath() + "/" + profileImage;
+            userImagePath = request.getContextPath() + "/" + profileImage;
         }
     } else {
         // Ảnh mặc định
-        imagePath = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
+        userImagePath = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
     }
 %>
 <!DOCTYPE html>
@@ -224,7 +227,7 @@
                            data-i18n-attr="aria-label"
                            aria-label="Hồ sơ người dùng"
                            href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>">
-                            <img src="<%= imagePath%>" alt="Avatar"
+                            <img src="<%= userImagePath%>" alt="Avatar"
                                  style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
                         </a>
                     </div>
@@ -396,21 +399,23 @@
         });
 
         // Auto-refresh số tin nhắn chưa đọc mỗi 30 giây
-        <% if (currentUser != null) { %>
-        setInterval(function() {
-            fetch('${pageContext.request.contextPath}/chat?action=getUnreadCount')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const currentCount = <%= unreadMessageCount %>;
-                        if (data.unreadCount !== currentCount && data.unreadCount > 0) {
-                            // Có tin nhắn mới, refresh để cập nhật badge
-                            location.reload();
+        // Tạm thời comment để tránh lỗi JSP compilation
+        /*
+        if (currentUser != null) {
+            setInterval(function() {
+                fetch('<%= request.getContextPath() %>/chat?action=getUnreadCount')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const currentCount = <%= unreadMessageCount %>;
+                            if (data.unreadCount !== currentCount && data.unreadCount > 0) {
+                                location.reload();
+                            }
                         }
-                    }
-                })
-                .catch(error => console.log('Error checking messages:', error));
-        }, 30000); // 30 giây
-        <% } %>
+                    })
+                    .catch(error => console.log('Error checking messages:', error));
+            }, 30000);
+        }
+        */
     </script>
 </html>

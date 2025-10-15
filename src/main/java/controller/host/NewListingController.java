@@ -2,6 +2,7 @@ package controller.host;
 
 import service.IListingService;
 import service.ListingService;
+import utils.FileUploadUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -119,11 +120,11 @@ public class NewListingController extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/host/listings?created=" + listingId);
     }
 
-    /** Lưu file ảnh vào thư mục /uploads/listings/{listingId}/ và trả về URL tương đối */
+    /** Lưu file ảnh vào thư mục an toàn và trả về URL tương đối */
     private List<String> saveUploadsAndReturnUrls(HttpServletRequest req, int listingId) throws IOException, ServletException {
         List<String> urls = new ArrayList<>();
-        // thư mục vĩnh viễn trong webapp/uploads (không bị mất khi restart)
-        String uploadRoot = getServletContext().getRealPath("/uploads/listings/" + listingId);
+        // Sử dụng FileUploadUtil để lấy đường dẫn an toàn
+        String uploadRoot = FileUploadUtil.getSmartUploadPath(getServletContext(), "listings/" + listingId);
         File dir = new File(uploadRoot);
         if (!dir.exists()) {
             Files.createDirectories(dir.toPath());
@@ -143,8 +144,8 @@ public class NewListingController extends HttpServlet {
             File dest = new File(dir, newName);
             part.write(dest.getAbsolutePath());
 
-            // URL để truy cập ảnh (từ context path)
-            String url = req.getContextPath() + "/uploads/listings/" + listingId + "/" + newName;
+            // URL để truy cập ảnh (sử dụng FileUploadUtil)
+            String url = FileUploadUtil.getSmartImageUrl(getServletContext(), "listings/" + listingId, newName);
             urls.add(url);
         }
         return urls;
