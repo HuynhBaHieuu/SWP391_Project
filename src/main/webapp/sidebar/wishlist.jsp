@@ -22,17 +22,27 @@
         %>
         <div class="row">
             <% for (Listing l : wishlist) {%>
-            <div class="col-md-4 mb-4 d-flex">
-                <div class="card h-100 border-0 overflow-hidden" style="border-radius: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
-                    <img src="<%= l.getFirstImage()%>"
-                         alt="Listing image"
-                         style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover;">
-                    <div class="card-body d-flex flex-column justify-content-between">
+            <div class="col-md-3 mb-4 d-flex">
+                <div class="card h-100 flex-fill border-0 overflow-hidden d-flex flex-column"
+                     style="border-radius: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.08); height: 400px;">
+
+                    <!-- Ảnh vuông, luôn fill toàn bộ vùng -->
+                    <div class="w-100" style="aspect-ratio: 1 / 1; overflow: hidden; flex-shrink: 0;">
+                        <img src="<%= l.getFirstImage()%>"
+                             alt="Listing image"
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+
+                    <!-- Nội dung luôn căn đều -->
+                    <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
                         <div>
-                            <h5 class="card-title text-truncate fw-bold" style="max-width: 100%;" title="<%= l.getTitle()%>"><%= l.getTitle()%></h5>
-                            <p class="card-text text-truncate fs-6 mt-2"><%= l.getCity()%></p>
+                            <h5 class="card-title text-truncate fw-bold mb-2" style="max-width: 100%;" title="<%= l.getTitle()%>">
+                                <%= l.getTitle()%>
+                            </h5>
+                            <p class="card-text text-truncate fs-6 mb-0"><%= l.getCity()%></p>
                         </div>
-                        <a href="${pageContext.request.contextPath}/customer/detail.jsp?id=<%= l.getListingID()%>" class="text-center fs-6 mt-3">Xem chi tiết</a>
+                        <a href="${pageContext.request.contextPath}/customer/detail.jsp?id=<%= l.getListingID()%>"
+                           class="text-center fs-6 mt-3">Xem chi tiết</a>
                     </div>
                 </div>
             </div>

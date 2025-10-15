@@ -34,6 +34,8 @@
 <html>
     <head>
         <title>Dropdown Menu</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
         <style>
             /* Cải thiện style cho dropdown menu */
             .header-top {
@@ -250,8 +252,9 @@
                                 <i class="bi bi-heart"></i>
                                 <span data-i18n="header.dropdown.wishlist">Danh sách yêu thích</span>
                             </a>
-
-                            <a href="#" class="menu-item user-profile">
+                              
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/trips") : (request.getContextPath() + "/login.jsp")%>" 
+                               class="menu-item user-profile">
                                 <i class="bi bi-suitcase"></i>
                                 <span data-i18n="header.dropdown.trips">Chuyến đi</span>
                             </a>

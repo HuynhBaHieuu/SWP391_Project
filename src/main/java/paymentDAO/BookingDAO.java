@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import model.BookingDetail;
+import model.Listing;
 
 public class BookingDAO {
     
@@ -170,5 +172,62 @@ public class BookingDAO {
         booking.setNumberOfNights((int) nights);
         
         return booking;
+    }
+    public List<Booking> getAllBookingsByUserId(int userId) {
+        List<Booking> list = new ArrayList<>();
+        String sql = "SELECT b.BookingID, b.Status, "
+                + "l.ListingID, l.Title, l.Address, i.ImageUrl "
+                + "FROM Bookings b "
+                + "JOIN Listings l ON b.ListingID = l.ListingID "
+                + "LEFT JOIN ListingImages i ON l.ListingID = i.ListingID "
+                + "WHERE b.GuestID = ?";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Listing listing = new Listing();
+                listing.setListingID(rs.getInt("ListingID"));
+                listing.setTitle(rs.getString("Title"));
+                listing.setAddress(rs.getString("Address"));
+                listing.setFirstImage(rs.getString("ImageUrl")); 
+
+                Booking booking = new Booking();
+                booking.setBookingID(rs.getInt("BookingID"));
+                booking.setStatus(rs.getString("Status"));
+                booking.setListing(listing);
+
+                list.add(booking);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    public BookingDetail getBookingDetailByBookingId(int bookingId) {
+        BookingDetail detail = null;
+        String sql = "SELECT * FROM vw_BookingDetails WHERE BookingID = ?";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                detail = new BookingDetail(
+                    rs.getInt("BookingID"),
+                    rs.getString("ListingTitle"),
+                    rs.getString("ListingAddress"),
+                    rs.getString("ListingCity"),
+                    rs.getString("HostName"),
+                    rs.getDate("CheckInDate"),
+                    rs.getDate("CheckOutDate"),
+                    rs.getBigDecimal("TotalPrice"),
+                    rs.getString("Status"),
+                    rs.getInt("NumberOfNights")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return detail;
     }
 }

@@ -22,6 +22,7 @@ public class Booking implements Serializable {
     private String listingAddress;
     private BigDecimal pricePerNight;
     private int numberOfNights;
+    private Listing listing;
 
     public Booking() {}
 
@@ -154,6 +155,15 @@ public class Booking implements Serializable {
     public String getFormattedCreatedAt() {
         return createdAt != null ? createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
     }
+    
+    public Listing getListing() {
+        return listing;
+    }
+
+    public void setListing(Listing listing) {
+        this.listing = listing;
+    }
+
 
     @Override
     public String toString() {
