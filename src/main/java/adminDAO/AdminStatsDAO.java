@@ -45,6 +45,31 @@ public class AdminStatsDAO {
                 if (rs.next()) stats.setPendingRequests(rs.getInt(1));
             }
             
+            // Thống kê host requests
+            try (PreparedStatement ps = con.prepareStatement(
+                    "SELECT COUNT(*) FROM HostRequests WHERE Status = 'PENDING'");
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) stats.setPendingHostRequests(rs.getInt(1));
+            }
+            
+            try (PreparedStatement ps = con.prepareStatement(
+                    "SELECT COUNT(*) FROM HostRequests WHERE Status = 'APPROVED'");
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) stats.setApprovedHostRequests(rs.getInt(1));
+            }
+            
+            try (PreparedStatement ps = con.prepareStatement(
+                    "SELECT COUNT(*) FROM HostRequests WHERE Status = 'REJECTED'");
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) stats.setRejectedHostRequests(rs.getInt(1));
+            }
+            
+            try (PreparedStatement ps = con.prepareStatement(
+                    "SELECT COUNT(*) FROM HostRequests");
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) stats.setTotalHostRequests(rs.getInt(1));
+            }
+            
             // Tổng số bookings
             try (PreparedStatement ps = con.prepareStatement(
                     "SELECT COUNT(*) FROM Bookings");

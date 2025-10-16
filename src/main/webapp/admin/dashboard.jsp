@@ -391,9 +391,9 @@
               <td><%= rs.getDate("created_at") %></td>
               <td>
                 <div class="action-buttons">
-                  <button class="action-btn action-btn-view" onclick="viewListing(<%= rs.getInt("id") %>)">Xem</button>
-                  <button class="action-btn action-btn-edit" onclick="approveListing(<%= rs.getInt("id") %>)">Duyệt</button>
-                  <button class="action-btn action-btn-delete" onclick="rejectListing(<%= rs.getInt("id") %>)">Từ chối</button>
+                  <button class="action-btn action-btn-view" data-listing-id="<%= rs.getInt("id") %>" onclick="viewListing(this.dataset.listingId)">Xem</button>
+                  <button class="action-btn action-btn-edit" data-listing-id="<%= rs.getInt("id") %>" onclick="approveListing(this.dataset.listingId)">Duyệt</button>
+                  <button class="action-btn action-btn-delete" data-listing-id="<%= rs.getInt("id") %>" onclick="rejectListing(this.dataset.listingId)">Từ chối</button>
                 </div>
               </td>
             </tr>
@@ -451,11 +451,10 @@
               <td><%= rs.getTimestamp("RequestedAt") %></td>
               <td><span class="badge badge-warning">PENDING</span></td>
               <td>
-                <form class="form-inline" method="post" action="<%=request.getContextPath()%>/admin/dashboard">
-                  <input type="hidden" name="requestId" value="<%= rs.getInt("RequestID") %>" />
-                  <button class="btn btn-success btn-sm" name="action" value="approve">Duyệt</button>
-                  <button class="btn btn-danger btn-sm" name="action" value="reject">Từ chối</button>
-                </form>
+                <div class="action-buttons">
+                  <button class="action-btn action-btn-success" data-request-id="<%= rs.getInt("RequestID") %>" onclick="approveHostRequest(this.dataset.requestId)">Duyệt</button>
+                  <button class="action-btn action-btn-danger" data-request-id="<%= rs.getInt("RequestID") %>" onclick="rejectHostRequest(this.dataset.requestId)">Từ chối</button>
+                </div>
               </td>
             </tr>
             <%
@@ -613,8 +612,8 @@
               </td>
               <td>
                 <div class="action-buttons">
-                  <button class="action-btn action-btn-view" onclick="viewBooking(<%= rs.getInt("id") %>)">Xem</button>
-                  <button class="action-btn action-btn-delete" onclick="cancelBooking(<%= rs.getInt("id") %>)">Hủy</button>
+                  <button class="action-btn action-btn-view" data-booking-id="<%= rs.getInt("id") %>" onclick="viewBooking(this.dataset.bookingId)">Xem</button>
+                  <button class="action-btn action-btn-delete" data-booking-id="<%= rs.getInt("id") %>" onclick="cancelBooking(this.dataset.bookingId)">Hủy</button>
                 </div>
               </td>
             </tr>
@@ -1045,6 +1044,70 @@
     function cancelBooking(id) {
       console.log('[v0] Cancel booking:', id);
       // Implement cancel booking logic
+    }
+    
+    // Host request functions
+    function approveHostRequest(requestId) {
+      console.log('[v0] Approve host request:', requestId);
+      
+      if (confirm('Bạn có chắc chắn muốn duyệt yêu cầu trở thành host này?')) {
+        processHostRequest(requestId, 'approve');
+      }
+    }
+    
+    function rejectHostRequest(requestId) {
+      console.log('[v0] Reject host request:', requestId);
+      
+      if (confirm('Bạn có chắc chắn muốn từ chối yêu cầu trở thành host này?')) {
+        processHostRequest(requestId, 'reject');
+      }
+    }
+    
+    function processHostRequest(requestId, action) {
+      console.log('Processing host request:', requestId, 'action:', action);
+      
+      const formData = new URLSearchParams();
+      formData.append('action', action);
+      formData.append('requestId', requestId);
+      
+      fetch('<%=request.getContextPath()%>/admin/host-requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      })
+      .then(response => {
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        return response.json();
+      })
+      .then(data => {
+        console.log('Server response:', data);
+        
+        if (data.success) {
+          // Hiển thị thông báo thành công
+          const actionText = action === 'approve' ? 'duyệt' : 'từ chối';
+          showSuccessMessage(`Đã ${actionText} yêu cầu trở thành host thành công!`);
+          
+          // Tự động reload trang sau 1.5 giây để cập nhật danh sách
+          setTimeout(() => {
+            console.log('Auto reloading page after successful host request processing');
+            window.location.reload();
+          }, 1500);
+        } else {
+          showErrorMessage(data.message || 'Có lỗi xảy ra khi xử lý yêu cầu.');
+        }
+      })
+      .catch(error => {
+        console.error('Fetch error:', error);
+        showErrorMessage('Có lỗi xảy ra khi xử lý yêu cầu: ' + error.message);
+      });
     }
     
     console.log('[v0] Dashboard initialized with database integration');
