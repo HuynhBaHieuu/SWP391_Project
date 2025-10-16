@@ -9,6 +9,12 @@ public class AdminStats implements Serializable {
     private int pendingRequests;
     private int totalBookings;
     private double totalRevenue;
+    
+    // Host request statistics
+    private int pendingHostRequests;
+    private int approvedHostRequests;
+    private int rejectedHostRequests;
+    private int totalHostRequests;
 
     // Constructors
     public AdminStats() {}
@@ -70,6 +76,39 @@ public class AdminStats implements Serializable {
     
     public void setTotalRevenue(double totalRevenue) { 
         this.totalRevenue = totalRevenue; 
+    }
+    
+    // Host request statistics getters and setters
+    public int getPendingHostRequests() { 
+        return pendingHostRequests; 
+    }
+    
+    public void setPendingHostRequests(int pendingHostRequests) { 
+        this.pendingHostRequests = pendingHostRequests; 
+    }
+    
+    public int getApprovedHostRequests() { 
+        return approvedHostRequests; 
+    }
+    
+    public void setApprovedHostRequests(int approvedHostRequests) { 
+        this.approvedHostRequests = approvedHostRequests; 
+    }
+    
+    public int getRejectedHostRequests() { 
+        return rejectedHostRequests; 
+    }
+    
+    public void setRejectedHostRequests(int rejectedHostRequests) { 
+        this.rejectedHostRequests = rejectedHostRequests; 
+    }
+    
+    public int getTotalHostRequests() { 
+        return totalHostRequests; 
+    }
+    
+    public void setTotalHostRequests(int totalHostRequests) { 
+        this.totalHostRequests = totalHostRequests; 
     }
 
     // Utility methods

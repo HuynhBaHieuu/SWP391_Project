@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
 import model.User;
@@ -43,11 +44,13 @@ public class AdminHostRequestController extends HttpServlet {
             AdminStats stats = statsDAO.getAdminStats();
             request.setAttribute("stats", stats);
 
-            request.getRequestDispatcher("/admin/host-requests.jsp").forward(request, response);
+            // Redirect to dashboard since we now handle host requests via AJAX
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("error", "Có lỗi hệ thống. Vui lòng thử lại sau.");
-            request.getRequestDispatcher("/admin/host-requests.jsp").forward(request, response);
+            // Redirect to dashboard since we now handle host requests via AJAX
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
         }
     }
 
@@ -75,29 +78,54 @@ public class AdminHostRequestController extends HttpServlet {
             return;
         }
 
+        boolean success = false;
+        String message = "";
+
         try {
             HostRequestDAO hostRequestDAO = new HostRequestDAO();
             
             if ("approve".equalsIgnoreCase(action)) {
-                boolean success = hostRequestDAO.approveRequest(reqId);
-                if (success && session != null) {
-                    session.setAttribute("success", "Đã duyệt yêu cầu trở thành host.");
-                } else if (session != null) {
-                    session.setAttribute("error", "Không thể duyệt yêu cầu.");
+                success = hostRequestDAO.approveRequest(reqId);
+                if (success) {
+                    message = "Đã duyệt yêu cầu trở thành host.";
+                } else {
+                    message = "Không thể duyệt yêu cầu.";
                 }
             } else if ("reject".equalsIgnoreCase(action)) {
-                boolean success = hostRequestDAO.rejectRequest(reqId);
-                if (success && session != null) {
-                    session.setAttribute("success", "Đã từ chối yêu cầu trở thành host.");
-                } else if (session != null) {
-                    session.setAttribute("error", "Không thể từ chối yêu cầu.");
+                success = hostRequestDAO.rejectRequest(reqId);
+                if (success) {
+                    message = "Đã từ chối yêu cầu trở thành host.";
+                } else {
+                    message = "Không thể từ chối yêu cầu.";
                 }
             } else {
-                if (session != null) session.setAttribute("error", "Hành động không hợp lệ.");
+                message = "Hành động không hợp lệ.";
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            if (session != null) session.setAttribute("error", "Có lỗi hệ thống. Vui lòng thử lại sau.");
+            message = "Có lỗi hệ thống. Vui lòng thử lại sau.";
+        }
+
+        // Kiểm tra nếu request đến từ AJAX (có header X-Requested-With)
+        String requestedWith = request.getHeader("X-Requested-With");
+        boolean isAjaxRequest = "XMLHttpRequest".equals(requestedWith);
+        
+        // Nếu là AJAX request, trả về JSON response
+        if (isAjaxRequest) {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            
+            PrintWriter out = response.getWriter();
+            out.print("{\"success\":" + success + ",\"message\":\"" + message + "\"}");
+            out.flush();
+            return;
+        }
+
+        // Nếu không phải AJAX request, xử lý như cũ
+        if (success && session != null) {
+            session.setAttribute("success", message);
+        } else if (session != null) {
+            session.setAttribute("error", message);
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/host-requests");
