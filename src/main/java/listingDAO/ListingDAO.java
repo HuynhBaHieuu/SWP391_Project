@@ -352,7 +352,13 @@ public class ListingDAO {
     // Get all active listings (excluding soft deleted)
     public List<Listing> getAllActiveListings() {
         List<Listing> listings = new ArrayList<>();
-        String sql = "SELECT * FROM Listings WHERE Status='Active' AND (IsDeleted = 0 OR IsDeleted IS NULL) ORDER BY CreatedAt DESC";
+        String sql = "SELECT l.* "
+                + "FROM Listings l "
+                + "JOIN ListingRequests lr ON l.ListingID = lr.ListingID "
+                + "WHERE l.Status = 'Active' "
+                + "AND (l.IsDeleted = 0 OR l.IsDeleted IS NULL) "
+                + "AND lr.Status = 'Approved' "
+                + "ORDER BY l.CreatedAt DESC;";
         try (Connection con = DBConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -432,4 +438,23 @@ public class ListingDAO {
         return listings;
     }
 
+    public void createListingRequest(int listingId, int hostId) throws SQLException {
+        String sql = "INSERT INTO ListingRequests (ListingID, HostID) VALUES (?, ?)";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, listingId);
+            ps.setInt(2, hostId);
+            ps.executeUpdate();
+        }
+    }
+    
+    public boolean createOrRejectListingRequest(int requestId, String status) throws SQLException {
+        String sql = "UPDATE ListingRequests SET Status = ?, ProcessedAt = GETDATE() WHERE RequestID = ?";
+        
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, requestId);
+            return ps.executeUpdate() > 0;
+        }
+    }
 }

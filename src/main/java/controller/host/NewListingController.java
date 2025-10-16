@@ -98,6 +98,7 @@ public class NewListingController extends HttpServlet {
         Integer listingId = null;
         try {
             listingId = listingService.createListing(me.getUserID(), title, description, address, city, price, maxGuests);
+            listingService.createListingRequest(listingId, me.getUserID());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -117,7 +118,8 @@ public class NewListingController extends HttpServlet {
         }
 
         // 4) Redirect dashboard/chi tiết
-        resp.sendRedirect(req.getContextPath() + "/host/listings?created=" + listingId);
+//        resp.sendRedirect(req.getContextPath() + "/host/listings?created=" + listingId);
+        resp.sendRedirect(req.getContextPath() + "/host/listing/pending");
     }
 
     /** Lưu file ảnh vào thư mục an toàn và trả về URL tương đối */
