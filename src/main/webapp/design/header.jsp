@@ -194,7 +194,7 @@
                         <span data-title="Trải nghiệm" aria-hidden="true" data-i18n="header.nav.experience">Trải nghiệm</span>
                     </a>
                     <!-- Dịch vụ -->
-                    <a href="/services" class="menu-sub">
+                    <a href="${pageContext.request.contextPath}/services.jsp" class="menu-sub">
                         <span class="w14w6ssu atm_mk_h2mmj6 dir dir-ltr" style="transform:none;" aria-hidden="true">
                             <img src="https://www.svgrepo.com/show/206293/meal-lunch.svg" alt="Service Icon" width="40" height="40">
                         </span>
