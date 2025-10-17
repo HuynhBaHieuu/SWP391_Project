@@ -177,10 +177,9 @@
                    href="<%= (currentUser != null) ? (request.getContextPath() + "/home") : (request.getContextPath() + "/login.jsp")%>">
                     <img src="${pageContext.request.contextPath}/image/logo.png" alt="logo" width="150" style="display:block;">
                 </a>
-
                 <div class="menu" role="tablist">
                     <!-- Nơi lưu trú -->
-                    <a href="/homes" class="menu-sub">
+                    <a href="${pageContext.request.contextPath}/home" class="menu-sub">
                         <span style="transform:none;">
                             <img src="https://www.svgrepo.com/show/434116/house.svg" alt="Homestay Icon" width="40" height="40">
                         </span>

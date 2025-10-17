@@ -72,7 +72,7 @@
                 <a href="booking?action=list" class="btn btn-outline-secondary">
                     <i class="fas fa-list"></i> Danh sách
                 </a>
-                <a href="home.jsp" class="btn btn-outline-primary">
+                <a href="${pageContext.request.contextPath}/home" class="btn btn-outline-primary">
                     <i class="fas fa-home"></i> Trang chủ
                 </a>
             </div>

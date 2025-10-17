@@ -65,7 +65,7 @@
                     </c:otherwise>
                 </c:choose>
             </h2>
-            <a href="home.jsp" class="btn btn-outline-primary">
+            <a href="${pageContext.request.contextPath}/home" class="btn btn-outline-primary">
                 <i class="fas fa-home"></i> Về trang chủ
             </a>
         </div>
@@ -84,7 +84,7 @@
                         </c:otherwise>
                     </c:choose>
                 </p>
-                <a href="home.jsp" class="btn btn-primary">
+                <a href="${pageContext.request.contextPath}/home" class="btn btn-primary">
                     <i class="fas fa-search"></i> Tìm phòng ngay
                 </a>
             </div>

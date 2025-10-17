@@ -13,7 +13,7 @@ public class ListingDAO {
             int hostId, String title, String description,
             String address, String city, java.math.BigDecimal pricePerNight, int maxGuests) {
         String sql = "INSERT INTO Listings (HostID, Title, Description, Address, City, PricePerNight, MaxGuests, Status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Active')";
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Inactive')";
         try (Connection con = DBConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, hostId);
@@ -36,7 +36,6 @@ public class ListingDAO {
         }
         return null;
     }
-
     // ====== ADD LISTING IMAGES ======
     public void addListingImages(int listingId, List<String> urls) {
         if (urls == null || urls.isEmpty())
@@ -352,13 +351,10 @@ public class ListingDAO {
     // Get all active listings (excluding soft deleted)
     public List<Listing> getAllActiveListings() {
         List<Listing> listings = new ArrayList<>();
-        String sql = "SELECT l.* "
-                + "FROM Listings l "
-                + "JOIN ListingRequests lr ON l.ListingID = lr.ListingID "
-                + "WHERE l.Status = 'Active' "
-                + "AND (l.IsDeleted = 0 OR l.IsDeleted IS NULL) "
-                + "AND lr.Status = 'Approved' "
-                + "ORDER BY l.CreatedAt DESC;";
+        String sql = "SELECT * FROM Listings "
+                + "WHERE Status = 'Active' "
+                + "AND (IsDeleted = 0 OR IsDeleted IS NULL) "
+                + "ORDER BY CreatedAt DESC";
         try (Connection con = DBConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -444,17 +440,81 @@ public class ListingDAO {
             ps.setInt(1, listingId);
             ps.setInt(2, hostId);
             ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("ERROR: SQLException in createListingRequest: " + e.getMessage());
+            throw e;
         }
     }
     
     public boolean createOrRejectListingRequest(int requestId, String status) throws SQLException {
-        String sql = "UPDATE ListingRequests SET Status = ?, ProcessedAt = GETDATE() WHERE RequestID = ?";
-        
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, status);
-            ps.setInt(2, requestId);
-            return ps.executeUpdate() > 0;
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            con.setAutoCommit(false); // Bắt đầu transaction
+            
+            // 1. Cập nhật status trong ListingRequests
+            String updateRequestSql = "UPDATE ListingRequests SET Status = ?, ProcessedAt = GETDATE() WHERE RequestID = ?";
+            try (PreparedStatement ps1 = con.prepareStatement(updateRequestSql)) {
+                ps1.setString(1, status);
+                ps1.setInt(2, requestId);
+                int requestUpdated = ps1.executeUpdate();
+                
+                if (requestUpdated == 0) {
+                    con.rollback();
+                    return false;
+                }
+            }
+            
+            // 2. Lấy ListingID từ request để cập nhật status của Listing
+            String getListingIdSql = "SELECT ListingID FROM ListingRequests WHERE RequestID = ?";
+            int listingId = -1;
+            try (PreparedStatement ps2 = con.prepareStatement(getListingIdSql)) {
+                ps2.setInt(1, requestId);
+                try (ResultSet rs = ps2.executeQuery()) {
+                    if (rs.next()) {
+                        listingId = rs.getInt("ListingID");
+                    }
+                }
+            }
+            
+            if (listingId == -1) {
+                con.rollback();
+                return false;
+            }
+            
+            // 3. Cập nhật status của Listing dựa trên status của request
+            String listingStatus = "Inactive"; // Mặc định
+            if ("Approved".equals(status)) {
+                listingStatus = "Active";
+            } else if ("Rejected".equals(status)) {
+                listingStatus = "Inactive"; // Giữ nguyên Inactive khi bị từ chối
+            }
+            
+            String updateListingSql = "UPDATE Listings SET Status = ? WHERE ListingID = ?";
+            try (PreparedStatement ps3 = con.prepareStatement(updateListingSql)) {
+                ps3.setString(1, listingStatus);
+                ps3.setInt(2, listingId);
+                int listingUpdated = ps3.executeUpdate();
+                
+                if (listingUpdated == 0) {
+                    con.rollback();
+                    return false;
+                }
+            }
+            
+            con.commit(); // Commit transaction
+            return true;
+            
+        } catch (SQLException e) {
+            if (con != null) {
+                con.rollback();
+            }
+            throw e;
+        } finally {
+            if (con != null) {
+                con.setAutoCommit(true);
+                con.close();
+            }
         }
     }
 }

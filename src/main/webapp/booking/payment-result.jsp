@@ -150,7 +150,7 @@
                         <a href="booking?action=list" class="btn btn-primary btn-action">
                             <i class="fas fa-list"></i> Xem đặt phòng
                         </a>
-                        <a href="home.jsp" class="btn btn-outline-primary btn-action">
+                        <a href="${pageContext.request.contextPath}/home" class="btn btn-outline-primary btn-action">
                             <i class="fas fa-home"></i> Về trang chủ
                         </a>
                     </c:otherwise>

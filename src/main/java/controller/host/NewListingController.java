@@ -73,12 +73,18 @@ public class NewListingController extends HttpServlet {
         List<String> errors = new ArrayList<>();
         if (title == null || title.isBlank()) errors.add("Vui lòng nhập tiêu đề.");
         if (city == null || city.isBlank()) errors.add("Vui lòng nhập thành phố.");
+        if (address == null || address.isBlank()) errors.add("Vui lòng nhập địa chỉ.");
+        if (description == null || description.isBlank()) errors.add("Vui lòng nhập mô tả.");
         BigDecimal price = null;
-        try {
-            price = new BigDecimal(priceStr);
-            if (price.compareTo(BigDecimal.ZERO) <= 0) errors.add("Giá phải > 0.");
-        } catch (Exception e) {
-            errors.add("Giá không hợp lệ.");
+        if (priceStr == null || priceStr.isBlank()) {
+            errors.add("Vui lòng nhập giá phòng.");
+        } else {
+            try {
+                price = new BigDecimal(priceStr);
+                if (price.compareTo(BigDecimal.ZERO) <= 0) errors.add("Giá phải > 0.");
+            } catch (Exception e) {
+                errors.add("Giá không hợp lệ.");
+            }
         }
         int maxGuests = 1;
         try {
@@ -98,12 +104,17 @@ public class NewListingController extends HttpServlet {
         Integer listingId = null;
         try {
             listingId = listingService.createListing(me.getUserID(), title, description, address, city, price, maxGuests);
-            listingService.createListingRequest(listingId, me.getUserID());
+            if (listingId != null) {
+                listingService.createListingRequest(listingId, me.getUserID());
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            errors.add("Lỗi hệ thống: " + e.getMessage());
         }
         if (listingId == null) {
-            errors.add("Không thể tạo bài đăng. Thử lại sau.");
+            if (errors.isEmpty()) {
+                errors.add("Không thể tạo bài đăng. Thử lại sau.");
+            }
             req.setAttribute("errors", errors);
             req.getRequestDispatcher("/host/listing_new.jsp").forward(req, resp);
             return;
