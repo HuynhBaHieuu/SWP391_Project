@@ -23,4 +23,6 @@ public interface IListingService {
 
     // ✅ Thêm mới: tìm kiếm nhà theo từ khóa (Title, City, Address, Description)
     List<Listing> searchListings(String keyword) throws SQLException;
+    
+    void createListingRequest(int listingId, int hostId) throws SQLException;
 }

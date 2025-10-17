@@ -49,4 +49,9 @@ public class ListingService implements IListingService {
     public List<Listing> searchListings(String keyword) throws SQLException {
         return listingDAO.searchListings(keyword);
     }
+
+    @Override
+    public void createListingRequest(int listingId, int hostId) throws SQLException {
+        listingDAO.createListingRequest(listingId, hostId);
+    }
 }

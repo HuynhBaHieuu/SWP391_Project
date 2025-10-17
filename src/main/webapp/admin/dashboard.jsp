@@ -10,6 +10,7 @@
   <title>Admin Dashboard - go2bnb</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<%=request.getContextPath()%>/css/dashboard.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
   <%
@@ -100,6 +101,10 @@
           <a href="#" class="nav-item" data-section="host-requests">
             <span class="nav-icon">📝</span>
             <span>Yêu cầu trở thành Host</span>
+          </a>
+          <a href="#" class="nav-item" data-section="listing-requests">
+            <span class="nav-icon">⏳</span>
+            <span>Yêu cầu duyệt bài đăng</span>
           </a>
           <a href="#" class="nav-item" data-section="bookings">
             <span class="nav-icon">📅</span>
@@ -462,7 +467,82 @@
           </tbody>
         </table>
       </div>
-      
+        <!-- Listing Requests Management Section -->      
+    <div id="listing-requests" class="content-section">
+        <div class="content-header">
+            <h1 class="page-title">Yêu cầu duyệt bài đăng</h1>
+            <p class="page-subtitle">Duyệt các bài đăng chỗ ở được gửi bởi chủ nhà</p>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Bài đăng</th>
+                    <th>Chủ nhà</th>
+                    <th>Ngày đăng</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%
+                    try {
+                        rs = stmt.executeQuery(                               
+                                "SELECT lr.RequestID, l.ListingID, l.Title, l.Description, "
+                                        + "u.FullName AS HostName, lr.RequestedAt AS RequestDate, "
+                                        + "lr.Status AS RequestStatus, "
+                                        + "(SELECT TOP 1 li.ImageUrl FROM ListingImages li "
+                                        + "WHERE li.ListingID = l.ListingID ORDER BY li.ImageID ASC) AS ImageUrl "
+                                        + "FROM ListingRequests lr "
+                                        + "JOIN Listings l ON lr.ListingID = l.ListingID "
+                                        + "JOIN Users u ON lr.HostID = u.UserID "
+                                        + "WHERE lr.Status = 'Pending' "
+                                        + "ORDER BY lr.RequestedAt DESC;"
+                        );
+                        if (!rs.isBeforeFirst()) {
+                            out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#6b7280;'>Không bài đăng chỗ ở nào cần duyệt</td></tr>");
+                        } else {
+                            while (rs.next()) {
+                %>
+                <tr>
+                    <td>
+                        <div class="user-info">
+                            <img src="<%= rs.getString("ImageUrl") != null ? rs.getString("ImageUrl") : "images/placeholder.jpg"%>" alt="Listing" class="user-avatar">
+                            <div class="user-details">
+                                <span class="user-name"><%= rs.getString("Title")%></span>
+                                <span class="user-email"><%= rs.getString("Description")%></span>
+                            </div>
+                        </div>
+                    </td>
+                    <td><%= rs.getString("HostName")%></td>
+                    <td><%= rs.getTimestamp("RequestDate")%></td>
+                    <td><span class="badge badge-warning">PENDING</span></td>
+                    <td>
+                        <form class="form-inline" method="post" action="<%=request.getContextPath()%>/admin/listing-requests">
+                            <input type="hidden" name="requestId" value="<%= rs.getInt("RequestID")%>" />
+                            <button class="btn btn-success btn-sm" name="action" value="approve">Duyệt</button>
+                            <button class="btn btn-danger btn-sm" name="action" value="reject">Từ chối</button>
+                        </form>
+                    </td>
+                </tr>
+                <%
+                            }
+                        }
+                    } catch (Exception e) {
+                        out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                    }
+                %>
+            </tbody>
+        </table>
+    </div>     
+        <% if (request.getAttribute("message") != null) {%>
+        <div id="autoDismissAlert" 
+             class="alert alert-<%= "success".equals(request.getAttribute("type")) ? "success" : "danger"%> alert-dismissible fade show" 
+             role="alert"
+             style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+            <%= request.getAttribute("message")%>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } %>
       <!-- Bookings Section -->
       <div id="bookings" class="content-section">
         <div class="content-header">
@@ -1032,6 +1112,17 @@
     
     console.log('[v0] Dashboard initialized with database integration');
   </script>
+  <script>
+    // Tự động đóng alert sau 3 giây
+    const alertBox = document.getElementById('autoDismissAlert');
+    if (alertBox) {
+        setTimeout(() => {
+            const alert = bootstrap.Alert.getOrCreateInstance(alertBox);
+            alert.close();
+        }, 3000); // 3000ms = 3 giây
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
     
