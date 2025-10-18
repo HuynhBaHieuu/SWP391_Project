@@ -466,6 +466,246 @@ body {
   gap: 20px;
 }
 
+/* Booking Management Styles */
+.listing-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.listing-title {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.listing-address {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.host-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.host-name {
+  font-weight: 500;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.host-email {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.price {
+  font-weight: 600;
+  color: #059669;
+  font-size: 16px;
+}
+
+.text-muted {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+/* Action Button Styles */
+.action-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+  margin: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn-success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.action-btn-success:hover {
+  background: #a7f3d0;
+}
+
+.action-btn-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.action-btn-warning:hover {
+  background: #fde68a;
+}
+
+.action-btn-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.action-btn-danger:hover {
+  background: #fecaca;
+}
+
+.action-btn-view {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.action-btn-view:hover {
+  background: #c7d2fe;
+}
+
+/* Badge Styles */
+.badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* Search and Filter Styles */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #ff385c;
+  box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.1);
+}
+
+.form-select {
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #ff385c;
+  box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.1);
+}
+
+/* Table Enhancements */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.data-table th {
+  background: #f8fafc;
+  font-weight: 600;
+  text-align: left;
+  padding: 16px;
+  border-bottom: 2px solid #e5e7eb;
+  color: #374151;
+  font-size: 14px;
+}
+
+.data-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.data-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* User Info Styles */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.user-email {
+  font-size: 12px;
+  color: #6b7280;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {
@@ -483,5 +723,24 @@ body {
 
   .grid-2 {
     grid-template-columns: 1fr;
+  }
+
+  .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .data-table {
+    font-size: 12px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 8px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
   }
 }

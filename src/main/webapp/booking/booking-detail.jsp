@@ -291,10 +291,89 @@
                         </a>
                     </div>
                 </c:if>
+                
+                <!-- Admin Actions -->
+                <c:if test="${sessionScope.user.role == 'admin'}">
+                    <div class="detail-card">
+                        <h5 class="mb-3">
+                            <i class="fas fa-cog"></i> Quản lý (Admin)
+                        </h5>
+                        <div class="d-grid gap-2">
+                            <c:if test="${booking.status == 'Processing'}">
+                                <button class="btn btn-success" onclick="updateBookingStatus(${booking.bookingID}, 'Completed')">
+                                    <i class="fas fa-check"></i> Xác nhận đặt phòng
+                                </button>
+                                <button class="btn btn-danger" onclick="updateBookingStatus(${booking.bookingID}, 'Failed')">
+                                    <i class="fas fa-times"></i> Hủy đặt phòng
+                                </button>
+                            </c:if>
+                            <c:if test="${booking.status == 'Completed'}">
+                                <button class="btn btn-warning" onclick="updateBookingStatus(${booking.bookingID}, 'Failed')">
+                                    <i class="fas fa-ban"></i> Hủy đặt phòng
+                                </button>
+                            </c:if>
+                            <c:if test="${booking.status == 'Failed'}">
+                                <button class="btn btn-success" onclick="updateBookingStatus(${booking.bookingID}, 'Processing')">
+                                    <i class="fas fa-undo"></i> Khôi phục đặt phòng
+                                </button>
+                            </c:if>
+                            <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </c:if>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function updateBookingStatus(bookingId, newStatus) {
+            const statusText = {
+                'Processing': 'đang xử lý',
+                'Completed': 'hoàn thành',
+                'Failed': 'hủy bỏ'
+            };
+            
+            const actionText = newStatus === 'Failed' ? 'hủy' : 
+                              newStatus === 'Completed' ? 'xác nhận' : 'khôi phục';
+            
+            if (confirm(`Bạn có chắc muốn ${actionText} đặt phòng #${bookingId}?`)) {
+                const formData = new URLSearchParams();
+                formData.append('action', 'updateStatus');
+                formData.append('bookingId', bookingId);
+                formData.append('status', newStatus);
+                
+                fetch('${pageContext.request.contextPath}/admin/bookings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert(`Đã ${actionText} đặt phòng #${bookingId} thành công!`);
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra khi cập nhật trạng thái đặt phòng.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    alert('Có lỗi xảy ra khi cập nhật trạng thái đặt phòng: ' + error.message);
+                });
+            }
+        }
+    </script>
 </body>
 </html>
