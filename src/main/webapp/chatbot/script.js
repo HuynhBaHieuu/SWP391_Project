@@ -57,13 +57,13 @@ const generateBotResponse = async (incomingMessageDiv) => {
     }
 
     try {
-        console.log("Sending request to backend:", requestOptions.body);
+        console.log("Sending request to GO2BNB Assistant:", requestOptions.body);
         
         // Fetch bot response from backend
         const response = await fetch(BACKEND_API_URL, requestOptions);
         const data = await response.json();
         
-        console.log("Backend Response:", data);
+        console.log("GO2BNB Assistant Response:", data);
         
         if (!response.ok) {
             console.error("Backend Error:", data);
@@ -73,8 +73,9 @@ const generateBotResponse = async (incomingMessageDiv) => {
         if (data.success) {
             // Display bot's response text
             const botResponse = data.response;
-            console.log("Bot response:", botResponse);
+            console.log("AI response:", botResponse);
             
+            // Format response with proper line breaks and styling
             messageElement.innerHTML = botResponse.replace(/\n/g, '<br>');
             messageElement.style.color = "#333";
         } else {
@@ -82,18 +83,24 @@ const generateBotResponse = async (incomingMessageDiv) => {
         }
         
     } catch (error) {
-        console.error("Chatbot error:", error);
+        console.error("GO2BNB Assistant error:", error);
         
-        // Fallback response with helpful suggestions
-        const fallbackResponses = [
-            "💡 **Gợi ý câu lệnh:**\n\n🏠 **Tìm phòng:**\n• 'tôi muốn tìm phòng' - Tìm phòng tốt nhất\n• 'tìm phòng giá rẻ' - Phòng giá tốt\n• 'phòng có tiện ích gì' - Tiện ích phòng\n\n💰 **Thông tin giá:**\n• 'giá phòng như thế nào' - Thông tin giá\n• 'so sánh giá phòng' - So sánh giá cả\n\n📍 **Địa điểm:**\n• 'phòng ở đâu' - Địa điểm phổ biến\n• 'địa điểm nào có nhiều phòng' - Khu vực có nhiều phòng\n\n🔧 **Test:**\n• 'test' - Kiểm tra database\n• 'simple' - Test đơn giản",
-            "🏠 **Bạn có thể hỏi:**\n\n📅 **Đặt phòng:**\n• 'làm sao đặt phòng' - Hướng dẫn đặt phòng\n• 'cách đặt phòng' - Quy trình đặt phòng\n• 'đặt phòng như thế nào' - Hướng dẫn chi tiết\n\n🏠 **Tiện ích:**\n• 'tiện ích phòng' - Tiện ích có sẵn\n• 'phòng có wifi không' - Hỏi về wifi\n• 'phòng có điều hòa không' - Hỏi về điều hòa\n\n🔧 **Test:**\n• 'kiểm tra' - Test hệ thống\n• 'simple' - Test đơn giản",
-            "📞 **Hỗ trợ khách hàng:**\n\n🏠 **Tìm phòng:**\n• 'phòng gần trung tâm' - Tìm phòng theo vị trí\n• 'phòng ở quận nào' - Tìm theo quận\n• 'tôi cần tư vấn phòng' - Tư vấn chuyên nghiệp\n\n💰 **Giá cả:**\n• 'phòng giá bao nhiêu' - Hỏi về giá\n• 'so sánh giá phòng' - So sánh giá cả\n\n💡 **Gợi ý khác:**\n• 'giúp tôi' - Xem tất cả lệnh\n• 'hướng dẫn' - Hướng dẫn sử dụng",
-            "❌ **Lỗi kết nối!** Vui lòng thử:\n\n🔧 **Test hệ thống:**\n• 'test' - Kiểm tra database\n• 'simple' - Test đơn giản\n• 'kiểm tra' - Test hệ thống\n\n💡 **Hoặc hỏi lại sau ít phút**\n\n🏠 **Câu hỏi phổ biến:**\n• 'tôi muốn tìm phòng'\n• 'giá phòng như thế nào'\n• 'phòng ở đâu'\n• 'làm sao đặt phòng'"
-        ];
+        // Fallback response for GO2BNB Assistant
+        const fallbackResponse = "🤖 **GO2BNB Assistant - Trợ lý AI nội bộ**<br><br>" +
+            "Xin lỗi, có lỗi xảy ra khi xử lý câu hỏi của bạn.<br><br>" +
+            "💡 **Tôi có thể hỗ trợ bạn về:**<br><br>" +
+            "📅 **Đặt phòng:** Quy trình đặt phòng, booking process<br>" +
+            "💳 **Thanh toán:** Hệ thống VNPay, payment flow<br>" +
+            "🏠 **Host:** Cách trở thành host, host request<br>" +
+            "👨‍💼 **Admin:** Dashboard, quản lý hệ thống<br>" +
+            "💬 **Chat:** Hệ thống tin nhắn, messaging<br>" +
+            "👤 **Vai trò:** Guest, Host, Admin roles<br>" +
+            "🔐 **Bảo mật:** Security, authentication<br>" +
+            "🗄️ **Database:** Cấu trúc cơ sở dữ liệu<br>" +
+            "🏗️ **Kiến trúc:** MVC, DAO, Service layers<br><br>" +
+            "❓ **Hãy hỏi cụ thể về chức năng GO2BNB bạn muốn tìm hiểu!**";
         
-        const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-        messageElement.innerHTML = randomResponse.replace(/\n/g, '<br>');
+        messageElement.innerHTML = fallbackResponse;
         messageElement.style.color = "#333";
         
     } finally {
