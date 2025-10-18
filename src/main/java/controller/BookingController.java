@@ -292,7 +292,11 @@ public class BookingController extends HttpServlet {
             
             // Check if user has permission to view this booking
             boolean canView = false;
-            if ("Host".equals(user.getRole()) && booking.getListingID() != 0) {
+            
+            // Admin can view all bookings
+            if ("admin".equalsIgnoreCase(user.getRole())) {
+                canView = true;
+            } else if ("Host".equals(user.getRole()) && booking.getListingID() != 0) {
                 Listing listing = listingDAO.getListingById(booking.getListingID());
                 canView = listing != null && listing.getHostID() == user.getUserID();
             } else if (booking.getGuestID() == user.getUserID()) {

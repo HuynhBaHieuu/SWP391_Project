@@ -230,4 +230,87 @@ public class BookingDAO {
         }
         return detail;
     }
+    
+    public List<Booking> getAllBookings() {
+        String sql = "SELECT b.*, u.FullName as GuestName, u.Email as GuestEmail, u.ProfileImage as GuestAvatar, " +
+                     "l.Title as ListingTitle, l.Address as ListingAddress, l.PricePerNight, " +
+                     "h.FullName as HostName, h.Email as HostEmail " +
+                     "FROM Bookings b " +
+                     "LEFT JOIN Users u ON b.GuestID = u.UserID " +
+                     "LEFT JOIN Listings l ON b.ListingID = l.ListingID " +
+                     "LEFT JOIN Users h ON l.HostID = h.UserID " +
+                     "ORDER BY b.CreatedAt DESC";
+        
+        List<Booking> bookings = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Booking booking = mapResultSetToBooking(rs);
+                    // Set additional fields for admin view
+                    booking.setGuestName(rs.getString("GuestName"));
+                    booking.setListingTitle(rs.getString("ListingTitle"));
+                    booking.setListingAddress(rs.getString("ListingAddress"));
+                    booking.setPricePerNight(rs.getBigDecimal("PricePerNight"));
+                    
+                    // Create a simple listing object for display
+                    Listing listing = new Listing();
+                    listing.setListingID(rs.getInt("ListingID"));
+                    listing.setTitle(rs.getString("ListingTitle"));
+                    listing.setAddress(rs.getString("ListingAddress"));
+                    listing.setPricePerNight(rs.getBigDecimal("PricePerNight"));
+                    booking.setListing(listing);
+                    
+                    bookings.add(booking);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return bookings;
+    }
+    
+    public List<Booking> getBookingsByStatus(String status) {
+        String sql = "SELECT b.*, u.FullName as GuestName, u.Email as GuestEmail, u.ProfileImage as GuestAvatar, " +
+                     "l.Title as ListingTitle, l.Address as ListingAddress, l.PricePerNight, " +
+                     "h.FullName as HostName, h.Email as HostEmail " +
+                     "FROM Bookings b " +
+                     "LEFT JOIN Users u ON b.GuestID = u.UserID " +
+                     "LEFT JOIN Listings l ON b.ListingID = l.ListingID " +
+                     "LEFT JOIN Users h ON l.HostID = h.UserID " +
+                     "WHERE b.Status = ? " +
+                     "ORDER BY b.CreatedAt DESC";
+        
+        List<Booking> bookings = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, status);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Booking booking = mapResultSetToBooking(rs);
+                    booking.setGuestName(rs.getString("GuestName"));
+                    booking.setListingTitle(rs.getString("ListingTitle"));
+                    booking.setListingAddress(rs.getString("ListingAddress"));
+                    booking.setPricePerNight(rs.getBigDecimal("PricePerNight"));
+                    
+                    Listing listing = new Listing();
+                    listing.setListingID(rs.getInt("ListingID"));
+                    listing.setTitle(rs.getString("ListingTitle"));
+                    listing.setAddress(rs.getString("ListingAddress"));
+                    listing.setPricePerNight(rs.getBigDecimal("PricePerNight"));
+                    booking.setListing(listing);
+                    
+                    bookings.add(booking);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return bookings;
+    }
 }
