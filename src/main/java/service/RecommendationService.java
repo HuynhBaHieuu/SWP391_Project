@@ -8,9 +8,10 @@ import java.util.stream.Collectors;
 
 /**
  * Service để đề xuất sản phẩm thông minh dựa trên:
- * - Cùng thành phố
+ * - Cùng thành phố (bắt buộc)
  * - Khoảng giá tương tự
  * - Số khách tối đa phù hợp
+ * - Từ khóa tương đồng
  * - Loại trừ sản phẩm hiện tại
  */
 public class RecommendationService {
@@ -35,6 +36,7 @@ public class RecommendationService {
         List<Listing> allListings = listingDAO.getAllActiveListings()
             .stream()
             .filter(listing -> listing.getListingID() != currentListing.getListingID())
+            .filter(listing -> isNearbyByLocation(currentListing, listing)) // Lọc theo vị trí gần
             .collect(Collectors.toList());
         
         if (allListings.isEmpty()) {
@@ -246,6 +248,19 @@ public class RecommendationService {
         
         return keywords;
     }
+    
+    /**
+     * Kiểm tra listing có cùng thành phố với listing hiện tại không
+     */
+    private boolean isNearbyByLocation(Listing currentListing, Listing candidateListing) {
+        // Chỉ lọc theo cùng thành phố
+        if (currentListing.getCity() != null && candidateListing.getCity() != null) {
+            return currentListing.getCity().equalsIgnoreCase(candidateListing.getCity());
+        }
+        
+        return false;
+    }
+    
     
     /**
      * Inner class để lưu trữ listing cùng với điểm số

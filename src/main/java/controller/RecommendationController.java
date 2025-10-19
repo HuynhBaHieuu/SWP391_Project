@@ -89,7 +89,7 @@ public class RecommendationController extends HttpServlet {
             }
             
             result.addProperty("success", true);
-            result.addProperty("message", "Recommendations retrieved successfully");
+            result.addProperty("message", "Sorry, we couldn’t find any rooms nearby");
             result.add("data", data);
             
         } catch (NumberFormatException e) {
