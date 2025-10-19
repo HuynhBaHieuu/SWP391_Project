@@ -1,0 +1,136 @@
+/* Root */
+:root {
+  --xp-text: #222;
+  --xp-muted: #717171;
+  --xp-border: #e5e5e5;
+  --xp-bg: #fff;
+  --xp-card: #ffffff;
+  --xp-shadow: 0 5px 20px rgba(0,0,0,.08);
+  --xp-shadow-hover: 0 20px 40px rgba(0,0,0,.15);
+  --xp-radius: 18px;
+}
+
+/* Layout */
+.xp-main { padding: 16px 32px 56px; }
+
+.xp-hero {
+  display: grid; gap: 16px; margin: 8px 0 24px;
+}
+
+.xp-tabs { display: flex; gap: 8px; }
+.xp-tab {
+  border: 1px solid var(--xp-border);
+  background: var(--xp-bg);
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: var(--xp-text);
+}
+.xp-tab.active { background: #000; color: #fff; }
+
+.xp-search {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid var(--xp-border);
+  border-radius: 999px;
+  background: var(--xp-bg);
+}
+.xp-search-item { padding: 8px 14px; display: grid; }
+.xp-search-item .label { font-size: 12px; color: var(--xp-muted); }
+.xp-search-item input {
+  border: none; outline: none; font-size: 14px; padding: 2px 0; color: var(--xp-text);
+}
+.xp-search-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: none; background: #ff385c; color: #fff; display: grid; place-items: center;
+}
+
+/* Row */
+.xp-row { margin: 24px 0 8px; }
+.xp-row-header {
+  display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 8px; margin-bottom: 12px;
+}
+.xp-row-header h2 { font-size: 22px; margin: 0; }
+.xp-sub { margin: 4px 0 0; color: var(--xp-muted); grid-column: 1/-1; }
+
+.nav-arrows { display: flex; gap: 6px; }
+.nav-arrow {
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--xp-border);
+  background: var(--xp-bg); line-height: 1; font-size: 18px;
+}
+
+/* Cards scroller */
+.xp-cards {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 300px);
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+}
+.xp-cards::-webkit-scrollbar { height: 8px; }
+.xp-cards::-webkit-scrollbar-thumb { background: #ddd; border-radius: 99px; }
+
+/* Card */
+.xp-card {
+  background: var(--xp-card);
+  border: 1px solid var(--xp-border);
+  border-radius: var(--xp-radius);
+  overflow: hidden;
+  box-shadow: var(--xp-shadow);
+  transform: translateY(8px);
+  opacity: 0;
+  transition: all .3s ease;
+  scroll-snap-align: start;
+}
+.xp-card.visible { transform: translateY(0); opacity: 1; }
+
+.xp-image { position: relative; aspect-ratio: 16/11; overflow: hidden; }
+.xp-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.xp-time {
+  position: absolute; top: 10px; left: 10px;
+  background: #fff; border-radius: 999px; padding: 4px 10px; font-weight: 600; font-size: 12px;
+  box-shadow: var(--xp-shadow);
+}
+.xp-badge {
+  position: absolute; top: 10px; left: 10px;
+  background: #fff; border-radius: 999px; padding: 4px 10px; font-weight: 700; font-size: 12px;
+  box-shadow: var(--xp-shadow);
+}
+.wishlist-btn {
+  position: absolute; top: 10px; right: 10px;
+  width: 36px; height: 36px; border-radius: 50%; border: none; background: #fff; display: grid; place-items: center;
+  box-shadow: var(--xp-shadow);
+}
+.wishlist-btn i { font-size: 18px; }
+.wishlist-btn.active { background: #ff385c; color: #fff; }
+
+.xp-info { padding: 12px 14px 14px; }
+.xp-info h3 {
+  font-size: 15px; line-height: 1.35; margin: 0 0 8px; color: var(--xp-text);
+}
+.xp-meta {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--xp-muted);
+}
+.xp-price { font-weight: 700; color: var(--xp-text); }
+.xp-rate::before { content: "★ "; color: #ff385c; }
+
+/* Hover */
+.xp-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: var(--xp-shadow-hover); }
+
+/* Responsive */
+@media (max-width: 992px) {
+  .xp-search { grid-template-columns: 1fr 1fr auto; }
+  .xp-search-item:nth-child(2) { display: none; }
+}
+@media (max-width: 640px) {
+  .xp-main { padding: 8px 14px 48px; }
+  .xp-search { grid-template-columns: 1fr auto; }
+  .xp-search-item:nth-child(2),
+  .xp-search-item:nth-child(3) { display: none; }
+}
+
