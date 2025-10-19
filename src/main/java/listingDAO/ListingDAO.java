@@ -136,7 +136,12 @@ public class ListingDAO {
         }
 
         // ✅ Lấy ảnh đầu tiên từ ListingImages
-        listing.setFirstImage(new ListingImageDAO().getFirstImage(listing.getListingID()));
+        try {
+            String firstImage = new ListingImageDAO().getFirstImage(listing.getListingID());
+            listing.setFirstImage(firstImage);
+        } catch (Exception e) {
+            listing.setFirstImage(null);
+        }
 
         return listing;
     }
@@ -355,12 +360,15 @@ public class ListingDAO {
                 + "WHERE Status = 'Active' "
                 + "AND (IsDeleted = 0 OR IsDeleted IS NULL) "
                 + "ORDER BY CreatedAt DESC";
+        
         try (Connection con = DBConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
+            
             while (rs.next()) {
                 listings.add(mapResultSetToListing(rs));
             }
+            
         } catch (SQLException e) {
             e.printStackTrace();
         }
