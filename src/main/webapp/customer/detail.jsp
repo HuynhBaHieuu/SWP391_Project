@@ -3,12 +3,16 @@
     String idParam = request.getParameter("id");
     Listing listing = null;
     java.util.List<String> images = new java.util.ArrayList<>();
+    if (pageContext.getAttribute("currentUser") == null) {
+        User currentUser = (User) session.getAttribute("user");
+        pageContext.setAttribute("currentUser", currentUser);
+    }
 
     if (idParam != null) {
         int listingId = Integer.parseInt(idParam);
         ListingDAO dao = new ListingDAO();
         ListingImageDAO imgDao = new ListingImageDAO();
-
+        
         listing = dao.getListingById(listingId);
         images = imgDao.getImagesForListing(listingId);
     }
@@ -21,6 +25,7 @@
         <title><%= (listing != null) ? listing.getTitle() : "Chi tiết nơi lưu trú"%></title>
         <link rel="icon" type="image/jpg" href="../image/logo.jpg">
         <link rel="stylesheet" href="../css/home.css">
+        <link rel="stylesheet" href="../css/recommendations.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
         <style>
@@ -276,6 +281,7 @@
                     max-height: 250px;
                 }
             }
+
         </style>
     </head>
     <body>
@@ -371,6 +377,35 @@
                 <a href="${pageContext.request.contextPath}/booking?action=create&listingId=<%= listing.getListingID()%>" class="book-btn">
                     <i class="bi bi-calendar-check"></i> Đặt phòng ngay
                 </a>
+            </div>
+
+            <!-- RECOMMENDATIONS SECTION -->
+            <div class="recommendations-section">
+                <h2 class="recommendations-title">
+                    <i class="bi bi-lightbulb"></i> 
+                    Có thể bạn sẽ thích
+                </h2>
+                <p class="recommendations-subtitle">Những nơi lưu trú tương tự mà bạn có thể quan tâm</p>
+                
+                <div class="recommendations-container">
+                    <div class="recommendations-loading" id="recommendationsLoading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                        <p>Đang tìm kiếm đề xuất phù hợp...</p>
+                    </div>
+                    
+                    <div class="recommendations-grid" id="recommendationsGrid" style="display: none;">
+                        <!-- Recommendations will be loaded here via JavaScript -->
+                    </div>
+                    
+                    <div class="recommendations-error" id="recommendationsError" style="display: none;">
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Không thể tải đề xuất sản phẩm. Vui lòng thử lại sau.
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <% } else { %>
@@ -482,6 +517,205 @@
                             });
                         });
                     });
+
+                    // Load recommendations
+                    loadRecommendations();
+
+                    // Function to load recommendations
+                    function loadRecommendations() {
+                        const loadingEl = document.getElementById('recommendationsLoading');
+                        const gridEl = document.getElementById('recommendationsGrid');
+                        const errorEl = document.getElementById('recommendationsError');
+                        
+                        // Get current listing ID from URL
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const listingId = urlParams.get('id');
+                        
+                        if (!listingId) {
+                            showRecommendationsError();
+                            return;
+                        }
+                        
+                        // Show loading
+                        loadingEl.style.display = 'block';
+                        gridEl.style.display = 'none';
+                        errorEl.style.display = 'none';
+                        
+                        // Fetch recommendations
+                        const apiUrl = window.location.origin + '/GO2BNB_Project/recommendations?listingId=' + listingId;
+                        fetch(apiUrl, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('HTTP error! status: ' + response.status);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                loadingEl.style.display = 'none';
+                                
+                                if (data.success && data.data && data.data.recommendations && data.data.recommendations.length > 0) {
+                                    displayRecommendations(data.data.recommendations);
+                                } else {
+                                    showRecommendationsError(data.message || 'Unknown error', data.error);
+                                }
+                            })
+                            .catch(error => {
+                                loadingEl.style.display = 'none';
+                                showRecommendationsError();
+                            });
+                    }
+                    
+                    // Function to display recommendations
+                    function displayRecommendations(recommendations) {
+                        const gridEl = document.getElementById('recommendationsGrid');
+                        
+                        if (!recommendations || recommendations.length === 0) {
+                            showRecommendationsEmpty();
+                            return;
+                        }
+                        
+                        const defaultImage = 'https://images.unsplash.com/photo-1594873604892-b599f847e859?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfHx8fDE3NTk3NzE0OTF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral';
+                        const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/../customer/detail.jsp?id=';
+                        
+                        gridEl.innerHTML = recommendations.map(function(listing) {
+                            return '<div class="recommendation-card" onclick="viewListing(' + listing.listingID + ')">' +
+                                '<img src="' + (listing.firstImage || defaultImage) + '" ' +
+                                     'alt="' + listing.title + '" ' +
+                                     'class="recommendation-image" ' +
+                                     'onerror="this.src=\'' + defaultImage + '\'">' +
+                                '<div class="recommendation-content">' +
+                                    '<h3 class="recommendation-title">' + listing.title + '</h3>' +
+                                    '<div class="recommendation-city">' +
+                                        '<i class="bi bi-geo-alt"></i>' +
+                                        listing.city +
+                                    '</div>' +
+                                    '<div class="recommendation-price">' +
+                                        '<span data-price="' + listing.pricePerNight + '"></span>' +
+                                        '<span>/ đêm</span>' +
+                                    '</div>' +
+                                    '<div class="recommendation-guests">' +
+                                        '<i class="bi bi-people"></i>' +
+                                        'Tối đa ' + listing.maxGuests + ' khách' +
+                                    '</div>' +
+                                    '<div class="recommendation-actions">' +
+                                        '<a href="' + baseUrl + listing.listingID + '" ' +
+                                           'class="recommendation-btn recommendation-view-btn" ' +
+                                           'onclick="event.stopPropagation()">' +
+                                            '<i class="bi bi-eye"></i>' +
+                                            'Xem chi tiết' +
+                                        '</a>' +
+                                        '<button class="recommendation-btn recommendation-wishlist-btn" ' +
+                                                'onclick="toggleWishlist(' + listing.listingID + ', this); event.stopPropagation()">' +
+                                            '<i class="bi bi-heart"></i>' +
+                                        '</button>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+                        }).join('');
+                        
+                        gridEl.style.display = 'grid';
+                        
+                        // Format prices
+                        formatPrices();
+                    }
+                    
+                    // Function to show error state
+                    function showRecommendationsError(message, error) {
+                        const loadingEl = document.getElementById('recommendationsLoading');
+                        const gridEl = document.getElementById('recommendationsGrid');
+                        const errorEl = document.getElementById('recommendationsError');
+                        
+                        loadingEl.style.display = 'none';
+                        gridEl.style.display = 'none';
+                        errorEl.style.display = 'block';
+                        
+                        // Update error message with details
+                        if (message || error) {
+                            let errorHtml = '<div class="alert alert-danger" role="alert">';
+                            errorHtml += '<i class="bi bi-exclamation-triangle"></i>';
+                            errorHtml += '<strong>Lỗi:</strong> ' + (message || 'Không thể tải đề xuất sản phẩm');
+                            if (error) {
+                                errorHtml += '<br><small>Chi tiết: ' + error + '</small>';
+                            }
+                            errorHtml += '</div>';
+                            errorEl.innerHTML = errorHtml;
+                        }
+                    }
+                    
+                    // Function to show empty state
+                    function showRecommendationsEmpty() {
+                        const loadingEl = document.getElementById('recommendationsLoading');
+                        const gridEl = document.getElementById('recommendationsGrid');
+                        const errorEl = document.getElementById('recommendationsError');
+                        
+                        loadingEl.style.display = 'none';
+                        gridEl.style.display = 'none';
+                        errorEl.style.display = 'block';
+                        
+                        // Update error message for empty state
+                        errorEl.innerHTML = '<div class="alert alert-info" role="alert">' +
+                            '<i class="bi bi-info-circle"></i>' +
+                            'Hiện tại chưa có sản phẩm tương tự để đề xuất. Hãy khám phá thêm các sản phẩm khác!' +
+                            '</div>';
+                    }
+                    
+                    // Function to view listing
+                    function viewListing(listingId) {
+                        const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/../customer/detail.jsp?id=' + listingId;
+                        window.location.href = baseUrl;
+                    }
+                    
+                    // Function to toggle wishlist
+                    function toggleWishlist(listingId, button) {
+                        // Check if user is logged in
+                        <% if (currentUser == null) { %>
+                        Swal.fire({
+                            title: 'Vui lòng đăng nhập',
+                            text: 'Bạn cần đăng nhập để thêm vào danh sách yêu thích.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Đăng nhập',
+                            cancelButtonText: 'Hủy'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '${pageContext.request.contextPath}/login.jsp';
+                            }
+                        });
+                        return;
+                        <% } %>
+                        
+                        // Toggle button state
+                        const isActive = button.classList.contains('active');
+                        button.classList.toggle('active');
+                        
+                        // Update icon
+                        const icon = button.querySelector('i');
+                        if (isActive) {
+                            icon.className = 'bi bi-heart';
+                        } else {
+                            icon.className = 'bi bi-heart-fill';
+                        }
+                        
+                        // TODO: Implement actual wishlist API call
+                    }
+                    
+                    // Function to format prices (reuse existing i18n functionality)
+                    function formatPrices() {
+                        document.querySelectorAll('[data-price]').forEach(element => {
+                            const price = parseFloat(element.getAttribute('data-price'));
+                            if (!isNaN(price)) {
+                                element.textContent = new Intl.NumberFormat('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND'
+                                }).format(price);
+                            }
+                        });
+                    }
         </script>
 
         <%@ include file="../design/footer.jsp" %>
