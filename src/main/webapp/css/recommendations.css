@@ -1,0 +1,256 @@
+/* ===== RECOMMENDATIONS SECTION STYLES ===== */
+
+.recommendations-section {
+    margin-top: 50px;
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 20px;
+}
+
+.recommendations-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.recommendations-title i {
+    color: #ff385c;
+    font-size: 26px;
+}
+
+.recommendations-subtitle {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 25px;
+}
+
+.recommendations-container {
+    position: relative;
+}
+
+.recommendations-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.recommendations-loading .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 15px;
+}
+
+.recommendations-loading p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.recommendation-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #e9ecef;
+    position: relative;
+}
+
+.recommendation-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 56, 92, 0.05) 0%, rgba(102, 126, 234, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+
+.recommendation-card:hover::before {
+    opacity: 1;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.recommendation-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: #f8f9fa;
+}
+
+.recommendation-content {
+    padding: 16px;
+    position: relative;
+    z-index: 2;
+}
+
+.recommendation-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.recommendation-city {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.recommendation-city i {
+    font-size: 12px;
+}
+
+.recommendation-price {
+    color: #ff385c;
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.recommendation-guests {
+    color: #666;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.recommendation-guests i {
+    font-size: 12px;
+}
+
+.recommendation-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.recommendation-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.recommendation-view-btn {
+    background: #ff385c;
+    color: white;
+}
+
+.recommendation-view-btn:hover {
+    background: #e31c5f;
+    color: white;
+}
+
+.recommendation-wishlist-btn {
+    background: #f8f9fa;
+    color: #666;
+    border: 1px solid #dee2e6;
+    flex: 0 0 auto;
+    width: 40px;
+    padding: 8px;
+}
+
+.recommendation-wishlist-btn:hover {
+    background: #e9ecef;
+    color: #ff385c;
+}
+
+.recommendation-wishlist-btn.active {
+    background: #ff385c;
+    color: white;
+    border-color: #ff385c;
+}
+
+.recommendations-error {
+    text-align: center;
+    padding: 20px;
+}
+
+.recommendations-error .alert {
+    margin: 0;
+    border-radius: 8px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .recommendation-card {
+        margin-bottom: 0;
+    }
+
+    .recommendations-title {
+        font-size: 20px;
+    }
+
+    .recommendations-subtitle {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .recommendations-section {
+        margin-top: 30px;
+        padding-top: 20px;
+    }
+
+    .recommendations-title {
+        font-size: 18px;
+    }
+
+    .recommendation-content {
+        padding: 12px;
+    }
+
+    .recommendation-title {
+        font-size: 15px;
+    }
+
+    .recommendation-price {
+        font-size: 16px;
+    }
+}
