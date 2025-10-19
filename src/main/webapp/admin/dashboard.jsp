@@ -113,7 +113,7 @@
           </a>
           <a href="#" class="nav-item" data-section="reviews">
             <span class="nav-icon">💬</span>
-            <span>Reviews / Reports</span>
+            <span>Feedbacks Management</span>
           </a>
           <a href="#" class="nav-item" data-section="payments">
             <span class="nav-icon">💵</span>
@@ -698,37 +698,49 @@
       <!-- Reviews & Reports Section -->
       <div id="reviews" class="content-section">
         <div class="content-header">
-          <h1 class="page-title">Quản lý đánh giá & báo cáo</h1>
-          <p class="page-subtitle">Xem và xử lý đánh giá, báo cáo từ người dùng</p>
-        </div>
-        
-        <div class="search-bar">
-          <input type="text" class="search-input" placeholder="Tìm kiếm đánh giá...">
-          <select class="form-select" style="width: auto;">
-            <option>Tất cả loại</option>
-            <option>Đánh giá</option>
-            <option>Báo cáo listing</option>
-            <option>Báo cáo user</option>
-          </select>
+          <h1 class="page-title">Quản lý phản hồi</h1>
+          <p class="page-subtitle">Xem và xử lý các phản hồi từ người dùng</p>
         </div>
         
         <table class="data-table">
           <thead>
             <tr>
-              <th>Người gửi</th>
-              <th>Loại</th>
-              <th>Nội dung</th>
-              <th>Đánh giá</th>
+              <th>Tên người gửi</th>
+              <th>Loại phản hồi</th>
               <th>Ngày gửi</th>
+              <th>Trạng thái</th>
               <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
+              <%
+                    try {
+                        rs = stmt.executeQuery(                               
+                            "SELECT * FROM Feedbacks WHERE Status = 'Pending' ORDER BY CreatedAt DESC;"
+                        );
+                        if (!rs.isBeforeFirst()) {
+                            out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#6b7280;'>Chưa có phản hồi nào từ người dùng</td></tr>");
+                        } else {
+                            while (rs.next()) {
+                %>
             <tr>
-              <td colspan="6" style="text-align: center; padding: 40px; color: #6b7280;">
-                Chưa có đánh giá hoặc báo cáo nào
-              </td>
-            </tr>
+                    <td><%= rs.getString("Name")%></td>
+                    <td><%= rs.getString("Type")%></td>
+                    <td><%= rs.getTimestamp("CreatedAt")%></td>
+                    <td><span class="badge badge-warning">Đang xử lí</span></td>
+                    <td>
+                        <a href="${pageContext.request.contextPath}/admin/feedback?action=view&id=<%= rs.getString("FeedbackID")%>"><i class="fas fa-eye"></i></a>
+                        <a href="${pageContext.request.contextPath}/admin/feedback?action=resolve&id=<%= rs.getString("FeedbackID")%>" onclick="return confirm('Đánh dấu là đã xử lý thành công?')" style="margin-left: 2rem;"><i class="fas fa-check"></i></a>
+                        <a href="${pageContext.request.contextPath}/admin/feedback?action=close&id=<%= rs.getString("FeedbackID")%>" onclick="return confirm('Đóng phản hồi này?')" style="margin-left: 2rem;"><i class="fas fa-times"></i></a>
+                    </td>
+                </tr>
+                            <%
+                            }
+                        }
+                    } catch (Exception e) {
+                        out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                    }
+                %>
           </tbody>
         </table>
       </div>
