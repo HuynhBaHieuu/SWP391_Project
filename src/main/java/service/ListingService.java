@@ -5,8 +5,10 @@ import model.Listing;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public class ListingService implements IListingService {
+
     private final ListingDAO listingDAO;
 
     public ListingService() {
@@ -15,7 +17,7 @@ public class ListingService implements IListingService {
 
     @Override
     public Integer createListing(int hostId, String title, String description,
-                                 String address, String city, BigDecimal pricePerNight, int maxGuests) throws SQLException {
+            String address, String city, BigDecimal pricePerNight, int maxGuests) throws SQLException {
         return listingDAO.createListing(hostId, title, description, address, city, pricePerNight, maxGuests);
     }
 
@@ -36,7 +38,7 @@ public class ListingService implements IListingService {
 
     @Override
     public boolean updateListing(int listingId, String title, String description,
-                                 String address, String city, BigDecimal pricePerNight, int maxGuests, String status) throws SQLException {
+            String address, String city, BigDecimal pricePerNight, int maxGuests, String status) throws SQLException {
         return listingDAO.updateListing(listingId, title, description, address, city, pricePerNight, maxGuests, status);
     }
 
@@ -54,4 +56,9 @@ public class ListingService implements IListingService {
     public void createListingRequest(int listingId, int hostId) throws SQLException {
         listingDAO.createListingRequest(listingId, hostId);
     }
+
+    public Map<String, List<Listing>> getListingsGroupedByCity() throws SQLException {
+        return listingDAO.getListingsGroupedByCity();
+    }
+
 }
