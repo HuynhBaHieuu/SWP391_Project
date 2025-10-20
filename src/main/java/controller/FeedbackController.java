@@ -37,17 +37,11 @@ public class FeedbackController extends HttpServlet {
         // Lấy userID từ session nếu có
         HttpSession session = request.getSession();
         User currentUser = (User) session.getAttribute("user");
-        System.out.println("userid: "+currentUser.getUserID());
         String name = request.getParameter("name");
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
         String type = request.getParameter("type");
         String content = request.getParameter("content");
-        System.out.println("name: "+name);
-        System.out.println("email: "+email);
-        System.out.println("phone: "+phone);
-        System.out.println("type: "+type);
-        System.out.println("content: "+content);
 
         Feedback feedback = new Feedback(currentUser.getUserID(), name, email, phone, type, content);
         boolean success = false;

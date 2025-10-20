@@ -525,4 +525,19 @@ public class ListingDAO {
             }
         }
     }
+    
+    public int getListingIdByRequestId(int requestId) {
+        String sql = "SELECT ListingID FROM ListingRequests WHERE RequestID = ?";
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("ListingID");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 }
