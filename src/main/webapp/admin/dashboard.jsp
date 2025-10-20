@@ -284,7 +284,7 @@
             <tr>
               <td>
                 <div class="user-info">
-                  <img src="<%= rs.getString("avatar_url") != null ? rs.getString("avatar_url") : "https://i.pravatar.cc/150" %>" alt="User" class="user-avatar">
+                  <img src="<%= rs.getString("avatar_url") != null ? request.getContextPath() + "/" + rs.getString("avatar_url") : "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg" %>" alt="User" class="user-avatar">
                   <div class="user-details">
                     <span class="user-name"><%= rs.getString("full_name") %></span>
                     <span class="user-email"><%= rs.getString("email") %></span>
@@ -516,10 +516,11 @@
                     </td>
                     <td><%= rs.getString("HostName")%></td>
                     <td><%= rs.getTimestamp("RequestDate")%></td>
-                    <td><span class="badge badge-warning">PENDING</span></td>
+                    <td><span class="badge badge-warning">Đang xử lí</span></td>
                     <td>
                         <form class="form-inline" method="post" action="<%=request.getContextPath()%>/admin/listing-requests">
                             <input type="hidden" name="requestId" value="<%= rs.getInt("RequestID")%>" />
+                            <button class="btn btn-primary btn-sm" name="action" value="view">Xem chi tiết</button>
                             <button class="btn btn-success btn-sm" name="action" value="approve">Duyệt</button>
                             <button class="btn btn-danger btn-sm" name="action" value="reject">Từ chối</button>
                         </form>
