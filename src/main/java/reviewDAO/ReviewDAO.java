@@ -39,12 +39,13 @@ public class ReviewDAO extends DBConnection {
         return list;
     }
 
-    // 🔹 Lấy BookingID mà user có thể review
+    // 🔹 Lấy BookingID mà user có thể review (đã hoàn thành và qua ngày checkout)
     public int getCompletedBookingID(int userID, int listingID) {
         String sql = """
             SELECT TOP 1 BookingID
             FROM Bookings
             WHERE GuestID = ? AND ListingID = ? AND Status = 'Completed'
+              AND CheckOutDate < GETDATE()
               AND BookingID NOT IN (SELECT BookingID FROM Reviews)
         """;
         try (Connection conn = getConnection();
@@ -74,12 +75,13 @@ public class ReviewDAO extends DBConnection {
         }
     }
 
-    // 🔹 Kiểm tra xem user đã từng ở và có thể review không
+    // 🔹 Kiểm tra xem user đã từng ở và có thể review không (đã hoàn thành và qua ngày checkout)
     public boolean canReview(int userID, int listingID) {
         String sql = """
             SELECT COUNT(*) AS CountBooking
             FROM Bookings
             WHERE GuestID = ? AND ListingID = ? AND Status = 'Completed'
+              AND CheckOutDate < GETDATE()
               AND BookingID NOT IN (SELECT BookingID FROM Reviews)
         """;
         try (Connection conn = getConnection();
@@ -110,6 +112,27 @@ public class ReviewDAO extends DBConnection {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getDouble("AvgRating");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    // 🔹 Lấy số lượng review của Listing
+    public int getReviewCount(int listingID) {
+        String sql = """
+            SELECT COUNT(*) AS ReviewCount
+            FROM Reviews r
+            JOIN Bookings b ON r.BookingID = b.BookingID
+            WHERE b.ListingID = ?
+        """;
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, listingID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("ReviewCount");
             }
         } catch (Exception e) {
             e.printStackTrace();

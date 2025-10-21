@@ -1,8 +1,12 @@
-<%@ page import="listingDAO.ListingDAO, listingDAO.ListingImageDAO, model.Listing, model.User" %>
+<%@ page import="listingDAO.ListingDAO, listingDAO.ListingImageDAO, model.Listing, model.User, reviewDAO.ReviewDAO, model.Review, java.util.List" %>
 <%
     String idParam = request.getParameter("id");
     Listing listing = null;
     java.util.List<String> images = new java.util.ArrayList<>();
+    List<Review> reviews = new java.util.ArrayList<>();
+    double averageRating = 0.0;
+    boolean canUserReview = false;
+    
     if (pageContext.getAttribute("currentUser") == null) {
         User currentUser = (User) session.getAttribute("user");
         pageContext.setAttribute("currentUser", currentUser);
@@ -12,9 +16,18 @@
         int listingId = Integer.parseInt(idParam);
         ListingDAO dao = new ListingDAO();
         ListingImageDAO imgDao = new ListingImageDAO();
+        ReviewDAO reviewDao = new ReviewDAO();
         
         listing = dao.getListingById(listingId);
         images = imgDao.getImagesForListing(listingId);
+        reviews = reviewDao.getReviewsByListing(listingId);
+        averageRating = reviewDao.getAverageRating(listingId);
+        
+        // Kiểm tra xem user hiện tại có thể review không
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser != null) {
+            canUserReview = reviewDao.canReview(currentUser.getUserID(), listingId);
+        }
     }
 %>
 
@@ -282,6 +295,231 @@
                 }
             }
 
+            /* --- REVIEW SECTION --- */
+            .reviews-section {
+                margin-top: 40px;
+                padding-top: 30px;
+                border-top: 1px solid #eee;
+            }
+
+            .reviews-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+            }
+
+            .reviews-title {
+                font-size: 24px;
+                font-weight: 600;
+                color: #333;
+                margin: 0;
+            }
+
+            .rating-summary {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .average-rating {
+                font-size: 32px;
+                font-weight: 700;
+                color: #ff385c;
+            }
+
+            .rating-stars {
+                display: flex;
+                gap: 2px;
+            }
+
+            .rating-stars .star {
+                color: #ffc107;
+                font-size: 20px;
+            }
+
+            .rating-count {
+                color: #666;
+                font-size: 14px;
+            }
+
+            .review-item {
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 15px;
+                border: 1px solid #e9ecef;
+            }
+
+            .review-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+
+            .reviewer-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .reviewer-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 16px;
+            }
+
+            .reviewer-name {
+                font-weight: 600;
+                color: #333;
+            }
+
+            .review-rating {
+                display: flex;
+                gap: 2px;
+            }
+
+            .review-rating .star {
+                color: #ffc107;
+                font-size: 16px;
+            }
+
+            .review-date {
+                color: #666;
+                font-size: 12px;
+            }
+
+            .review-comment {
+                color: #555;
+                line-height: 1.5;
+                margin-top: 10px;
+            }
+
+            /* --- REVIEW FORM --- */
+            .review-form-section {
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 25px;
+                margin-top: 30px;
+                border: 1px solid #e9ecef;
+            }
+
+            .review-form-title {
+                font-size: 20px;
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 20px;
+            }
+
+            .review-form {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .rating-input-group {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .rating-input-group label {
+                font-weight: 600;
+                color: #333;
+            }
+
+            .star-rating {
+                display: flex;
+                gap: 5px;
+                align-items: center;
+            }
+
+            .star-rating input[type="radio"] {
+                display: none;
+            }
+
+            .star-rating label {
+                font-size: 30px;
+                color: #ddd;
+                cursor: pointer;
+                transition: color 0.2s ease;
+            }
+
+            .star-rating label:hover,
+            .star-rating label:hover ~ label,
+            .star-rating input[type="radio"]:checked ~ label {
+                color: #ffc107;
+            }
+
+            .star-rating input[type="radio"]:checked + label {
+                color: #ffc107;
+            }
+
+            .comment-input-group {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .comment-input-group label {
+                font-weight: 600;
+                color: #333;
+            }
+
+            .comment-input-group textarea {
+                width: 100%;
+                min-height: 100px;
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-family: inherit;
+                font-size: 14px;
+                resize: vertical;
+                transition: border-color 0.2s ease;
+            }
+
+            .comment-input-group textarea:focus {
+                outline: none;
+                border-color: #ff385c;
+                box-shadow: 0 0 0 2px rgba(255, 56, 92, 0.1);
+            }
+
+            .review-submit-btn {
+                background: #ff385c;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+                align-self: flex-start;
+            }
+
+            .review-submit-btn:hover {
+                background: #e31c5f;
+            }
+
+            .review-submit-btn:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+            }
+
+            .no-reviews {
+                text-align: center;
+                color: #666;
+                font-style: italic;
+                padding: 40px 20px;
+            }
+
         </style>
     </head>
     <body>
@@ -379,6 +617,128 @@
                 </a>
             </div>
 
+            <!-- REVIEWS SECTION -->
+            <div class="reviews-section">
+                <div class="reviews-header">
+                    <h2 class="reviews-title">
+                        <i class="bi bi-star-fill"></i> 
+                        Đánh giá từ khách hàng
+                    </h2>
+                    <div class="rating-summary">
+                        <div class="average-rating"><%= String.format("%.1f", averageRating) %></div>
+                        <div class="rating-stars">
+                            <% for (int i = 1; i <= 5; i++) { %>
+                                <% if (i <= averageRating) { %>
+                                    <span class="star">★</span>
+                                <% } else if (i - 0.5 <= averageRating) { %>
+                                    <span class="star">☆</span>
+                                <% } else { %>
+                                    <span class="star">☆</span>
+                                <% } %>
+                            <% } %>
+                        </div>
+                        <div class="rating-count">(<%= reviews.size() %> đánh giá)</div>
+                    </div>
+                </div>
+
+                <% if (reviews.isEmpty()) { %>
+                    <div class="no-reviews">
+                        <i class="bi bi-chat-square-text" style="font-size: 48px; color: #ddd;"></i>
+                        <p>Chưa có đánh giá nào cho nơi lưu trú này.</p>
+                    </div>
+                <% } else { %>
+                    <% for (Review review : reviews) { %>
+                        <div class="review-item">
+                            <div class="review-header">
+                                <div class="reviewer-info">
+                                    <div class="reviewer-avatar">
+                                        <%= review.getReviewerName() != null ? review.getReviewerName().charAt(0) : "U" %>
+                                    </div>
+                                    <div>
+                                        <div class="reviewer-name"><%= review.getReviewerName() != null ? review.getReviewerName() : "Khách hàng" %></div>
+                                        <div class="review-date">
+                                            <%= review.getCreatedAt() != null ? 
+                                                new java.text.SimpleDateFormat("dd/MM/yyyy").format(review.getCreatedAt()) : "" %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="review-rating">
+                                    <% for (int i = 1; i <= 5; i++) { %>
+                                        <% if (i <= review.getRating()) { %>
+                                            <span class="star">★</span>
+                                        <% } else { %>
+                                            <span class="star">☆</span>
+                                        <% } %>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <div class="review-comment">
+                                <%= review.getComment() != null ? review.getComment() : "Không có bình luận" %>
+                            </div>
+                        </div>
+                    <% } %>
+                <% } %>
+
+                <!-- REVIEW FORM (chỉ hiển thị cho user đã booking hoàn thành) -->
+                <% if (canUserReview) { %>
+                    <div class="review-form-section">
+                        <h3 class="review-form-title">
+                            <i class="bi bi-pencil-square"></i> 
+                            Viết đánh giá của bạn
+                        </h3>
+                        <form class="review-form" action="${pageContext.request.contextPath}/review" method="POST">
+                            <input type="hidden" name="listingID" value="<%= listing.getListingID() %>">
+                            
+                            <div class="rating-input-group">
+                                <label>Đánh giá của bạn:</label>
+                                <div class="star-rating">
+                                    <input type="radio" id="star5" name="rating" value="5">
+                                    <label for="star5">★</label>
+                                    <input type="radio" id="star4" name="rating" value="4">
+                                    <label for="star4">★</label>
+                                    <input type="radio" id="star3" name="rating" value="3">
+                                    <label for="star3">★</label>
+                                    <input type="radio" id="star2" name="rating" value="2">
+                                    <label for="star2">★</label>
+                                    <input type="radio" id="star1" name="rating" value="1">
+                                    <label for="star1">★</label>
+                                </div>
+                            </div>
+
+                            <div class="comment-input-group">
+                                <label for="comment">Bình luận của bạn:</label>
+                                <textarea id="comment" name="comment" placeholder="Chia sẻ trải nghiệm của bạn về nơi lưu trú này..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="review-submit-btn">
+                                <i class="bi bi-send"></i> Gửi đánh giá
+                            </button>
+                        </form>
+                    </div>
+                <% } else if (currentUser != null) { %>
+                    <div class="review-form-section" style="background: #fff3cd; border-color: #ffeaa7;">
+                        <div style="text-align: center; color: #856404;">
+                            <i class="bi bi-info-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                            <p style="margin: 0; font-weight: 500;">
+                                Bạn cần hoàn thành chuyến đi để có thể đánh giá nơi lưu trú này.
+                            </p>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="review-form-section" style="background: #d1ecf1; border-color: #bee5eb;">
+                        <div style="text-align: center; color: #0c5460;">
+                            <i class="bi bi-person-plus" style="font-size: 24px; margin-bottom: 10px;"></i>
+                            <p style="margin: 0; font-weight: 500;">
+                                <a href="${pageContext.request.contextPath}/login.jsp" style="color: #0c5460; text-decoration: underline;">
+                                    Đăng nhập
+                                </a> 
+                                để xem và viết đánh giá.
+                            </p>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+
             <!-- RECOMMENDATIONS SECTION -->
             <div class="recommendations-section">
                 <h2 class="recommendations-title">
@@ -421,6 +781,96 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            // Hiển thị thông báo từ URL parameters
+            document.addEventListener('DOMContentLoaded', function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const success = urlParams.get('success');
+                const error = urlParams.get('error');
+                
+                if (success === 'review_added') {
+                    Swal.fire({
+                        title: 'Thành công!',
+                        text: 'Đánh giá của bạn đã được gửi thành công.',
+                        icon: 'success',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    // Xóa parameter khỏi URL
+                    window.history.replaceState({}, document.title, window.location.pathname + '?id=' + urlParams.get('id'));
+                } else if (error) {
+                    let errorMessage = 'Đã xảy ra lỗi!';
+                    switch(error) {
+                        case 'invalid_rating':
+                            errorMessage = 'Đánh giá phải từ 1 đến 5 sao!';
+                            break;
+                        case 'empty_comment':
+                            errorMessage = 'Vui lòng nhập bình luận!';
+                            break;
+                        case 'cannot_review':
+                            errorMessage = 'Bạn chưa hoàn tất chuyến đi hoặc đã đánh giá rồi!';
+                            break;
+                        case 'no_booking':
+                            errorMessage = 'Không tìm thấy booking để đánh giá!';
+                            break;
+                        case 'invalid_data':
+                            errorMessage = 'Dữ liệu không hợp lệ!';
+                            break;
+                        case 'server_error':
+                            errorMessage = 'Lỗi máy chủ! Vui lòng thử lại sau.';
+                            break;
+                    }
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: errorMessage,
+                        icon: 'error',
+                        timer: 5000
+                    });
+                    // Xóa parameter khỏi URL
+                    window.history.replaceState({}, document.title, window.location.pathname + '?id=' + urlParams.get('id'));
+                }
+            });
+
+            // Xử lý form đánh giá
+            document.addEventListener('DOMContentLoaded', function() {
+                const reviewForm = document.querySelector('.review-form');
+                if (reviewForm) {
+                    reviewForm.addEventListener('submit', function(e) {
+                        const rating = document.querySelector('input[name="rating"]:checked');
+                        const comment = document.querySelector('textarea[name="comment"]');
+                        
+                        if (!rating) {
+                            e.preventDefault();
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: 'Vui lòng chọn đánh giá sao!',
+                                icon: 'warning'
+                            });
+                            return;
+                        }
+                        
+                        if (!comment.value.trim()) {
+                            e.preventDefault();
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: 'Vui lòng nhập bình luận!',
+                                icon: 'warning'
+                            });
+                            return;
+                        }
+                        
+                        // Hiển thị loading
+                        Swal.fire({
+                            title: 'Đang gửi đánh giá...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                    });
+                }
+            });
+        </script>
         <script>
                     function startConversation(hostId) {
             <% if (currentUser == null) { %>

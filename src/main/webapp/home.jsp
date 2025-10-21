@@ -1,7 +1,12 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="java.util.*, model.Listing"%>
+<%@page import="java.util.*, model.Listing, reviewDAO.ReviewDAO"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%
+    // Tạo ReviewDAO instance để dùng trong JSP
+    ReviewDAO reviewDAO = new ReviewDAO();
+    request.setAttribute("reviewDAO", reviewDAO);
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -192,7 +197,7 @@
         <%-- ======= KẾT QUẢ TÌM KIẾM ======= --%>
         <c:when test="${not empty listings}">
             <h2 class="text-center mb-4">
-                Kết quả tìm kiếm cho:
+                <span data-i18n="home.search.results_for">Kết quả tìm kiếm cho</span>:
                 <span class="text-danger fw-bold">${keyword}</span>
                 <small class="text-muted">
                     (${fn:length(listings)} kết quả
@@ -214,11 +219,12 @@
                                 <h5 class="card-title">${item.title}</h5>
                                 <p class="card-text">${item.city}</p>
                                 <p class="fw-bold text-danger">
-                                    <span>${item.pricePerNight}</span> đ / đêm
+                                    <span data-price="${item.pricePerNight}"></span>
+                                    <span data-i18n="home.card.per_night">/ đêm</span>
                                 </p>
                                 <p class="text-muted">Tối đa ${item.maxGuests} khách</p>
                                 <a href="${pageContext.request.contextPath}/customer/detail.jsp?id=${item.listingID}" 
-                                   class="btn btn-outline-primary">Xem chi tiết</a>
+                                   class="btn btn-outline-primary" data-i18n="home.card.view_detail">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -241,7 +247,7 @@
 
         <%-- ======= TRANG HOME NHÓM THEO ĐỊA ĐIỂM ======= --%>
         <c:otherwise>
-            <h1 class="mb-4 text-center fw-bold">Khám phá nơi lưu trú theo địa điểm</h1>
+            <h1 class="mb-4 text-center fw-bold" data-i18n="home.featured.title">Khám phá nơi lưu trú theo địa điểm</h1>
             <c:forEach var="entry" items="${groupedListings}">
                 <section class="service-row mt-5">
                     <div class="service-row-header">
@@ -265,12 +271,23 @@
                                 <div class="service-info">
                                     <h3>${item.title}</h3>
                                     <div class="price-info d-flex justify-content-between align-items-center">
-                                        <span class="price-from text-danger fw-semibold">${item.pricePerNight} đ / đêm</span>
-                                        <span class="rating">★ 4.9</span>
+                                        <span class="price-from text-danger fw-semibold">
+                                            <span data-price="${item.pricePerNight}"></span>
+                                            <span data-i18n="home.card.per_night">/ đêm</span>
+                                        </span>
+                                        <c:set var="avgRating" value="${reviewDAO.getAverageRating(item.listingID)}" />
+                                        <c:choose>
+                                            <c:when test="${avgRating > 0}">
+                                                <span class="rating">★ ${String.format('%.1f', avgRating)}</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="rating text-muted">Chưa có đánh giá</span>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                     <p class="text-muted">Tối đa ${item.maxGuests} khách</p>
                                     <a href="${pageContext.request.contextPath}/customer/detail.jsp?id=${item.listingID}"
-                                       class="btn btn-outline-primary">Xem chi tiết</a>
+                                       class="btn btn-outline-primary" data-i18n="home.card.view_detail">Xem chi tiết</a>
                                 </div>
                             </div>
                         </c:forEach>
