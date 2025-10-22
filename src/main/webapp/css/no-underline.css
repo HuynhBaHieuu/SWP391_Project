@@ -1,0 +1,82 @@
+/* 
+ * GLOBAL CSS - BỎ TẤT CẢ DẤU GẠCH CHÂN
+ * Include file này ở đầu trang để override mọi styles
+ */
+
+/* Bỏ underline cho TẤT CẢ link trong trang experiences */
+.xp-section a,
+.xp-section a:link,
+.xp-section a:visited, 
+.xp-section a:hover,
+.xp-section a:active,
+.xp-section a:focus,
+.xp-cards a,
+.xp-cards a:link,
+.xp-cards a:visited,
+.xp-cards a:hover,
+.xp-cards a:active,
+.xp-cards a:focus,
+.experience-link,
+.experience-link:link,
+.experience-link:visited,
+.experience-link:hover,
+.experience-link:active,
+.experience-link:focus,
+a[href*="experience-detail"],
+a[href*="experience-detail"]:link,
+a[href*="experience-detail"]:visited,
+a[href*="experience-detail"]:hover,
+a[href*="experience-detail"]:active,
+a[href*="experience-detail"]:focus {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+  text-decoration-thickness: 0 !important;
+  border-bottom: none !important;
+  text-underline-offset: 0 !important;
+  -webkit-text-decoration: none !important;
+  -moz-text-decoration: none !important;
+  -ms-text-decoration: none !important;
+}
+
+/* Bỏ underline cho TẤT CẢ phần tử bên trong link */
+.xp-section a *,
+.xp-section a span,
+.xp-section a h3,
+.xp-section a strong,
+.xp-section a div,
+.xp-cards a *,
+.xp-cards a span,
+.xp-cards a h3,
+.xp-cards a strong,
+.xp-cards a div,
+.experience-link *,
+.experience-link span,
+.experience-link h3,
+.experience-link strong,
+.experience-link div,
+a[href*="experience-detail"] *,
+a[href*="experience-detail"] span,
+a[href*="experience-detail"] h3,
+a[href*="experience-detail"] strong,
+a[href*="experience-detail"] div {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-color: transparent !important;
+  border-bottom: none !important;
+  -webkit-text-decoration: none !important;
+  -moz-text-decoration: none !important;
+}
+
+/* Bỏ underline cho class cụ thể */
+.xp-loc,
+.xp-price,
+.xp-rate,
+.xp-info h3,
+.xp-meta,
+.xp-meta * {
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+
