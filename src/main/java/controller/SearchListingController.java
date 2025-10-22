@@ -10,6 +10,7 @@ import java.util.List;
 
 @WebServlet("/search")
 public class SearchListingController extends HttpServlet {
+
     private ListingDAO listingDAO;
 
     @Override
@@ -17,43 +18,39 @@ public class SearchListingController extends HttpServlet {
         listingDAO = new ListingDAO();
     }
 
-   @Override
-protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    String keyword = request.getParameter("keyword");
-    String checkin = request.getParameter("checkin");
-    String checkout = request.getParameter("checkout");
-    String guestsStr = request.getParameter("guests");
+        String keyword = request.getParameter("keyword"); // có thể là tên thành phố
+        int guests = 0;
 
-    int guests = 0;
-    try {
-        if (guestsStr != null && !guestsStr.trim().isEmpty()) {
-            guests = Integer.parseInt(guestsStr);
+        try {
+            String guestsStr = request.getParameter("guests");
+            if (guestsStr != null && !guestsStr.trim().isEmpty()) {
+                guests = Integer.parseInt(guestsStr);
+            }
+        } catch (NumberFormatException e) {
+            guests = 0;
         }
-    } catch (NumberFormatException e) {
-        guests = 0;
+
+        List<Listing> listings;
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/home");
+            return;
+        } else {
+            listings = listingDAO.searchByCity(keyword.trim(), guests);
+        }
+
+        // ✅ Truyền thêm dữ liệu ra JSP
+        request.setAttribute("listings", listings);
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("guests", guests);
+
+        // Log để kiểm tra trong console
+        System.out.println("🔎 Search city=" + keyword + ", guests=" + guests + " → found=" + listings.size());
+
+        request.getRequestDispatcher("/home.jsp").forward(request, response);
     }
-
-    List<Listing> listings;
-
-    // Không nhập gì => về home
-    if ((keyword == null || keyword.trim().isEmpty()) && guests == 0) {
-        response.sendRedirect(request.getContextPath() + "/home");
-        return;
-    } else {
-        // Gọi DAO với cả keyword và guests
-        listings = listingDAO.searchActiveListings(keyword, guests);
-    }
-
-    // Gửi dữ liệu sang JSP
-    request.setAttribute("listings", listings);
-    request.setAttribute("keyword", keyword);
-    request.setAttribute("checkin", checkin);
-    request.setAttribute("checkout", checkout);
-    request.setAttribute("guests", guests);
-
-    request.getRequestDispatcher("home.jsp").forward(request, response);
-}
-
 }

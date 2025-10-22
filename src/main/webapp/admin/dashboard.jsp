@@ -49,6 +49,8 @@
       margin-right: 6px;
     }
   </style>
+  //---------------------------
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
   <%
@@ -169,7 +171,7 @@
           </a>
           <a href="#" class="nav-item" data-section="reviews">
             <span class="nav-icon">💬</span>
-            <span>Reviews / Reports</span>
+            <span>Feedbacks Management</span>
           </a>
           <a href="#" class="nav-item" data-section="payments">
             <span class="nav-icon">💵</span>
@@ -340,7 +342,7 @@
             <tr>
               <td>
                 <div class="user-info">
-                  <img src="<%= rs.getString("avatar_url") != null ? rs.getString("avatar_url") : "https://i.pravatar.cc/150" %>" alt="User" class="user-avatar">
+                  <img src="<%= rs.getString("avatar_url") != null ? request.getContextPath() + "/" + rs.getString("avatar_url") : "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg" %>" alt="User" class="user-avatar">
                   <div class="user-details">
                     <span class="user-name"><%= rs.getString("full_name") %></span>
                     <span class="user-email"><%= rs.getString("email") %></span>
@@ -431,7 +433,7 @@
             <tr>
               <td>
                 <div class="user-info">
-                  <img src="<%= rs.getString("image_url") != null ? rs.getString("image_url") : "images/placeholder.jpg" %>" alt="Listing" class="user-avatar">
+                  <img src="<%= rs.getString("image_url") != null ? request.getContextPath() + "/" + rs.getString("image_url") : request.getContextPath() + "/images/placeholder.jpg" %>" alt="Listing" class="user-avatar">
                   <div class="user-details">
                     <span class="user-name"><%= rs.getString("title") %></span>
                     <span class="user-email"><%= rs.getString("description") %></span>
@@ -622,7 +624,7 @@
                 <tr>
                     <td>
                         <div class="user-info">
-                            <img src="<%= rs.getString("ImageUrl") != null ? rs.getString("ImageUrl") : "images/placeholder.jpg"%>" alt="Listing" class="user-avatar">
+                            <img src="<%= rs.getString("ImageUrl") != null ? request.getContextPath() + "/" + rs.getString("ImageUrl") : request.getContextPath() + "/images/placeholder.jpg"%>" alt="Listing" class="user-avatar">
                             <div class="user-details">
                                 <span class="user-name"><%= rs.getString("Title")%></span>
                                 <span class="user-email"><%= rs.getString("Description")%></span>
@@ -631,10 +633,11 @@
                     </td>
                     <td><%= rs.getString("HostName")%></td>
                     <td><%= rs.getTimestamp("RequestDate")%></td>
-                    <td><span class="badge badge-warning">PENDING</span></td>
+                    <td><span class="badge badge-warning">Đang xử lí</span></td>
                     <td>
                         <form class="form-inline" method="post" action="<%=request.getContextPath()%>/admin/listing-requests">
                             <input type="hidden" name="requestId" value="<%= rs.getInt("RequestID")%>" />
+                            <button class="btn btn-primary btn-sm" name="action" value="view">Xem chi tiết</button>
                             <button class="btn btn-success btn-sm" name="action" value="approve">Duyệt</button>
                             <button class="btn btn-danger btn-sm" name="action" value="reject">Từ chối</button>
                         </form>
@@ -667,69 +670,135 @@
         </div>
         
         <div class="search-bar">
-          <input type="text" class="search-input" placeholder="Tìm kiếm đặt phòng...">
-          <select class="form-select" style="width: auto;">
-            <option>Tất cả trạng thái</option>
-            <option>Đang xử lý</option>
-            <option>Đã xác nhận</option>
-            <option>Đã hủy</option>
+          <input type="text" class="search-input" id="bookingSearch" placeholder="Tìm kiếm theo tên khách hàng, chỗ ở...">
+          <select class="form-select" id="statusFilter" style="width: auto;">
+            <option value="">Tất cả trạng thái</option>
+            <option value="Processing">Đang xử lý</option>
+            <option value="Completed">Đã hoàn thành</option>
+            <option value="Failed">Đã hủy</option>
           </select>
+          <button class="btn btn-primary" onclick="filterBookings()">Lọc</button>
         </div>
         
         <!-- Bookings table now fetches from database -->
-        <table class="data-table">
+        <table class="data-table" id="bookingsTable">
           <thead>
             <tr>
               <th>Mã đặt phòng</th>
               <th>Khách hàng</th>
               <th>Chỗ ở</th>
+              <th>Chủ nhà</th>
               <th>Ngày nhận phòng</th>
               <th>Ngày trả phòng</th>
+              <th>Số đêm</th>
               <th>Tổng tiền</th>
               <th>Trạng thái</th>
+              <th>Ngày đặt</th>
               <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
             <%
               try {
+                // Get all bookings with detailed information
                 rs = stmt.executeQuery(
-                  "SELECT b.BookingID AS id, b.BookingCode AS booking_code, " +
+                  "SELECT b.BookingID AS id, " +
                   "       b.CheckInDate AS check_in_date, b.CheckOutDate AS check_out_date, " +
-                  "       b.TotalAmount AS total_amount, b.Status AS status, " +
-                  "       u.FullName AS guest_name, u.ProfileImage AS avatar_url, l.Title AS listing_title " +
+                  "       b.TotalPrice AS total_price, b.Status AS status, b.CreatedAt AS created_at, " +
+                  "       u.FullName AS guest_name, u.Email AS guest_email, u.ProfileImage AS guest_avatar, " +
+                  "       l.Title AS listing_title, l.Address AS listing_address, l.PricePerNight AS price_per_night, " +
+                  "       h.FullName AS host_name, h.Email AS host_email, " +
+                  "       DATEDIFF(day, b.CheckInDate, b.CheckOutDate) AS nights " +
                   "FROM Bookings b " +
-                  "JOIN Users u ON b.GuestID = u.UserID " +
-                  "JOIN Listings l ON b.ListingID = l.ListingID " +
+                  "LEFT JOIN Users u ON b.GuestID = u.UserID " +
+                  "LEFT JOIN Listings l ON b.ListingID = l.ListingID " +
+                  "LEFT JOIN Users h ON l.HostID = h.UserID " +
                   "ORDER BY b.CreatedAt DESC"
                 );
                 
                 if (!rs.isBeforeFirst()) {
-                  out.println("<tr><td colspan='8' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có đặt phòng nào</td></tr>");
+                  out.println("<tr><td colspan='11' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có đặt phòng nào</td></tr>");
                 } else {
                   while (rs.next()) {
+                    String status = rs.getString("status");
+                    String statusClass = "";
+                    String statusText = "";
+                    
+                    switch(status) {
+                      case "Processing":
+                        statusClass = "badge-warning";
+                        statusText = "Đang xử lý";
+                        break;
+                      case "Completed":
+                        statusClass = "badge-success";
+                        statusText = "Đã hoàn thành";
+                        break;
+                      case "Failed":
+                        statusClass = "badge-danger";
+                        statusText = "Đã hủy";
+                        break;
+                      default:
+                        statusClass = "badge-secondary";
+                        statusText = status;
+                    }
             %>
-            <tr>
-              <td><%= rs.getString("booking_code") %></td>
+            <tr data-booking-id="<%= rs.getInt("id") %>" data-status="<%= status %>">
+              <td><strong>#<%= rs.getInt("id") %></strong></td>
               <td>
                 <div class="user-info">
-                  <img src="<%= rs.getString("avatar_url") != null ? rs.getString("avatar_url") : "https://i.pravatar.cc/150" %>" alt="User" class="user-avatar">
+                  <img src="<%= rs.getString("guest_avatar") != null ? request.getContextPath() + "/" + rs.getString("guest_avatar") : "https://i.pravatar.cc/150" %>" alt="User" class="user-avatar">
+                  <div class="user-details">
                   <span class="user-name"><%= rs.getString("guest_name") %></span>
+                    <span class="user-email"><%= rs.getString("guest_email") %></span>
+                  </div>
                 </div>
               </td>
-              <td><%= rs.getString("listing_title") %></td>
-              <td><%= rs.getDate("check_in_date") %></td>
-              <td><%= rs.getDate("check_out_date") %></td>
-              <td>$<%= rs.getDouble("total_amount") %></td>
               <td>
-                <span class="badge badge-<%= rs.getString("status").equals("confirmed") ? "success" : "warning" %>">
-                  <%= rs.getString("status") %>
-                </span>
+                <div class="listing-info">
+                  <span class="listing-title"><%= rs.getString("listing_title") %></span>
+                  <span class="listing-address"><%= rs.getString("listing_address") %></span>
+                </div>
               </td>
               <td>
+                <div class="host-info">
+                  <span class="host-name"><%= rs.getString("host_name") %></span>
+                  <span class="host-email"><%= rs.getString("host_email") %></span>
+                </div>
+              </td>
+              <td><%= rs.getDate("check_in_date") %></td>
+              <td><%= rs.getDate("check_out_date") %></td>
+              <td><%= rs.getInt("nights") %> đêm</td>
+              <td>
+                <span class="price">$<%= String.format("%.2f", rs.getDouble("total_price")) %></span>
+                <br><small class="text-muted">$<%= String.format("%.2f", rs.getDouble("price_per_night")) %>/đêm</small>
+              </td>
+              <td>
+                <span class="badge <%= statusClass %>">
+                  <%= statusText %>
+                </span>
+              </td>
+              <td><%= rs.getTimestamp("created_at") %></td>
+              <td>
                 <div class="action-buttons">
-                  <button class="action-btn action-btn-view" data-booking-id="<%= rs.getInt("id") %>" onclick="viewBooking(this.dataset.bookingId)">Xem</button>
-                  <button class="action-btn action-btn-delete" data-booking-id="<%= rs.getInt("id") %>" onclick="cancelBooking(this.dataset.bookingId)">Hủy</button>
+                  <button class="action-btn action-btn-view" data-booking-id="<%= rs.getInt("id") %>" onclick="viewBookingDetail(this.dataset.bookingId)" title="Xem chi tiết">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <% if ("Processing".equals(status)) { %>
+                    <button class="action-btn action-btn-success" data-booking-id="<%= rs.getInt("id") %>" onclick="updateBookingStatus(<%= rs.getInt("id") %>, 'Completed')" title="Xác nhận">
+                      <i class="fas fa-check"></i>
+                    </button>
+                    <button class="action-btn action-btn-danger" data-booking-id="<%= rs.getInt("id") %>" onclick="updateBookingStatus(<%= rs.getInt("id") %>, 'Failed')" title="Hủy">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  <% } else if ("Completed".equals(status)) { %>
+                    <button class="action-btn action-btn-warning" data-booking-id="<%= rs.getInt("id") %>" onclick="updateBookingStatus(<%= rs.getInt("id") %>, 'Failed')" title="Hủy">
+                      <i class="fas fa-ban"></i>
+                    </button>
+                  <% } else if ("Failed".equals(status)) { %>
+                    <button class="action-btn action-btn-success" data-booking-id="<%= rs.getInt("id") %>" onclick="updateBookingStatus(<%= rs.getInt("id") %>, 'Processing')" title="Khôi phục">
+                      <i class="fas fa-undo"></i>
+                    </button>
+                  <% } %>
                 </div>
               </td>
             </tr>
@@ -737,7 +806,7 @@
                   }
                 }
               } catch (Exception e) {
-                out.println("<tr><td colspan='8' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                out.println("<tr><td colspan='11' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
               }
             %>
           </tbody>
@@ -747,37 +816,49 @@
       <!-- Reviews & Reports Section -->
       <div id="reviews" class="content-section">
         <div class="content-header">
-          <h1 class="page-title">Quản lý đánh giá & báo cáo</h1>
-          <p class="page-subtitle">Xem và xử lý đánh giá, báo cáo từ người dùng</p>
-        </div>
-        
-        <div class="search-bar">
-          <input type="text" class="search-input" placeholder="Tìm kiếm đánh giá...">
-          <select class="form-select" style="width: auto;">
-            <option>Tất cả loại</option>
-            <option>Đánh giá</option>
-            <option>Báo cáo listing</option>
-            <option>Báo cáo user</option>
-          </select>
+          <h1 class="page-title">Quản lý phản hồi</h1>
+          <p class="page-subtitle">Xem và xử lý các phản hồi từ người dùng</p>
         </div>
         
         <table class="data-table">
           <thead>
             <tr>
-              <th>Người gửi</th>
-              <th>Loại</th>
-              <th>Nội dung</th>
-              <th>Đánh giá</th>
+              <th>Tên người gửi</th>
+              <th>Loại phản hồi</th>
               <th>Ngày gửi</th>
+              <th>Trạng thái</th>
               <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
+              <%
+                    try {
+                        rs = stmt.executeQuery(                               
+                            "SELECT * FROM Feedbacks WHERE Status = 'Pending' ORDER BY CreatedAt DESC;"
+                        );
+                        if (!rs.isBeforeFirst()) {
+                            out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#6b7280;'>Chưa có phản hồi nào từ người dùng</td></tr>");
+                        } else {
+                            while (rs.next()) {
+                %>
             <tr>
-              <td colspan="6" style="text-align: center; padding: 40px; color: #6b7280;">
-                Chưa có đánh giá hoặc báo cáo nào
-              </td>
-            </tr>
+                    <td><%= rs.getString("Name")%></td>
+                    <td><%= rs.getString("Type")%></td>
+                    <td><%= rs.getTimestamp("CreatedAt")%></td>
+                    <td><span class="badge badge-warning">Đang xử lí</span></td>
+                    <td>
+                        <a href="${pageContext.request.contextPath}/admin/feedback?action=view&id=<%= rs.getString("FeedbackID")%>"><i class="fas fa-eye"></i></a>
+                        <a href="${pageContext.request.contextPath}/admin/feedback?action=resolve&id=<%= rs.getString("FeedbackID")%>" onclick="return confirm('Đánh dấu là đã xử lý thành công?')" style="margin-left: 2rem;"><i class="fas fa-check"></i></a>
+                        <a href="${pageContext.request.contextPath}/admin/feedback?action=close&id=<%= rs.getString("FeedbackID")%>" onclick="return confirm('Đóng phản hồi này?')" style="margin-left: 2rem;"><i class="fas fa-times"></i></a>
+                    </td>
+                </tr>
+                            <%
+                            }
+                        }
+                    } catch (Exception e) {
+                        out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                    }
+                %>
           </tbody>
         </table>
       </div>
@@ -1239,15 +1320,178 @@
       // Implement reject listing logic
     }
     
-    function viewBooking(id) {
-      console.log('[v0] View booking:', id);
-      // Implement view booking logic
+    function viewBookingDetail(id) {
+      // Open booking detail modal or redirect to detail page
+      const contextPath = '<%=request.getContextPath()%>';
+      const url = contextPath + '/booking?action=detail&bookingId=' + id;
+      window.open(url, '_blank');
     }
     
-    function cancelBooking(id) {
-      console.log('[v0] Cancel booking:', id);
-      // Implement cancel booking logic
+    function updateBookingStatus(bookingId, newStatus) {
+      console.log('[v0] Update booking status:', bookingId, 'to', newStatus);
+      
+      const statusText = {
+        'Processing': 'đang xử lý',
+        'Completed': 'hoàn thành',
+        'Failed': 'hủy bỏ'
+      };
+      
+      const actionText = newStatus === 'Failed' ? 'hủy' : 
+                        newStatus === 'Completed' ? 'xác nhận' : 'khôi phục';
+      
+      if (confirm(`Bạn có chắc muốn ${actionText} đặt phòng #${bookingId}?`)) {
+        const formData = new URLSearchParams();
+        formData.append('action', 'updateStatus');
+        formData.append('bookingId', bookingId);
+        formData.append('status', newStatus);
+        
+        fetch('<%=request.getContextPath()%>/admin/bookings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: formData
+        })
+        .then(response => {
+          console.log('Response status:', response.status);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          return response.json();
+        })
+        .then(data => {
+          console.log('Server response:', data);
+          
+          if (data.success) {
+            showSuccessMessage(`Đã ${actionText} đặt phòng #${bookingId} thành công!`);
+            
+            // Update UI immediately
+            updateBookingStatusUI(bookingId, newStatus);
+            
+            // Reload page after 1.5 seconds to ensure data consistency
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } else {
+            showErrorMessage(data.message || 'Có lỗi xảy ra khi cập nhật trạng thái đặt phòng.');
+          }
+        })
+        .catch(error => {
+          console.error('Fetch error:', error);
+          showErrorMessage('Có lỗi xảy ra khi cập nhật trạng thái đặt phòng: ' + error.message);
+        });
+      }
     }
+    
+    function updateBookingStatusUI(bookingId, newStatus) {
+      console.log('Updating UI for bookingId:', bookingId, 'newStatus:', newStatus);
+      
+      const row = document.querySelector(`tr[data-booking-id="${bookingId}"]`);
+      if (row) {
+        // Update status badge
+        const statusBadge = row.querySelector('.badge');
+        if (statusBadge) {
+          statusBadge.className = 'badge';
+          
+          switch(newStatus) {
+            case 'Processing':
+              statusBadge.classList.add('badge-warning');
+              statusBadge.textContent = 'Đang xử lý';
+              break;
+            case 'Completed':
+              statusBadge.classList.add('badge-success');
+              statusBadge.textContent = 'Đã hoàn thành';
+              break;
+            case 'Failed':
+              statusBadge.classList.add('badge-danger');
+              statusBadge.textContent = 'Đã hủy';
+              break;
+          }
+        }
+        
+        // Update action buttons
+        const actionButtons = row.querySelector('.action-buttons');
+        if (actionButtons) {
+          actionButtons.innerHTML = generateActionButtons(bookingId, newStatus);
+        }
+        
+        // Update row data attribute
+        row.setAttribute('data-status', newStatus);
+      }
+    }
+    
+    function generateActionButtons(bookingId, status) {
+      let buttons = `<button class="action-btn action-btn-view" data-booking-id="${bookingId}" onclick="viewBookingDetail(${bookingId})" title="Xem chi tiết">
+                       <i class="fas fa-eye"></i>
+                     </button>`;
+      
+      switch(status) {
+        case 'Processing':
+          buttons += `<button class="action-btn action-btn-success" data-booking-id="${bookingId}" onclick="updateBookingStatus(${bookingId}, 'Completed')" title="Xác nhận">
+                        <i class="fas fa-check"></i>
+                      </button>
+                      <button class="action-btn action-btn-danger" data-booking-id="${bookingId}" onclick="updateBookingStatus(${bookingId}, 'Failed')" title="Hủy">
+                        <i class="fas fa-times"></i>
+                      </button>`;
+          break;
+        case 'Completed':
+          buttons += `<button class="action-btn action-btn-warning" data-booking-id="${bookingId}" onclick="updateBookingStatus(${bookingId}, 'Failed')" title="Hủy">
+                        <i class="fas fa-ban"></i>
+                      </button>`;
+          break;
+        case 'Failed':
+          buttons += `<button class="action-btn action-btn-success" data-booking-id="${bookingId}" onclick="updateBookingStatus(${bookingId}, 'Processing')" title="Khôi phục">
+                        <i class="fas fa-undo"></i>
+                      </button>`;
+          break;
+      }
+      
+      return buttons;
+    }
+    
+    function filterBookings() {
+      const searchTerm = document.getElementById('bookingSearch').value.toLowerCase();
+      const statusFilter = document.getElementById('statusFilter').value;
+      const table = document.getElementById('bookingsTable');
+      const rows = table.querySelectorAll('tbody tr');
+      
+      rows.forEach(row => {
+        const bookingId = row.querySelector('td:first-child').textContent.toLowerCase();
+        const guestName = row.querySelector('.user-name').textContent.toLowerCase();
+        const listingTitle = row.querySelector('.listing-title').textContent.toLowerCase();
+        const status = row.getAttribute('data-status');
+        
+        const matchesSearch = !searchTerm || 
+          bookingId.includes(searchTerm) || 
+          guestName.includes(searchTerm) || 
+          listingTitle.includes(searchTerm);
+        
+        const matchesStatus = !statusFilter || status === statusFilter;
+        
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+    
+    // Add event listeners for search and filter
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('bookingSearch');
+      const statusFilter = document.getElementById('statusFilter');
+      
+      if (searchInput) {
+        searchInput.addEventListener('input', filterBookings);
+      }
+      
+      if (statusFilter) {
+        statusFilter.addEventListener('change', filterBookings);
+      }
+    });
     
     // Host request functions
     function approveHostRequest(requestId) {
