@@ -139,6 +139,10 @@
         <filter-name>CharacterEncodingFilter</filter-name>
         <url-pattern>/admin/*</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/experiences</url-pattern>
+    </filter-mapping>
     
     <!-- Image Servlet for serving external images -->
 

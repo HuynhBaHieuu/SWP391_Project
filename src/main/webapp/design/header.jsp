@@ -186,7 +186,7 @@
                         <span data-title="Nơi lưu trú" data-i18n="header.nav.stay">Nơi lưu trú</span>
                     </a>
                     <!-- Trải nghiệm -->
-                    <a href="${pageContext.request.contextPath}/experiences/experiences.jsp" class="menu-sub">
+                    <a href="${pageContext.request.contextPath}/experiences" class="menu-sub">
                         <span class="w14w6ssu atm_mk_h2mmj6 dir dir-ltr" style="transform:none;" aria-hidden="true">
                             <img src="https://www.svgrepo.com/show/484353/balloon.svg" alt="Experience Icon" width="40" height="40">
                         </span>

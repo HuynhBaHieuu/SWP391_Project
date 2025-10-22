@@ -11,6 +11,44 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<%=request.getContextPath()%>/css/dashboard.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    /* Experiences Filter Tabs - Airbnb Style */
+    .exp-filter-tabs {
+      background: transparent;
+      padding: 0;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #EBEBEB;
+      padding-bottom: 0;
+    }
+    .exp-tab-btn {
+      padding: 12px 0;
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #717171;
+      transition: all 0.2s;
+      position: relative;
+      margin-right: 24px;
+    }
+    .exp-tab-btn:hover {
+      color: #222222;
+      border-bottom-color: #DDDDDD;
+    }
+    .exp-tab-btn.active {
+      color: #222222;
+      border-bottom-color: #222222;
+    }
+    .exp-tab-btn i {
+      margin-right: 6px;
+    }
+  </style>
 </head>
 <body>
   <%
@@ -53,11 +91,26 @@
         rs.close();
         
         // Fetch total revenue (adjust column names if different in your schema)
-        rs = stmt.executeQuery("SELECT SUM(TotalAmount) as revenue FROM Bookings WHERE Status = 'completed'");
-        if (rs.next()) {
-          totalRevenue = rs.getDouble("revenue");
+        try {
+          rs = stmt.executeQuery("SELECT SUM(TotalAmount) as revenue FROM Bookings WHERE Status = 'completed'");
+          if (rs.next()) {
+            totalRevenue = rs.getDouble("revenue");
+          }
+          rs.close();
+        } catch (SQLException e) {
+          // Column name might be different, try alternative names
+          try {
+            rs = stmt.executeQuery("SELECT SUM(Total_Amount) as revenue FROM Bookings WHERE Status = 'completed'");
+            if (rs.next()) {
+              totalRevenue = rs.getDouble("revenue");
+            }
+            rs.close();
+          } catch (SQLException e2) {
+            // If still fails, just set to 0
+            totalRevenue = 0.0;
+            System.out.println("Warning: Could not fetch revenue - " + e2.getMessage());
+          }
         }
-        rs.close();
       }
       
     } catch (Exception e) {
@@ -97,6 +150,10 @@
           <a href="#" class="nav-item" data-section="listings">
             <span class="nav-icon">🏠</span>
             <span>Listings Management</span>
+          </a>
+          <a href="#" class="nav-item" data-section="experiences">
+            <span class="nav-icon">⭐</span>
+            <span>Experiences Management</span>
           </a>
           <a href="#" class="nav-item" data-section="host-requests">
             <span class="nav-icon">📝</span>
@@ -406,6 +463,65 @@
             %>
           </tbody>
         </table>
+      </div>
+      
+      <!-- Experiences Management Section -->
+      <div id="experiences" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">⭐ Quản lý Experiences</h1>
+          <p class="page-subtitle">Quản lý các trải nghiệm trên trang Experiences</p>
+          <button class="btn btn-primary" onclick="openAddExperienceModal()">
+            <i class="bi bi-plus-lg"></i> Thêm Experience
+          </button>
+        </div>
+
+        <!-- Filter Tabs - Airbnb Style -->
+        <div class="exp-filter-tabs">
+          <button class="exp-tab-btn active" onclick="filterExperienceCategory('all')">
+            <i class="bi bi-grid-3x3-gap"></i> Tất cả
+          </button>
+          <button class="exp-tab-btn" onclick="filterExperienceCategory('original')">
+            <i class="bi bi-award"></i> GO2BNB Original
+          </button>
+          <button class="exp-tab-btn" onclick="filterExperienceCategory('tomorrow')">
+            <i class="bi bi-calendar"></i> Ngày mai
+          </button>
+          <button class="exp-tab-btn" onclick="filterExperienceCategory('food')">
+            <i class="bi bi-cup-hot"></i> Ẩm thực
+          </button>
+          <button class="exp-tab-btn" onclick="filterExperienceCategory('workshop')">
+            <i class="bi bi-palette"></i> Workshop
+          </button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Hình ảnh</th>
+                <th>Tiêu đề</th>
+                <th>Category</th>
+                <th>Địa điểm</th>
+                <th>Giá</th>
+                <th>Rating</th>
+                <th>Status</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="experiencesTableBody">
+              <tr>
+                <td colspan="9" style="text-align: center; padding: 40px;">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <p class="mt-2">Đang tải dữ liệu...</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       
       <!-- Host Requests Management Section -->
@@ -786,6 +902,93 @@
     </main>
   </div>
   
+  <!-- Experience Modal -->
+  <div class="modal fade" id="experienceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="expModalTitle">Thêm Experience</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="experienceForm">
+            <input type="hidden" id="experienceId" name="id">
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Category *</label>
+                <select class="form-select" id="expCategory" name="category" required>
+                  <option value="">-- Chọn category --</option>
+                  <option value="original">GO2BNB Original</option>
+                  <option value="tomorrow">Ngày mai</option>
+                  <option value="food">Ẩm thực</option>
+                  <option value="workshop">Workshop</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Status *</label>
+                <select class="form-select" id="expStatus" name="status" required>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Tiêu đề *</label>
+              <input type="text" class="form-control" id="expTitle" name="title" required>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-8">
+                <label class="form-label">Địa điểm *</label>
+                <input type="text" class="form-control" id="expLocation" name="location" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Thứ tự hiển thị</label>
+                <input type="number" class="form-control" id="expDisplayOrder" name="displayOrder" value="0">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Giá (VNĐ) *</label>
+                <input type="number" class="form-control" id="expPrice" name="price" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Rating *</label>
+                <input type="number" class="form-control" id="expRating" name="rating" step="0.1" min="0" max="5" value="5.0" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Image URL *</label>
+              <input type="url" class="form-control" id="expImageUrl" name="imageUrl" required>
+              <small class="text-muted">Nhập link hình ảnh từ Unsplash hoặc nguồn khác</small>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Badge</label>
+                <input type="text" class="form-control" id="expBadge" name="badge" placeholder="Original">
+                <small class="text-muted">Chỉ dùng cho category "original"</small>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Time Slot</label>
+                <input type="text" class="form-control" id="expTimeSlot" name="timeSlot" placeholder="07:00">
+                <small class="text-muted">Chỉ dùng cho category "tomorrow"</small>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="saveExperience()">Lưu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <!-- Hidden logout form (POST) -->
   <form id="logoutForm" action="<%=request.getContextPath()%>/logout" method="post" style="display:none;"></form>
   
@@ -1111,6 +1314,311 @@
     }
     
     console.log('[v0] Dashboard initialized with database integration');
+    
+    // ========== EXPERIENCES MANAGEMENT ==========
+    
+    let experiencesData = [];
+    let experiencesLoaded = false;
+    
+    // Load experiences data - ĐƠN GIẢN
+    function loadExperiencesData() {
+      if (experiencesLoaded) return;
+      
+      console.log('Loading experiences...');
+      
+      fetch('<%=request.getContextPath()%>/admin/experiences?action=get')
+        .then(response => response.ok ? response.json() : Promise.reject('HTTP ' + response.status))
+        .then(data => {
+          console.log('Loaded:', data.length);
+          experiencesData = data;
+          experiencesLoaded = true;
+          renderExperiencesTable(data);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('experiencesTableBody').innerHTML = 
+            '<tr><td colspan="9" style="text-align:center;padding:40px;"><div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Lỗi: ' + error + '<br><button class="btn btn-sm btn-primary mt-2" onclick="experiencesLoaded=false;loadExperiencesData()">Thử lại</button></div></td></tr>';
+        });
+    }
+    
+    // Render bảng experiences - ĐƠN GIẢN
+    function renderExperiencesTable(experiences) {
+      const tbody = document.getElementById('experiencesTableBody');
+      if (!tbody) return;
+      
+      if (!experiences || experiences.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;">Chưa có experience</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = experiences.map(exp => {
+        const categoryBadge = {
+          'original': '<span class="badge bg-warning">Original</span>',
+          'tomorrow': '<span class="badge bg-info">Ngày mai</span>',
+          'food': '<span class="badge bg-success">Ẩm thực</span>',
+          'workshop': '<span class="badge bg-danger">Workshop</span>'
+        }[exp.category] || exp.category;
+        
+        const statusBadge = exp.status === 'active' 
+          ? '<span class="badge bg-success">Active</span>'
+          : '<span class="badge bg-secondary">Inactive</span>';
+          
+        const toggleBtn = exp.status === 'active'
+          ? '<button class="btn btn-sm btn-warning" onclick="toggleExperienceStatus(' + exp.experienceId + ', \'delete\')" title="Ẩn"><i class="bi bi-eye-slash"></i></button>'
+          : '<button class="btn btn-sm btn-success" onclick="toggleExperienceStatus(' + exp.experienceId + ', \'activate\')" title="Hiện"><i class="bi bi-eye"></i></button>';
+        
+        const badge = exp.badge ? '<i class="bi bi-tag"></i> ' + exp.badge : '';
+        const timeSlot = exp.timeSlot ? '<i class="bi bi-clock"></i> ' + exp.timeSlot : '';
+        const formattedPrice = new Intl.NumberFormat('vi-VN').format(exp.price);
+        
+        return '<tr data-category="' + exp.category + '">' +
+          '<td><strong>' + exp.experienceId + '</strong></td>' +
+          '<td>' +
+            '<img src="' + exp.imageUrl + '" alt="' + exp.title + '" ' +
+                 'onerror="this.src=\'https://via.placeholder.com/80x60?text=No+Image\'" ' +
+                 'style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;">' +
+          '</td>' +
+          '<td>' +
+            '<div style="font-weight: bold; color: #333; margin-bottom: 4px;">' + exp.title + '</div>' +
+            '<div style="font-size: 12px; color: #666;">' + badge + ' ' + timeSlot + '</div>' +
+          '</td>' +
+          '<td>' + categoryBadge + '</td>' +
+          '<td>' + exp.location + '</td>' +
+          '<td>' + formattedPrice + '₫</td>' +
+          '<td>' +
+            '<span style="color: #ffc107;">' +
+              '<i class="bi bi-star-fill"></i> ' + exp.rating +
+            '</span>' +
+          '</td>' +
+          '<td>' + statusBadge + '</td>' +
+          '<td>' +
+            '<button class="btn btn-sm btn-success" onclick="openEditExperienceModal(' + exp.experienceId + ')" title="Sửa">' +
+              '<i class="bi bi-pencil"></i>' +
+            '</button> ' +
+            toggleBtn + ' ' +
+            '<button class="btn btn-sm btn-danger" onclick="deleteExperience(' + exp.experienceId + ')" title="Xóa">' +
+              '<i class="bi bi-trash"></i>' +
+            '</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+    
+    // Load data khi click vào Experiences tab
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('✅ Setting up event listeners...');
+      
+      // Tìm tất cả nav items
+      const navItems = document.querySelectorAll('.nav-item');
+      console.log('Found', navItems.length, 'nav items');
+      
+      navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          const section = this.getAttribute('data-section');
+          console.log('🔘 Clicked section:', section);
+          
+          if (section === 'experiences' && !experiencesLoaded) {
+            console.log('🎯 Loading experiences for first time...');
+            setTimeout(loadExperiencesData, 200);
+          }
+        });
+      });
+      
+      console.log('✅ Event listeners attached!');
+    });
+    
+    function filterExperienceCategory(category) {
+      document.querySelectorAll('.exp-tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      const rows = document.querySelectorAll('#experiencesTableBody tr[data-category]');
+      rows.forEach(row => {
+        if (category === 'all' || row.dataset.category === category) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    function openAddExperienceModal() {
+      document.getElementById('experienceForm').reset();
+      document.getElementById('experienceId').value = '';
+      document.getElementById('expModalTitle').textContent = 'Thêm Experience Mới';
+      const modal = new bootstrap.Modal(document.getElementById('experienceModal'));
+      modal.show();
+    }
+
+    function openEditExperienceModal(id) {
+      console.log('📝 EDIT EXPERIENCE:', id);
+      fetch('<%=request.getContextPath()%>/admin/experiences?action=getById&id=' + id)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('experienceId').value = data.experienceId;
+          document.getElementById('expCategory').value = data.category;
+          document.getElementById('expTitle').value = data.title;
+          document.getElementById('expLocation').value = data.location;
+          document.getElementById('expPrice').value = data.price;
+          document.getElementById('expRating').value = data.rating;
+          document.getElementById('expImageUrl').value = data.imageUrl;
+          document.getElementById('expBadge').value = data.badge || '';
+          document.getElementById('expTimeSlot').value = data.timeSlot || '';
+          document.getElementById('expStatus').value = data.status;
+          document.getElementById('expDisplayOrder').value = data.displayOrder;
+          
+          document.getElementById('expModalTitle').textContent = 'Chỉnh sửa Experience';
+          const modal = new bootstrap.Modal(document.getElementById('experienceModal'));
+          modal.show();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('❌ Không thể tải dữ liệu: ' + error);
+        });
+    }
+
+    function saveExperience() {
+      const form = document.getElementById('experienceForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const id = document.getElementById('experienceId').value;
+      const actionValue = id ? 'update' : 'add';
+      
+      console.log('💾 SAVING EXPERIENCE:', actionValue.toUpperCase());
+      console.log('ID:', id);
+      
+      // ĐỔI CÁCH: Tạo URLSearchParams thay vì FormData
+      const params = new URLSearchParams();
+      params.append('action', actionValue);
+      params.append('id', id);
+      params.append('category', document.getElementById('expCategory').value);
+      params.append('title', document.getElementById('expTitle').value);
+      params.append('location', document.getElementById('expLocation').value);
+      params.append('price', document.getElementById('expPrice').value);
+      params.append('rating', document.getElementById('expRating').value);
+      params.append('imageUrl', document.getElementById('expImageUrl').value);
+      params.append('badge', document.getElementById('expBadge').value || '');
+      params.append('timeSlot', document.getElementById('expTimeSlot').value || '');
+      params.append('status', document.getElementById('expStatus').value);
+      params.append('displayOrder', document.getElementById('expDisplayOrder').value);
+      
+      // Debug
+      console.log('📋 Params being sent:');
+      console.log('  action:', params.get('action'));
+      console.log('  id:', params.get('id'));
+      console.log('  category:', params.get('category'));
+      console.log('  title:', params.get('title'));
+
+      fetch('<%=request.getContextPath()%>/admin/experiences', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params.toString()
+      })
+      .then(response => {
+        console.log('📡 Response status:', response.status);
+        return response.json();
+      })
+      .then(data => {
+        console.log('📥 Response data:', data);
+        
+        if (data && typeof data === 'object') {
+          if (data.success) {
+            alert('✅ ' + (data.message || 'Thành công!'));
+            // Đóng modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('experienceModal'));
+            if (modal) modal.hide();
+            // Reload data
+            experiencesLoaded = false;
+            setTimeout(loadExperiencesData, 200);
+          } else {
+            alert('❌ ' + (data.message || 'Có lỗi xảy ra!'));
+          }
+        } else {
+          alert('❌ Response không hợp lệ!');
+          console.error('Invalid response:', data);
+        }
+      })
+      .catch(error => {
+        console.error('❌ Fetch error:', error);
+        alert('❌ Lỗi: ' + error);
+      });
+    }
+
+    function toggleExperienceStatus(id, action) {
+      if (!confirm('Bạn có chắc muốn ' + (action === 'delete' ? 'ẩn' : 'hiện') + ' experience này?')) {
+        return;
+      }
+
+      console.log('🔄 TOGGLE STATUS:', id, action);
+
+      // Dùng URLSearchParams
+      const params = new URLSearchParams();
+      params.append('action', action);
+      params.append('id', id);
+
+      fetch('<%=request.getContextPath()%>/admin/experiences', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params.toString()
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('✅ ' + data.message);
+          // Reload data
+          experiencesLoaded = false;
+          setTimeout(loadExperiencesData, 200);
+        } else {
+          alert('❌ ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Lỗi: ' + error);
+      });
+    }
+
+    function deleteExperience(id) {
+      if (!confirm('⚠️ Bạn có chắc muốn xóa vĩnh viễn experience này? Không thể khôi phục!')) {
+        return;
+      }
+
+      console.log('🗑️ DELETE EXPERIENCE:', id);
+
+      // Dùng URLSearchParams
+      const params = new URLSearchParams();
+      params.append('action', 'permanentDelete');
+      params.append('id', id);
+
+      fetch('<%=request.getContextPath()%>/admin/experiences', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params.toString()
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('✅ ' + data.message);
+          // Reload data
+          experiencesLoaded = false;
+          setTimeout(loadExperiencesData, 200);
+        } else {
+          alert('❌ ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Lỗi: ' + error);
+      });
+    }
   </script>
   <script>
     // Tự động đóng alert sau 3 giây
