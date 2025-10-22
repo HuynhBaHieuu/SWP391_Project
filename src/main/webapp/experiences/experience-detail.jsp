@@ -653,7 +653,7 @@
     </div>
 
     <!-- Chatbot -->
-    <jsp:include page="/design/chatbot.jsp"/>
+    <jsp:include page="../chatbot/chatbot.jsp"/>
 
     <!-- Scripts -->
     <script src="<c:url value='/js/i18n.js'/>"></script>
