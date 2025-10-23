@@ -266,7 +266,7 @@
                                                   : item.firstImage}" 
                                          alt="${item.title}"
                                          onerror="this.src='https://images.unsplash.com/photo-1505691723518-36a0f6738cbb?w=1000'">
-                                    <button class="wishlist-btn"><i class="bi bi-heart"></i></button>
+                                    <button class="wishlist-btn" data-listing-id="${item.listingID}"><i class="bi bi-heart"></i></button>
                                 </div>
                                 <div class="service-info">
                                     <h3>${item.title}</h3>
@@ -308,16 +308,69 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        // Load wishlist status khi trang load
+        loadWishlistStatus();
+        
+        // Xử lý click wishlist button
         document.querySelectorAll('.wishlist-btn').forEach(btn => {
             btn.addEventListener('click', e => {
                 e.preventDefault();
-                const icon = btn.querySelector('i');
-                btn.classList.toggle('active');
-                icon.classList.toggle('bi-heart');
-                icon.classList.toggle('bi-heart-fill');
+                e.stopPropagation();
+                toggleWishlist(btn);
             });
         });
     });
+    
+    function loadWishlistStatus() {
+        <% if (session.getAttribute("user") != null) { %>
+        fetch('${pageContext.request.contextPath}/api/wishlist/ids')
+            .then(response => response.json())
+            .then(wishlistIds => {
+                document.querySelectorAll('.wishlist-btn').forEach(btn => {
+                    const listingId = parseInt(btn.dataset.listingId);
+                    if (wishlistIds.includes(listingId)) {
+                        btn.classList.add('active');
+                        btn.querySelector('i').classList.replace('bi-heart', 'bi-heart-fill');
+                    }
+                });
+            })
+            .catch(err => console.error('Error loading wishlist:', err));
+        <% } %>
+    }
+    
+    function toggleWishlist(btn) {
+        <% if (session.getAttribute("user") == null) { %>
+        alert('Vui lòng đăng nhập để thêm vào danh sách yêu thích!');
+        window.location.href = '${pageContext.request.contextPath}/login.jsp';
+        return;
+        <% } else { %>
+        const listingId = btn.dataset.listingId;
+        const icon = btn.querySelector('i');
+        const isActive = btn.classList.contains('active');
+        const action = isActive ? 'remove' : 'add';
+        
+        fetch('${pageContext.request.contextPath}/WishlistServlet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'listingId=' + listingId + '&action=' + action
+        })
+        .then(response => {
+            if (response.ok) {
+                btn.classList.toggle('active');
+                icon.classList.toggle('bi-heart');
+                icon.classList.toggle('bi-heart-fill');
+            } else {
+                alert('Có lỗi xảy ra, vui lòng thử lại!');
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('Có lỗi xảy ra, vui lòng thử lại!');
+        });
+        <% } %>
+    }
 </script>
 <script src="<%=request.getContextPath()%>/js/i18n.js?v=1"></script>
 </body>

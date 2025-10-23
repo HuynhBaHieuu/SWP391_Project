@@ -1137,21 +1137,62 @@
                             }
                         });
                         return;
-                        <% } %>
+                        <% } else { %>
                         
-                        // Toggle button state
                         const isActive = button.classList.contains('active');
-                        button.classList.toggle('active');
-                        
-                        // Update icon
+                        const action = isActive ? 'remove' : 'add';
                         const icon = button.querySelector('i');
-                        if (isActive) {
-                            icon.className = 'bi bi-heart';
-                        } else {
-                            icon.className = 'bi bi-heart-fill';
-                        }
                         
-                        // TODO: Implement actual wishlist API call
+                        // Send request to backend
+                        fetch('${pageContext.request.contextPath}/WishlistServlet', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: 'listingId=' + listingId + '&action=' + action
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                // Toggle button state
+                                button.classList.toggle('active');
+                                
+                                // Update icon
+                                if (isActive) {
+                                    icon.className = 'bi bi-heart';
+                                } else {
+                                    icon.className = 'bi bi-heart-fill';
+                                }
+                                
+                                // Show success message
+                                const Toast = Swal.mixin({
+                                    toast: true,
+                                    position: 'top-end',
+                                    showConfirmButton: false,
+                                    timer: 2000,
+                                    timerProgressBar: true
+                                });
+                                
+                                Toast.fire({
+                                    icon: 'success',
+                                    title: isActive ? 'Đã xóa khỏi danh sách yêu thích' : 'Đã thêm vào danh sách yêu thích'
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi',
+                                    text: 'Có lỗi xảy ra, vui lòng thử lại!'
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error:', err);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: 'Có lỗi xảy ra, vui lòng thử lại!'
+                            });
+                        });
+                        <% } %>
                     }
                     
                     // Function to format prices (reuse existing i18n functionality)
