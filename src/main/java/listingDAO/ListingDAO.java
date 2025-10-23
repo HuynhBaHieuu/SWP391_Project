@@ -583,10 +583,10 @@ public Map<String, List<Listing>> getListingsGroupedByCity() {
         return l;
     }
 
-// ====== SEARCH LISTINGS BY CITY + GUESTS ======
-    public List<Listing> searchByCity(String city, int guests) {
+// ====== SEARCH LISTINGS BY KEYWORD (Title, City, Address, Description) + GUESTS ======
+    public List<Listing> searchByCity(String keyword, int guests) {
         List<Listing> list = new ArrayList<>();
-        if (city == null || city.trim().isEmpty()) {
+        if (keyword == null || keyword.trim().isEmpty()) {
             return list;
         }
 
@@ -603,14 +603,23 @@ public Map<String, List<Listing>> getListingsGroupedByCity() {
             }
 
             try (ResultSet rs = ps.executeQuery()) {
-                String keyword = removeAccents(city.toLowerCase());
+                // Bỏ dấu và chuyển thành chữ thường để tìm kiếm
+                String searchKeyword = removeAccents(keyword.toLowerCase());
+                
                 while (rs.next()) {
                     Listing l = mapResultSetToListing(rs);
-                    String cityName = removeAccents(
-                            l.getCity() != null ? l.getCity().toLowerCase() : ""
-                    );
-
-                    if (cityName.contains(keyword)) {
+                    
+                    // Chuẩn hóa các trường để tìm kiếm
+                    String title = removeAccents(l.getTitle() != null ? l.getTitle().toLowerCase() : "");
+                    String city = removeAccents(l.getCity() != null ? l.getCity().toLowerCase() : "");
+                    String address = removeAccents(l.getAddress() != null ? l.getAddress().toLowerCase() : "");
+                    String description = removeAccents(l.getDescription() != null ? l.getDescription().toLowerCase() : "");
+                    
+                    // Tìm kiếm trong tất cả các trường
+                    if (title.contains(searchKeyword) || 
+                        city.contains(searchKeyword) || 
+                        address.contains(searchKeyword) || 
+                        description.contains(searchKeyword)) {
                         list.add(l);
                     }
                 }
@@ -620,7 +629,7 @@ public Map<String, List<Listing>> getListingsGroupedByCity() {
             e.printStackTrace();
         }
 
-        System.out.println("🔍 Search city: " + city + " → Found " + list.size() + " listings");
+        System.out.println("🔍 Search keyword: '" + keyword + "' → Found " + list.size() + " listings");
         return list;
     }
 

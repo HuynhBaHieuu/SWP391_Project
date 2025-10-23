@@ -205,6 +205,22 @@
                 color: white;
             }
 
+            .host-badge {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+                padding: 12px 22px;
+                border-radius: 10px;
+                font-weight: bold;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+            }
+
+            .host-badge i {
+                font-size: 18px;
+            }
+
             /* --- MAP --- */
             .map-box {
                 margin-top: 35px;
@@ -277,7 +293,8 @@
                 }
                 .actions .back-btn,
                 .actions .message-btn,
-                .actions .book-btn {
+                .actions .book-btn,
+                .actions .host-badge {
                     text-align: center;
                     justify-content: center;
                 }
@@ -612,9 +629,15 @@
                 </button>
                 <% }%>
 
+                <% if (currentUser == null || currentUser.getUserID() != listing.getHostID()) {%>
                 <a href="${pageContext.request.contextPath}/booking?action=create&listingId=<%= listing.getListingID()%>" class="book-btn">
                     <i class="bi bi-calendar-check"></i> Đặt phòng ngay
                 </a>
+                <% } else { %>
+                <div class="host-badge">
+                    <i class="bi bi-house-check"></i> Đây là accommodation của bạn
+                </div>
+                <% } %>
             </div>
 
             <!-- REVIEWS SECTION -->

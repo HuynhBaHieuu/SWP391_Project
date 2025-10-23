@@ -22,7 +22,7 @@ public class SearchListingController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String keyword = request.getParameter("keyword"); // có thể là tên thành phố
+        String keyword = request.getParameter("keyword"); // Từ khóa tìm kiếm (title, city, address, description)
         int guests = 0;
 
         try {
@@ -40,6 +40,7 @@ public class SearchListingController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/home");
             return;
         } else {
+            // Tìm kiếm theo Title, City, Address, Description
             listings = listingDAO.searchByCity(keyword.trim(), guests);
         }
 
@@ -49,7 +50,7 @@ public class SearchListingController extends HttpServlet {
         request.setAttribute("guests", guests);
 
         // Log để kiểm tra trong console
-        System.out.println("🔎 Search city=" + keyword + ", guests=" + guests + " → found=" + listings.size());
+        System.out.println("🔎 Search keyword='" + keyword + "', guests=" + guests + " → found=" + listings.size() + " listings");
 
         request.getRequestDispatcher("/home.jsp").forward(request, response);
     }

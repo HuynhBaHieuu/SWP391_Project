@@ -30,7 +30,7 @@
         <a href="${pageContext.request.contextPath}/host/today" class="nav-link ${param.active eq 'today' ? 'active' : ''}" data-i18n="header.host.nav.today">Hôm nay</a>
         <a href="${pageContext.request.contextPath}/host/calendar" class="nav-link ${param.active eq 'calendar' ? 'active' : ''}" data-i18n="header.host.nav.calendar">Lịch</a>
         <a href="${pageContext.request.contextPath}/host/listings" class="nav-link ${param.active eq 'listings' ? 'active' : ''}" data-i18n="header.host.nav.listings">Bài đăng</a>
-        <a href="${pageContext.request.contextPath}/host/inbox" class="nav-link ${param.active eq 'inbox' ? 'active' : ''}" data-i18n="header.host.nav.inbox">Tin nhắn</a>
+        <a href="${pageContext.request.contextPath}/chat" class="nav-link ${param.active eq 'inbox' ? 'active' : ''}" data-i18n="header.host.nav.inbox">Tin nhắn</a>
     </nav>
     <div class="host-header-right">
         <a href="${pageContext.request.contextPath}/host/switch-to-guest" class="switch-mode" data-i18n="header.host.switch_to_guest">Chuyển sang chế độ du lịch</a>

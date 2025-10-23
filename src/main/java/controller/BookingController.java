@@ -92,6 +92,14 @@ public class BookingController extends HttpServlet {
                 return;
             }
             
+            // Kiểm tra xem user có phải là host của listing này không
+            if (listing.getHostID() == user.getUserID()) {
+                request.setAttribute("error", "Bạn không thể đặt phòng của chính mình");
+                request.setAttribute("listing", listing);
+                request.getRequestDispatcher("booking/booking-form.jsp").forward(request, response);
+                return;
+            }
+            
             request.setAttribute("listing", listing);
             request.getRequestDispatcher("booking/booking-form.jsp").forward(request, response);
             
@@ -121,9 +129,26 @@ public class BookingController extends HttpServlet {
             System.out.println("Check-in: " + checkInDate + ", Check-out: " + checkOutDate);
             
             // Validate dates
-            if (checkInDate.isBefore(LocalDate.now()) || checkOutDate.isBefore(checkInDate)) {
-                request.setAttribute("error", "Ngày check-in và check-out không hợp lệ");
-                response.sendRedirect("booking?action=create&listingId=" + listingId);
+            if (checkInDate.isBefore(LocalDate.now())) {
+                request.setAttribute("error", "Ngày check-in không thể trong quá khứ");
+                request.setAttribute("errorType", "date_invalid");
+                response.sendRedirect("booking?action=create&listingId=" + listingId + "&error=past_date");
+                return;
+            }
+            
+            if (checkOutDate.isBefore(checkInDate) || checkOutDate.isEqual(checkInDate)) {
+                request.setAttribute("error", "Ngày check-out phải sau ngày check-in");
+                request.setAttribute("errorType", "date_invalid");
+                response.sendRedirect("booking?action=create&listingId=" + listingId + "&error=invalid_range");
+                return;
+            }
+            
+            // Kiểm tra xem ngày đặt có bị trùng không
+            if (!bookingDAO.isDateRangeAvailable(listingId, checkInDate, checkOutDate)) {
+                System.out.println("Date range not available for listing " + listingId + ": " + checkInDate + " to " + checkOutDate);
+                request.setAttribute("error", "Phòng đã được đặt trong khoảng thời gian này. Vui lòng chọn ngày khác.");
+                request.setAttribute("errorType", "date_overlap");
+                response.sendRedirect("booking?action=create&listingId=" + listingId + "&error=date_overlap");
                 return;
             }
             
@@ -131,6 +156,15 @@ public class BookingController extends HttpServlet {
             if (listing == null) {
                 System.out.println("Listing not found for ID: " + listingId);
                 response.sendRedirect("home.jsp");
+                return;
+            }
+            
+            // Kiểm tra xem user có phải là host của listing này không
+            if (listing.getHostID() == user.getUserID()) {
+                System.out.println("Host cannot book their own listing. HostID: " + listing.getHostID() + ", UserID: " + user.getUserID());
+                request.setAttribute("error", "Bạn không thể đặt phòng của chính mình");
+                request.setAttribute("errorType", "self_booking");
+                response.sendRedirect("booking?action=create&listingId=" + listingId + "&error=self_booking");
                 return;
             }
             
