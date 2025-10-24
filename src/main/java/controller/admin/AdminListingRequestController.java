@@ -27,38 +27,36 @@ import model.User;
 
 @WebServlet(name = "AdminListingRequestController", urlPatterns = {"/admin/listing-requests"})
 public class AdminListingRequestController extends HttpServlet {
-
+    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
-
+        
         if (user == null || !user.isAdmin()) {
             response.sendRedirect(request.getContextPath() + "/unauthorized.jsp");
             return;
         }
-
         String action = request.getParameter("action");
         Integer requestId = null;
         try {
             requestId = Integer.parseInt(request.getParameter("requestId"));
-        } catch (Exception ignore) {
-        }
-
+        } catch (Exception ignore) {}
+        
         if (requestId == null) {
-            if (session != null) {
+            if (session != null){
                 request.setAttribute("message", "Thiếu hoặc sai mã yêu cầu.");
                 request.setAttribute("type", "error");
             }
             request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
-            return; 
+            return;
         }
-
+        
         try {
             ListingDAO listingDAO = new ListingDAO();
             String status;
-
             if ("approve".equalsIgnoreCase(action)) {
                 status = "Approved";
                 boolean success = listingDAO.createOrRejectListingRequest(requestId, status);
@@ -69,8 +67,6 @@ public class AdminListingRequestController extends HttpServlet {
                     request.setAttribute("message", "Không thể duyệt yêu cầu bài đăng.");
                     request.setAttribute("type", "error");
                 }
-                request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
-                return; 
             } else if ("reject".equalsIgnoreCase(action)) {
                 status = "Rejected";
                 boolean success = listingDAO.createOrRejectListingRequest(requestId, status);
@@ -81,35 +77,20 @@ public class AdminListingRequestController extends HttpServlet {
                     request.setAttribute("message", "Không thể từ chối yêu cầu duyệt bài đăng.");
                     request.setAttribute("type", "error");
                 }
-                request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
-                return; 
-            } else if ("view".equalsIgnoreCase(action)) {
-                int listingID = listingDAO.getListingIdByRequestId(requestId);
-                if (listingID == -1) {
-                    request.setAttribute("message", "Không thể xem chi tiết bài đăng.");
-                    request.setAttribute("type", "error");
-                    request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
-                    return;
-                }
-                request.setAttribute("listingID", listingID);
-                request.getRequestDispatcher("/admin/listing-detail.jsp").forward(request, response);
-                return; 
             } else {
-                if (session != null) {
+                if (session != null){ 
                     request.setAttribute("message", "Hành động không hợp lệ.");
                     request.setAttribute("type", "error");
                 }
-                request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
-                return; 
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            if (session != null) {
+            if (session != null){
                 request.setAttribute("message", "Có lỗi hệ thống. Vui lòng thử lại sau.");
                 request.setAttribute("type", "error");
             }
-            request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
-            return; 
         }
+
+        request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
     }
 }

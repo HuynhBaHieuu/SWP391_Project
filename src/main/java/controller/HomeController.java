@@ -3,36 +3,40 @@ package controller;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import listingDAO.ListingDAO;
 import model.Listing;
-import service.ListingService;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
+import model.User;
+import service.IUserService;
+import service.UserService;
 
 @WebServlet("/home")
 public class HomeController extends HttpServlet {
-
-    private ListingService listingService;
+    private ListingDAO listingDAO;
 
     @Override
     public void init() {
-        listingService = new ListingService();
+        listingDAO = new ListingDAO();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Lấy tất cả listings để hiển thị trên trang chủ (loại trừ soft deleted)
+        List<Listing> listings = listingDAO.getAllActiveListings();
+        
+        request.setAttribute("listings", listings);
+        
+        HttpSession session = request.getSession();
+        User currentUser = (User) session.getAttribute("user");
 
-        try {
-            // ✅ Lấy danh sách grouped by city
-            Map<String, List<Listing>> groupedListings = listingService.getListingsGroupedByCity();
-            request.setAttribute("groupedListings", groupedListings);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Lỗi khi tải danh sách nơi lưu trú.");
+        if (currentUser != null) {
+            IUserService userService = new UserService();
+            List<Integer> userWishlist = userService.getAllListingIDByUser(currentUser.getUserID());
+            request.setAttribute("userWishlist", userWishlist);
         }
-
-        request.getRequestDispatcher("/home.jsp").forward(request, response);
+    
+        request.getRequestDispatcher("home.jsp").forward(request, response);
     }
 }
