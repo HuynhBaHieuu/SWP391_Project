@@ -11,26 +11,31 @@
 <script src="<%=request.getContextPath()%>/js/i18n.js?v=13"></script>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%
-    User currentUser = (User) session.getAttribute("user");
-    String userImagePath = null;
-    
-    // Lấy số tin nhắn chưa đọc
-    int unreadMessageCount = 0;
-    if (currentUser != null) {
-        unreadMessageCount = new ConversationDAO().getTotalUnreadCount(currentUser.getUserID());
+    Object currentUserObj = pageContext.getAttribute("currentUser");
+    User currentUser = null;
+    if (currentUserObj instanceof User) {
+        currentUser = (User) currentUserObj;
+    } else {
+        currentUser = (User) session.getAttribute("user");
     }
 
-    if (currentUser != null && currentUser.getProfileImage() != null) {
+    String userImagePath = null;
+    int unreadMessageCount = 0;
+
+    if (currentUser != null) {
+        unreadMessageCount = new ConversationDAO().getTotalUnreadCount(currentUser.getUserID());
+
         String profileImage = currentUser.getProfileImage();
-        if (profileImage.startsWith("http")) {
-            // Ảnh từ Google (đường dẫn tuyệt đối)
-            userImagePath = profileImage;
+        if (profileImage != null && !profileImage.trim().isEmpty()) {
+            if (profileImage.startsWith("http")) {
+                userImagePath = profileImage;
+            } else {
+                userImagePath = request.getContextPath() + "/" + profileImage;
+            }
         } else {
-            // Ảnh từ thư mục trong server
-            userImagePath = request.getContextPath() + "/" + profileImage;
+            userImagePath = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
         }
     } else {
-        // Ảnh mặc định
         userImagePath = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
     }
 %>
@@ -41,8 +46,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
         <style>
-            /* Cải thiện style cho dropdown menu */
-            .header-top {
+            /* Cải thiện style cho dropdown menu - chỉ áp dụng cho header */
+            .header .header-top {
                 display: flex;
                 max-width: 64%;
                 margin: 0 auto;
@@ -158,9 +163,15 @@
             }
 
             @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-5px); }
-                75% { transform: translateX(5px); }
+                0%, 100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px);
+                }
+                75% {
+                    transform: translateX(5px);
+                }
             }
         </style>
     </head>
@@ -243,11 +254,11 @@
                             <path d="M2 16h28M2 24h28M2 8h28"></path>
                             </g>
                             </svg>
-                            <% if (unreadMessageCount > 0) { %>
-                                <span class="message-badge-1"><%= unreadMessageCount %></span>
-                            <% } %>
+                            <% if (unreadMessageCount > 0) {%>
+                            <span class="message-badge-1"><%= unreadMessageCount%></span>
+                            <% }%>
                         </button>   
-                    
+
                         <!-- Dropdown menu -->
                         <div id="dropdown-menu" style="display:none; position:absolute; background:#fff; border:1px solid #ddd; border-radius:8px; padding:10px;">
                             <a href="<%= (currentUser != null) ? (request.getContextPath() + "/WishlistServlet") : (request.getContextPath() + "/login.jsp")%>" 
@@ -255,7 +266,7 @@
                                 <i class="bi bi-heart"></i>
                                 <span data-i18n="header.dropdown.wishlist">Danh sách yêu thích</span>
                             </a>
-                              
+
                             <a href="<%= (currentUser != null) ? (request.getContextPath() + "/trips") : (request.getContextPath() + "/login.jsp")%>" 
                                class="menu-item user-profile">
                                 <i class="bi bi-suitcase"></i>
@@ -370,12 +381,12 @@
             const dropdownMenu = document.getElementById('dropdown-menu');
             dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
         }
-        
+
         // Đóng dropdown khi click vào nút ngôn ngữ
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const langMenuItem = document.querySelector('[data-open-lang-modal]');
             if (langMenuItem) {
-                langMenuItem.addEventListener('click', function(e) {
+                langMenuItem.addEventListener('click', function (e) {
                     e.preventDefault();
                     // Đóng dropdown menu
                     const dropdownMenu = document.getElementById('dropdown-menu');
@@ -389,10 +400,10 @@
         });
 
         // Đóng dropdown khi click bên ngoài
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const dropdownMenu = document.getElementById('dropdown-menu');
             const profileIcon = event.target.closest('.profile-icon');
-            
+
             if (!profileIcon && dropdownMenu.style.display === 'block') {
                 dropdownMenu.style.display = 'none';
             }
@@ -401,21 +412,21 @@
         // Auto-refresh số tin nhắn chưa đọc mỗi 30 giây
         // Tạm thời comment để tránh lỗi JSP compilation
         /*
-        if (currentUser != null) {
-            setInterval(function() {
-                fetch('<%= request.getContextPath() %>/chat?action=getUnreadCount')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const currentCount = <%= unreadMessageCount %>;
-                            if (data.unreadCount !== currentCount && data.unreadCount > 0) {
-                                location.reload();
-                            }
-                        }
-                    })
-                    .catch(error => console.log('Error checking messages:', error));
-            }, 30000);
-        }
-        */
+         if (currentUser != null) {
+         setInterval(function() {
+         fetch('<%= request.getContextPath()%>/chat?action=getUnreadCount')
+         .then(response => response.json())
+         .then(data => {
+         if (data.success) {
+         const currentCount = <%= unreadMessageCount%>;
+         if (data.unreadCount !== currentCount && data.unreadCount > 0) {
+         location.reload();
+         }
+         }
+         })
+         .catch(error => console.log('Error checking messages:', error));
+         }, 30000);
+         }
+         */
     </script>
 </html>
