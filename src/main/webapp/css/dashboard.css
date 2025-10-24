@@ -744,3 +744,330 @@ body {
     gap: 4px;
   }
 }
+
+/* Service Management Styles */
+.service-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.service-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.service-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.service-search-bar {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+}
+
+.service-search-bar .search-input {
+  flex: 1;
+  max-width: 300px;
+}
+
+.service-search-bar .form-select {
+  min-width: 150px;
+}
+
+.service-search-bar .btn {
+  white-space: nowrap;
+}
+
+/* Service Management Table Styles */
+#servicesTable th,
+#categoriesTable th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+#servicesTable td,
+#categoriesTable td {
+  vertical-align: middle;
+  padding: 12px 16px;
+}
+
+/* Service Management Action Buttons */
+.service-action-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 4px;
+}
+
+.service-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.service-action-btn-edit {
+  background: #3b82f6;
+  color: white;
+}
+
+.service-action-btn-edit:hover {
+  background: #2563eb;
+}
+
+.service-action-btn-delete {
+  background: #ef4444;
+  color: white;
+}
+
+.service-action-btn-delete:hover {
+  background: #dc2626;
+}
+
+.service-action-btn-view {
+  background: #10b981;
+  color: white;
+}
+
+.service-action-btn-view:hover {
+  background: #059669;
+}
+
+/* Service Management Modal Styles */
+.service-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+  padding: 20px 0;
+  box-sizing: border-box;
+}
+
+.service-modal-content {
+  background-color: white;
+  margin: 0 auto;
+  padding: 0;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  min-height: 200px;
+  max-height: calc(100vh - 40px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.service-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.service-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.service-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.service-modal-close:hover {
+  color: #374151;
+}
+
+.service-modal-body {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.service-form-group {
+  margin-bottom: 20px;
+}
+
+.service-form-label {
+  display: block;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.service-form-input,
+.service-form-select,
+.service-form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.service-form-input:focus,
+.service-form-select:focus,
+.service-form-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.service-form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.service-modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.service-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.service-btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.service-btn-primary:hover {
+  background: #2563eb;
+}
+
+.service-btn-secondary {
+  background: #6b7280;
+  color: white;
+}
+
+.service-btn-secondary:hover {
+  background: #4b5563;
+}
+
+/* Service Management Status Badges */
+.service-status-active {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.service-status-inactive {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Service Management Price Display */
+.service-price {
+  font-weight: 600;
+  color: #059669;
+  font-size: 14px;
+}
+
+/* Service Management Empty State */
+.service-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.service-empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.service-empty-state-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+.service-empty-state-description {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Category Information Styles */
+.category-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.category-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.category-slug {
+  color: #6b7280;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.category-description {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.service-count {
+  font-weight: 600;
+  color: #059669;
+  font-size: 14px;
+}
