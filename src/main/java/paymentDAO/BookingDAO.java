@@ -15,6 +15,76 @@ import model.Listing;
 
 public class BookingDAO {
     
+    /**
+     * Kiểm tra xem listing có available trong khoảng thời gian không
+     * @param listingId ID của listing
+     * @param checkIn Ngày check-in
+     * @param checkOut Ngày check-out
+     * @return true nếu listing available, false nếu đã được đặt
+     */
+    public boolean isDateRangeAvailable(int listingId, LocalDate checkIn, LocalDate checkOut) {
+        // Kiểm tra xem có booking nào OVERLAP với khoảng thời gian này không
+        // Hai khoảng thời gian OVERLAP nếu:
+        // - Booking mới bắt đầu trước khi booking cũ kết thúc VÀ
+        // - Booking mới kết thúc sau khi booking cũ bắt đầu
+        String sql = "SELECT COUNT(*) FROM Bookings " +
+                     "WHERE ListingID = ? " +
+                     "AND Status IN ('Processing', 'Completed') " + // Chỉ check booking đang active
+                     "AND CheckInDate < ? " +  // Booking cũ bắt đầu trước khi booking mới kết thúc
+                     "AND CheckOutDate > ?";   // Booking cũ kết thúc sau khi booking mới bắt đầu
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, listingId);
+            ps.setDate(2, Date.valueOf(checkOut));
+            ps.setDate(3, Date.valueOf(checkIn));
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    return count == 0; // Available nếu không có booking nào overlap
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false; // Mặc định không available nếu có lỗi
+    }
+    
+    /**
+     * Lấy danh sách các booking đã đặt cho listing (để hiển thị calendar)
+     * @param listingId ID của listing
+     * @return List các booking
+     */
+    public List<Booking> getBookedDatesForListing(int listingId) {
+        String sql = "SELECT CheckInDate, CheckOutDate " +
+                     "FROM Bookings " +
+                     "WHERE ListingID = ? " +
+                     "AND Status IN ('Processing', 'Completed') " +
+                     "ORDER BY CheckInDate";
+        
+        List<Booking> bookings = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, listingId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Booking booking = new Booking();
+                    booking.setCheckInDate(rs.getDate("CheckInDate").toLocalDate());
+                    booking.setCheckOutDate(rs.getDate("CheckOutDate").toLocalDate());
+                    bookings.add(booking);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return bookings;
+    }
+    
     public boolean createBooking(Booking booking) {
         String sql = "INSERT INTO Bookings (GuestID, ListingID, CheckInDate, CheckOutDate, TotalPrice, Status, CreatedAt) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -302,6 +372,72 @@ public class BookingDAO {
                     listing.setListingID(rs.getInt("ListingID"));
                     listing.setTitle(rs.getString("ListingTitle"));
                     listing.setAddress(rs.getString("ListingAddress"));
+                    listing.setPricePerNight(rs.getBigDecimal("PricePerNight"));
+                    booking.setListing(listing);
+                    
+                    bookings.add(booking);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return bookings;
+    }
+    
+    /**
+     * Lấy danh sách bookings trong ngày hôm nay của host
+     * Bao gồm: Check-in hôm nay, Check-out hôm nay, hoặc đang ở trong khoảng thời gian
+     */
+    public List<Booking> getTodayBookingsByHostId(int hostId) {
+        String sql = "SELECT b.*, u.FullName as GuestName, u.Email as GuestEmail, u.ProfileImage as GuestAvatar, " +
+                     "l.Title as ListingTitle, l.Address as ListingAddress, l.City as ListingCity, " +
+                     "l.PricePerNight, l.ListingID " +
+                     "FROM Bookings b " +
+                     "LEFT JOIN Users u ON b.GuestID = u.UserID " +
+                     "LEFT JOIN Listings l ON b.ListingID = l.ListingID " +
+                     "WHERE l.HostID = ? " +
+                     "AND b.Status IN ('Processing', 'Completed') " +
+                     "AND ( " +
+                     "    CAST(b.CheckInDate AS DATE) = CAST(GETDATE() AS DATE) " +  // Check-in hôm nay
+                     "    OR CAST(b.CheckOutDate AS DATE) = CAST(GETDATE() AS DATE) " +  // Check-out hôm nay
+                     "    OR (b.CheckInDate <= CAST(GETDATE() AS DATE) AND b.CheckOutDate >= CAST(GETDATE() AS DATE)) " +  // Đang ở
+                     ") " +
+                     "ORDER BY b.CheckInDate ASC, b.CheckOutDate ASC";
+        
+        List<Booking> bookings = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, hostId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Booking booking = mapResultSetToBooking(rs);
+                    
+                    // Set guest info
+                    booking.setGuestName(rs.getString("GuestName"));
+                    
+                    // Set listing info
+                    booking.setListingTitle(rs.getString("ListingTitle"));
+                    booking.setListingAddress(rs.getString("ListingAddress"));
+                    booking.setPricePerNight(rs.getBigDecimal("PricePerNight"));
+                    
+                    // Calculate number of nights
+                    if (booking.getCheckInDate() != null && booking.getCheckOutDate() != null) {
+                        long nights = java.time.temporal.ChronoUnit.DAYS.between(
+                            booking.getCheckInDate(), 
+                            booking.getCheckOutDate()
+                        );
+                        booking.setNumberOfNights((int) nights);
+                    }
+                    
+                    // Create listing object
+                    Listing listing = new Listing();
+                    listing.setListingID(rs.getInt("ListingID"));
+                    listing.setTitle(rs.getString("ListingTitle"));
+                    listing.setAddress(rs.getString("ListingAddress"));
+                    listing.setCity(rs.getString("ListingCity"));
                     listing.setPricePerNight(rs.getBigDecimal("PricePerNight"));
                     booking.setListing(listing);
                     

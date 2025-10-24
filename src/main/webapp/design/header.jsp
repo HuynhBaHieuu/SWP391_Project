@@ -1,4 +1,3 @@
-
 <%-- 
     Document   : header
     Created on : Sep 20, 2025, 8:57:56 PM
@@ -11,31 +10,26 @@
 <script src="<%=request.getContextPath()%>/js/i18n.js?v=13"></script>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%
-    Object currentUserObj = pageContext.getAttribute("currentUser");
-    User currentUser = null;
-    if (currentUserObj instanceof User) {
-        currentUser = (User) currentUserObj;
-    } else {
-        currentUser = (User) session.getAttribute("user");
-    }
-
+    User currentUser = (User) session.getAttribute("user");
     String userImagePath = null;
+    
+    // Lấy số tin nhắn chưa đọc
     int unreadMessageCount = 0;
-
     if (currentUser != null) {
         unreadMessageCount = new ConversationDAO().getTotalUnreadCount(currentUser.getUserID());
+    }
 
+    if (currentUser != null && currentUser.getProfileImage() != null) {
         String profileImage = currentUser.getProfileImage();
-        if (profileImage != null && !profileImage.trim().isEmpty()) {
-            if (profileImage.startsWith("http")) {
-                userImagePath = profileImage;
-            } else {
-                userImagePath = request.getContextPath() + "/" + profileImage;
-            }
+        if (profileImage.startsWith("http")) {
+            // Ảnh từ Google (đường dẫn tuyệt đối)
+            userImagePath = profileImage;
         } else {
-            userImagePath = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
+            // Ảnh từ thư mục trong server
+            userImagePath = request.getContextPath() + "/" + profileImage;
         }
     } else {
+        // Ảnh mặc định
         userImagePath = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
     }
 %>
@@ -46,8 +40,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
         <style>
-            /* Cải thiện style cho dropdown menu - chỉ áp dụng cho header */
-            .header .header-top {
+            /* Cải thiện style cho dropdown menu */
+            .header-top {
                 display: flex;
                 max-width: 64%;
                 margin: 0 auto;
@@ -198,7 +192,7 @@
                         <span data-title="Nơi lưu trú" data-i18n="header.nav.stay">Nơi lưu trú</span>
                     </a>
                     <!-- Trải nghiệm -->
-                    <a href="${pageContext.request.contextPath}/experiences/experiences.jsp" class="menu-sub">
+                    <a href="${pageContext.request.contextPath}/experiences" class="menu-sub">
                         <span class="w14w6ssu atm_mk_h2mmj6 dir dir-ltr" style="transform:none;" aria-hidden="true">
                             <img src="https://www.svgrepo.com/show/484353/balloon.svg" alt="Experience Icon" width="40" height="40">
                         </span>
@@ -254,9 +248,9 @@
                             <path d="M2 16h28M2 24h28M2 8h28"></path>
                             </g>
                             </svg>
-                            <% if (unreadMessageCount > 0) {%>
-                            <span class="message-badge-1"><%= unreadMessageCount%></span>
-                            <% }%>
+                            <% if (unreadMessageCount > 0) { %>
+                            <span class="message-badge-1"><%= unreadMessageCount %></span>
+                            <% } %>
                         </button>   
 
                         <!-- Dropdown menu -->
@@ -414,11 +408,11 @@
         /*
          if (currentUser != null) {
          setInterval(function() {
-         fetch('<%= request.getContextPath()%>/chat?action=getUnreadCount')
+         fetch('<%= request.getContextPath() %>/chat?action=getUnreadCount')
          .then(response => response.json())
          .then(data => {
          if (data.success) {
-         const currentCount = <%= unreadMessageCount%>;
+         const currentCount = <%= unreadMessageCount %>;
          if (data.unreadCount !== currentCount && data.unreadCount > 0) {
          location.reload();
          }

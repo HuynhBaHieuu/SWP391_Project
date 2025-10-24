@@ -17,16 +17,6 @@
             <page-encoding>UTF-8</page-encoding>
         </jsp-property-group>
     </jsp-config>
-
-    <!-- Service Mappings -->
-    <servlet>
-        <servlet-name>ServiceController</servlet-name>
-        <servlet-class>controller.ServiceController</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ServiceController</servlet-name>
-        <url-pattern>/service/*</url-pattern>
-    </servlet-mapping>
     
     <!-- Default encoding for all servlets -->
     <servlet>
@@ -48,7 +38,6 @@
 
     <!-- Trang mặc định -->
     <welcome-file-list>
-        <welcome-file>login.jsp</welcome-file>
         <welcome-file>home</welcome-file>
     </welcome-file-list>
     
@@ -149,17 +138,11 @@
         <filter-name>CharacterEncodingFilter</filter-name>
         <url-pattern>/admin/*</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/experiences</url-pattern>
+    </filter-mapping>
     
-    <!-- Service Categories Servlet -->
-<!--    <servlet>
-        <servlet-name>ServiceCategoriesServlet</servlet-name>
-        <servlet-class>controller.admin.ServiceCategoriesServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ServiceCategoriesServlet</servlet-name>
-        <url-pattern>/admin/service-categories</url-pattern>
-    </servlet-mapping>
-    -->
     <!-- Image Servlet for serving external images -->
 
 </web-app>

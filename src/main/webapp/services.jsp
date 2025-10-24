@@ -1,7 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="java.sql.*" %>
-<%@ page import="dao.DBConnection" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -17,208 +15,320 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     </head>
     <body>
-        <%
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rs = null;
-            
-            // Lưu trữ dữ liệu dịch vụ theo danh mục
-            java.util.Map<String, java.util.List<java.util.Map<String, Object>>> servicesByCategory = new java.util.HashMap<>();
-            
-            try {
-                conn = DBConnection.getConnection();
-                if (conn != null) {
-                    out.println("<!-- Database connection successful -->");
-                    stmt = conn.createStatement();
-                    
-                    // Query để lấy tất cả dịch vụ với thông tin danh mục
-                    // Tạm thời bỏ điều kiện Status để hiển thị tất cả dịch vụ active
-                    String sql = "SELECT s.ServiceID, s.Name, s.CategoryID, s.Price, s.Description, " +
-                                 "s.Status, s.CreatedAt, s.UpdatedAt, s.IsDeleted, s.ImageURL, " +
-                                 "COALESCE(c.Name, N'Chưa phân loại') AS CategoryName " +
-                                 "FROM ServiceCustomer s " +
-                                 "LEFT JOIN ServiceCategories c ON s.CategoryID = c.CategoryID " +
-                                 "WHERE s.IsDeleted = 0 " +
-                                 "ORDER BY c.SortOrder ASC, s.CreatedAt DESC";
-                    
-                    out.println("<!-- SQL Query: " + sql + " -->");
-                    
-                    rs = stmt.executeQuery(sql);
-                    
-                    int serviceCount = 0;
-                    while (rs.next()) {
-                        serviceCount++;
-                        String categoryName = rs.getString("CategoryName");
-                        
-                        out.println("<!-- Service " + serviceCount + ": " + rs.getString("Name") + " in category: " + categoryName + " -->");
-                        
-                        // Tạo map chứa thông tin dịch vụ
-                        java.util.Map<String, Object> service = new java.util.HashMap<>();
-                        service.put("serviceId", rs.getInt("ServiceID"));
-                        service.put("name", rs.getString("Name"));
-                        service.put("categoryId", rs.getObject("CategoryID"));
-                        service.put("price", rs.getBigDecimal("Price"));
-                        service.put("description", rs.getString("Description"));
-                        service.put("status", rs.getString("Status"));
-                        service.put("createdAt", rs.getTimestamp("CreatedAt"));
-                        service.put("updatedAt", rs.getTimestamp("UpdatedAt"));
-                        service.put("isDeleted", rs.getBoolean("IsDeleted"));
-                        service.put("imageUrl", rs.getString("ImageURL"));
-                        service.put("categoryName", categoryName);
-                        
-                        // Thêm vào map theo danh mục
-                        if (!servicesByCategory.containsKey(categoryName)) {
-                            servicesByCategory.put(categoryName, new java.util.ArrayList<>());
-                        }
-                        servicesByCategory.get(categoryName).add(service);
-                    }
-                    
-                    out.println("<!-- Total services found: " + serviceCount + " -->");
-                    out.println("<!-- Categories found: " + servicesByCategory.size() + " -->");
-                    
-                    // Kiểm tra tổng số dịch vụ trong bảng (bao gồm cả đã xóa)
-                    try {
-                        Statement checkStmt = conn.createStatement();
-                        ResultSet checkRs = checkStmt.executeQuery("SELECT COUNT(*) as total FROM ServiceCustomer");
-                        if (checkRs.next()) {
-                            out.println("<!-- Total services in database (including deleted): " + checkRs.getInt("total") + " -->");
-                        }
-                        checkRs.close();
-                        checkStmt.close();
-                        
-                        // Kiểm tra dịch vụ chưa xóa
-                        checkStmt = conn.createStatement();
-                        checkRs = checkStmt.executeQuery("SELECT COUNT(*) as active FROM ServiceCustomer WHERE IsDeleted = 0");
-                        if (checkRs.next()) {
-                            out.println("<!-- Active services in database: " + checkRs.getInt("active") + " -->");
-                        }
-                        checkRs.close();
-                        checkStmt.close();
-                        
-                        // Kiểm tra dịch vụ có status 'Hoạt động'
-                        checkStmt = conn.createStatement();
-                        checkRs = checkStmt.executeQuery("SELECT COUNT(*) as active_status FROM ServiceCustomer WHERE IsDeleted = 0 AND Status = 'Hoạt động'");
-                        if (checkRs.next()) {
-                            out.println("<!-- Services with 'Hoạt động' status: " + checkRs.getInt("active_status") + " -->");
-                        }
-                        checkRs.close();
-                        checkStmt.close();
-                        
-                        // Kiểm tra tất cả Status values trong database
-                        checkStmt = conn.createStatement();
-                        checkRs = checkStmt.executeQuery("SELECT DISTINCT Status, COUNT(*) as count FROM ServiceCustomer WHERE IsDeleted = 0 GROUP BY Status");
-                        out.println("<!-- Status values in database: -->");
-                        while (checkRs.next()) {
-                            out.println("<!-- Status: '" + checkRs.getString("Status") + "' - Count: " + checkRs.getInt("count") + " -->");
-                        }
-                        checkRs.close();
-                        checkStmt.close();
-                        
-                    } catch (Exception checkE) {
-                        out.println("<!-- Error checking service counts: " + checkE.getMessage() + " -->");
-                    }
-                } else {
-                    out.println("<!-- Database connection failed -->");
-                }
-            } catch (Exception e) {
-                out.println("<!-- Error loading services: " + e.getMessage() + " -->");
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (rs != null) rs.close();
-                    if (stmt != null) stmt.close();
-                    if (conn != null) conn.close();
-                } catch (SQLException e) {
-                    out.println("<!-- Error closing connection: " + e.getMessage() + " -->");
-                }
-            }
-        %>
-        
         <%@ include file="design/header.jsp" %>
         <main>
-            <%
-                // Hiển thị dịch vụ theo từng danh mục
-                int categoryIndex = 0;
-                for (java.util.Map.Entry<String, java.util.List<java.util.Map<String, Object>>> entry : servicesByCategory.entrySet()) {
-                    String categoryName = entry.getKey();
-                    java.util.List<java.util.Map<String, Object>> services = entry.getValue();
-                    String categoryId = "category-" + categoryIndex;
-            %>
-            <!-- <%= categoryName %> Services Row -->
+            <!-- Chef Services Row -->
             <section class="service-row">
                 <div class="service-row-header">
-                    <h2><%= categoryName %></h2>
+                    <h2>Đầu bếp</h2>
                     <div class="nav-arrows">
-                        <button class="nav-arrow left" onclick="scrollRow('<%= categoryId %>', -1)">‹</button>
-                        <button class="nav-arrow right" onclick="scrollRow('<%= categoryId %>', 1)">›</button>
+                        <button class="nav-arrow left" onclick="scrollRow('chef-row', -1)">‹</button>
+                        <button class="nav-arrow right" onclick="scrollRow('chef-row', 1)">›</button>
                     </div>
                 </div>
-                <div class="service-cards-container" id="<%= categoryId %>">
-                    <%
-                        for (java.util.Map<String, Object> service : services) {
-                            String serviceName = (String) service.get("name");
-                            java.math.BigDecimal price = (java.math.BigDecimal) service.get("price");
-                            String description = (String) service.get("description");
-                            String imageUrl = (String) service.get("imageUrl");
-                            Integer serviceId = (Integer) service.get("serviceId");
-                            
-                            // Xử lý URL ảnh
-                            String displayImageUrl = "image_service/placeholder.png"; // Default image
-                            if (imageUrl != null && !imageUrl.trim().isEmpty()) {
-                                displayImageUrl = imageUrl;
-                            }
-                            
-                            // Format giá tiền
-                            String formattedPrice = String.format("₫%,d", price.longValue());
-                    %>
-                    <div class="service-card" data-service-id="<%= serviceId %>">
+                <div class="service-cards-container" id="chef-row">
+                    <div class="service-card">
                         <div class="service-image">
-                            <img src="<%= displayImageUrl %>" alt="<%= serviceName %>" onerror="this.src='image_service/placeholder.png'">
-                            <button class="wishlist-btn" onclick='toggleWishlist(<%= serviceId %>)'>
+                            <img src="image_service/daubep1.png" alt="Chef Service">
+                            <button class="wishlist-btn">
                                 <i class="bi bi-heart"></i>
                             </button>
                         </div>
                         <div class="service-info">
-                            <h3><%= serviceName %></h3>
-                            <% if (description != null && !description.trim().isEmpty()) { %>
-                                <p class="service-description"><%= description.length() > 100 ? description.substring(0, 100) + "..." : description %></p>
-                            <% } %>
+                            <h3>Giá vé siêu địa phương, tìm kiếm thức ăn của Clair</h3>
                             <div class="price-info">
-                                <span class="price-from">Từ <%= formattedPrice %>/khách</span>
-                                <span class="price-min">Tối thiểu <%= formattedPrice %></span>
+                                <span class="price-from">Từ ₫2.606.813/khách</span>
+                                <span class="price-min">Tối thiểu ₫5.002.975</span>
+                                <span class="rating">★ 5,0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/daubep2.png" alt="Roman Meal">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Bữa ăn La Mã đích thực</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫1.993.273/khách</span>
+                                <span class="rating">★ 4,97</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/daubep3.png" alt="Fusion Flavors">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Đằng sau ngọn lửa và hương vị hợp nhất của Erick</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫1.710.700/khách</span>
+                                <span class="price-min">Tối thiểu ₫2.993.725</span>
+                                <span class="rating">★ 5,0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/daubep4.png" alt="Luxury Dining">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Luxury Private Dining by Chef Jimmy Matiz</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫4.344.689/khách</span>
+                                <span class="price-min">Tối thiểu ₫34.230.882</span>
+                                <span class="rating">★ 5,0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/daubep5.png" alt="Catalan Cuisine">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Ẩm thực Catalan cùng Cristina</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫1.226.630/khách</span>
+                                <span class="price-min">Tối thiểu ₫58.892.230</span>
+                                <span class="rating">★ 4,8</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/daubep6.png" alt="Cali-Mediterranean">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Thực đơn Cali-Mediterranean sôi động của Liza</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫6.661.856/khách</span>
+                                <span class="price-min">Tối thiểu ₫26.647.425</span>
+                                <span class="rating">★ 4,9</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/daubep7.png" alt="International Gourmet">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Sự kết hợp dành cho người sành ăn quốc tế của Brian</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫2.369.830/khách</span>
+                                <span class="price-min">Tối thiểu ₫43.421.000</span>
+                                <span class="rating">★ 4,7</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Training Services Row -->
+            <section class="service-row">
+                <div class="service-row-header">
+                    <h2>Đào tạo</h2>
+                    <div class="nav-arrows">
+                        <button class="nav-arrow left" onclick="scrollRow('training-row', -1)">‹</button>
+                        <button class="nav-arrow right" onclick="scrollRow('training-row', 1)">›</button>
+                    </div>
+                </div>
+                <div class="service-cards-container" id="training-row">
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/daotao1.png" alt="Cooking Class">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Lớp học nấu ăn truyền thống Việt Nam</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫800.000/khách</span>
+                                <span class="rating">★ 4,8</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/daotao2.png" alt="Barista Training">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Khóa học Shuffle Dance chuyên nghiệp</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫1.200.000/khách</span>
+                                <span class="rating">★ 4,9</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/daotao3.png" alt="Language Learning">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Tập luyện phục hồi của TaylorTaylor</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫1.238.000/khách</span>
+                                <span class="rating">★ 4,7</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/daotao4.png" alt="Photography Course">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Yoga và hiện thân củ JuliaJulia</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫2.679.000/khách</span>
+                                <span class="rating">★ 4,6</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/daotao5.png" alt="Art Workshop">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Huấn luyện cá nhân và thể dục nhóm</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫2.000.000/khách</span>
                                 <span class="rating">★ 4,5</span>
                             </div>
                         </div>
                     </div>
-                    <%
-                        }
-                    %>
                 </div>
             </section>
-            <%
-                    categoryIndex++;
-                }
 
-                // Nếu không có dịch vụ nào
-                if (servicesByCategory.isEmpty()) {
-            %>
+            <!-- Massage Services Row -->
             <section class="service-row">
                 <div class="service-row-header">
-                    <h2>Dịch vụ</h2>
+                    <h2>Massage</h2>
+                    <div class="nav-arrows">
+                        <button class="nav-arrow left" onclick="scrollRow('massage-row', -1)">‹</button>
+                        <button class="nav-arrow right" onclick="scrollRow('massage-row', 1)">›</button>
+                    </div>
                 </div>
-                <div class="service-cards-container">
-                    <div class="no-services">
-                        <div class="no-services-content">
-                            <i class="bi bi-info-circle" style="font-size: 3rem; color: #6c757d; margin-bottom: 1rem;"></i>
-                            <h3>Chưa có dịch vụ nào</h3>
-                            <p>Hiện tại chưa có dịch vụ nào được cung cấp. Vui lòng quay lại sau!</p>
+                <div class="service-cards-container" id="massage-row">
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/massage1.png" alt="Thai Massage">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Massage Thái truyền thống</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫1.000.000/khách</span>
+                                <span class="rating">★ 4,9</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/massage2.png" alt="Hot Stone Massage">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Massage trị liệu bằng hương thơm của Jenna</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫2.800.000/khách</span>
+                                <span class="rating">★ 4,8</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/massage3.png" alt="Hot Stone Massage">                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Massage cơ sâu của Olga</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫600.000/khách</span>
+                                <span class="rating">★ 4,7</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/massage4.png" alt="The Massage Escape Guy">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>The Massage Escape Guy</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫2.468.000/khách</span>
+                                <span class="rating">★ 4,6</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="image_service/massage5.png" alt="Spa Package">
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="service-info">
+                            <h3>Gói spa thư giãn toàn diện</h3>
+                            <div class="price-info">
+                                <span class="price-from">Từ ₫5.549.000/khách</span>
+                                <span class="rating">★ 4,9</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
-            <%
-                }
-            %>
         </main>
 
         <script>
@@ -266,48 +376,41 @@
                         const icon = this.querySelector('i');
                         
                         // Toggle active class
-                        if (icon.classList.contains('bi-heart-fill')) {
-                            icon.classList.remove('bi-heart-fill');
-                            icon.classList.add('bi-heart');
-                            this.style.color = '#6c757d';
-                        } else {
+                        this.classList.toggle('active');
+                        
+                        // Toggle icon between heart and heart-fill
+                        if (this.classList.contains('active')) {
                             icon.classList.remove('bi-heart');
                             icon.classList.add('bi-heart-fill');
-                            this.style.color = '#dc3545';
-                        }
-                    });
-                });
-            });
-
-            // Service action functions
-            function toggleWishlist(serviceId) {
-                console.log('Toggle wishlist for service:', serviceId);
-                // Implement wishlist functionality
-            }
-
-            // Add click handler for service cards
-            document.addEventListener('DOMContentLoaded', function() {
-                const serviceCards = document.querySelectorAll('.service-card');
-                
-                serviceCards.forEach(card => {
-                    card.addEventListener('click', function(e) {
-                        // Don't trigger if clicking on wishlist button
-                        if (e.target.closest('.wishlist-btn')) {
-                            return;
-                        }
-                        
-                        const serviceId = this.getAttribute('data-service-id');
-                        if (serviceId) {
-                            // Navigate to service detail page via controller
-                            window.location.href = 'service-detail?id=' + serviceId;
+                        } else {
+                            icon.classList.remove('bi-heart-fill');
+                            icon.classList.add('bi-heart');
                         }
                     });
                 });
             });
         </script>
 
-        <%@ include file="../design/footer.jsp" %>
+        <%@ include file="design/footer.jsp" %>
         <jsp:include page="chatbot/chatbot.jsp" />
+
+        <!-- Linking Emoji Mart script for emoji picker -->
+        <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+
+        <!-- Linking for file upload functionality -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.all.min.js"></script>
+
+        <!-- Test script -->
+        <script>
+            console.log("=== SERVICES PAGE LOADED ===");
+            console.log("Services page loaded successfully");
+        </script>
+
+        <!-- Linking custom script -->
         <script src="chatbot/script.js"></script>
+
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lang_modal.css?v=1">
+        <script src="<%=request.getContextPath()%>/js/i18n.js?v=1"></script>
+        
     </body>
 </html>
