@@ -157,6 +157,10 @@
             <span class="nav-icon">⭐</span>
             <span>Experiences Management</span>
           </a>
+          <a href="#" class="nav-item" data-section="services">
+            <span class="nav-icon">🔧</span>
+            <span>Quản lý dịch vụ</span>
+          </a>
           <a href="#" class="nav-item" data-section="host-requests">
             <span class="nav-icon">📝</span>
             <span>Yêu cầu trở thành Host</span>
@@ -980,6 +984,225 @@
           </div>
         </div>
       </div>
+       <!-- Service Management Section -->
+      <div id="services" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">Quản lý dịch vụ</h1>
+          <p class="page-subtitle">Quản lý danh mục và dịch vụ trên hệ thống</p>
+        </div>
+        
+        <!-- Category Management -->
+        <div class="service-card">
+          <div class="service-card-header">
+            <h2 class="service-card-title">Quản lý danh mục</h2>
+            <button class="btn btn-primary" onclick="openAddCategoryModal()">
+              <i class="fas fa-plus"></i> Thêm danh mục
+            </button>
+          </div>
+          
+          <div class="service-search-bar">
+            <input type="text" class="search-input" id="categorySearch" placeholder="Tìm kiếm danh mục...">
+            <select class="form-select" id="categoryStatusFilter">
+              <option value="">Tất cả trạng thái</option>
+              <option value="active">Hoạt động</option>
+              <option value="inactive">Không hoạt động</option>
+            </select>
+            <button class="btn btn-secondary" onclick="filterCategories()">Lọc</button>
+          </div>
+          
+          <table class="data-table" id="categoriesTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>TÊN DANH MỤC</th>
+                <th>MÔ TẢ</th>
+                <th>SỐ DỊCH VỤ</th>
+                <th>TRẠNG THÁI</th>
+                <th>NGÀY TẠO</th>
+                <th>HÀNH ĐỘNG</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%
+                try {
+                  // Fetch ServiceCategories data
+                  rs = stmt.executeQuery(
+                    "SELECT sc.CategoryID AS id, sc.Name AS name, sc.Slug AS slug, sc.SortOrder AS sort_order, " +
+                    "       sc.IsActive AS is_active, sc.CreatedAt AS created_at, " +
+                    "       0 AS service_count " +
+                    "FROM ServiceCategories sc " +
+                    "WHERE sc.IsDeleted = 0 " +
+                    "GROUP BY sc.CategoryID, sc.Name, sc.Slug, sc.SortOrder, sc.IsActive, sc.CreatedAt " +
+                    "ORDER BY sc.SortOrder ASC"
+                  );
+                  
+                  if (!rs.isBeforeFirst()) {
+                    out.println("<tr><td colspan='7' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có danh mục nào</td></tr>");
+                  } else {
+                    while (rs.next()) {
+                      boolean isActive = rs.getBoolean("is_active");
+                      String status = isActive ? "Hoạt động" : "Không hoạt động";
+                      String statusClass = isActive ? "service-status-active" : "service-status-inactive";
+              %>
+              <tr>
+                <td><%= rs.getInt("id") %></td>
+                <td>
+                  <div class="category-info">
+                    <span class="category-name"><%= rs.getString("name") %></span>
+                    <br><small class="category-slug">/<%= rs.getString("slug") %></small>
+                  </div>
+                </td>
+                <td>
+                  <span class="category-description">Danh mục dịch vụ <%= rs.getString("name").toLowerCase() %></span>
+                </td>
+                <td>
+                  <span class="service-count"><%= rs.getInt("service_count") %></span>
+                </td>
+                <td>
+                  <span class="<%= statusClass %>"><%= status %></span>
+                </td>
+                <td>
+                  <%= rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at") : "N/A" %>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="action-btn action-btn-view" data-category-id="<%= rs.getInt("id") %>" onclick="viewCategory(this.dataset.categoryId)" title='Xem chi tiết'>
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn action-btn-edit" data-category-id="<%= rs.getInt("id") %>" onclick="editCategory(this.dataset.categoryId)" title='Chỉnh sửa'>
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn action-btn-delete" data-category-id="<%= rs.getInt("id") %>" onclick="deleteCategory(this.dataset.categoryId)" title='Xóa'>
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <%
+                    }
+                  }
+                } catch (Exception e) {
+                  out.println("<tr><td colspan='7' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                }
+              %>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Service Management -->
+        <div class="service-card">
+          <div class="service-card-header">
+            <h2 class="service-card-title">Quản lý dịch vụ</h2>
+            <button class="btn btn-primary" onclick="openAddServiceModal()">
+              <i class="fas fa-plus"></i> Thêm dịch vụ
+            </button>
+          </div>
+          
+          <div class="service-search-bar">
+            <input type="text" class="search-input" id="serviceSearch" placeholder="Tìm kiếm dịch vụ...">
+            <select class="form-select" id="serviceCategoryFilter">
+              <option value="">Tất cả danh mục</option>
+              <%
+                try {
+                  // Fetch categories for service filter dropdown
+                  rs = stmt.executeQuery("SELECT CategoryID, Name FROM ServiceCategories WHERE IsDeleted = 0 ORDER BY SortOrder ASC");
+                  while (rs.next()) {
+              %>
+              <option value="<%= rs.getInt("CategoryID") %>"><%= rs.getString("Name") %></option>
+              <%
+                  }
+                } catch (Exception e) {
+                  out.println("<!-- Error loading categories: " + e.getMessage() + " -->");
+                }
+              %>
+            </select>
+            <select class="form-select" id="serviceStatusFilter">
+              <option value="">Tất cả trạng thái</option>
+              <option value="active">Hoạt động</option>
+              <option value="inactive">Không hoạt động</option>
+            </select>
+            <button class="btn btn-secondary" onclick="filterServices()">Lọc</button>
+          </div>
+          
+          <table class="data-table" id="servicesTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>TÊN DỊCH VỤ</th>
+                <th>DANH MỤC</th>
+                <th>GIÁ</th>
+                <th>MÔ TẢ</th>
+                <th>TRẠNG THÁI</th>
+                <th>NGÀY TẠO</th>
+                <th>HÀNH ĐỘNG</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%
+                try {
+                  java.sql.Statement stmt2 = conn.createStatement();
+                  rs = stmt2.executeQuery(
+                    "SELECT s.ServiceID AS id, s.Name AS name, " +
+                    "COALESCE(c.Name, N'Chưa phân loại') AS category_name, " +
+                    "s.Price AS price, s.Description AS description, " +
+                    "s.Status AS status, s.CreatedAt AS created_at " +
+                    "FROM ServiceCustomer s " +
+                    "LEFT JOIN ServiceCategories c ON s.CategoryID = c.CategoryID " +
+                    "WHERE s.IsDeleted = 0 " +
+                    "ORDER BY s.CreatedAt DESC"
+                  );
+
+                  boolean hasAnyService = false;
+                  while (rs.next()) {
+                    hasAnyService = true;
+              %>
+              <tr>
+                <td><%= rs.getInt("id") %></td>
+                <td><%= rs.getString("name") %></td>
+                <td><%= rs.getString("category_name") %></td>
+                <td><%= rs.getBigDecimal("price") %> ₫</td>
+                <td><%= rs.getString("description") != null ? rs.getString("description") : "" %></td>
+                <td>
+                  <span class="<%= "Hoạt động".equalsIgnoreCase(rs.getString("status")) ? "service-status-badge service-status-active" : "service-status-badge service-status-inactive" %>">
+                    <%= rs.getString("status") %>
+                  </span>
+                </td>
+                <td><%= rs.getTimestamp("created_at") %></td>
+                 <td>
+                   <div class="action-buttons">
+                     <button class="action-btn action-btn-view" data-service-id="<%= rs.getInt("id") %>" onclick="viewService(this.dataset.serviceId)" title='Xem chi tiết'>
+                       <i class="fas fa-eye"></i>
+                     </button>
+                     <button class="action-btn action-btn-edit" data-service-id="<%= rs.getInt("id") %>" onclick="editService(this.dataset.serviceId)" title='Chỉnh sửa'>
+                       <i class="fas fa-edit"></i>
+                     </button>
+                     <button class="action-btn action-btn-delete" data-service-id="<%= rs.getInt("id") %>" onclick="deleteService(this.dataset.serviceId)" title='Xóa'>
+                       <i class="fas fa-trash"></i>
+                     </button>
+                   </div>
+                 </td>
+              </tr>
+              <%
+                  }
+
+                  if (!hasAnyService) {
+              %>
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 40px; color: #6b7280;">Chưa có dịch vụ nào</td>
+              </tr>
+              <%
+                  }
+
+                  rs.close();
+                  stmt2.close();
+                } catch (Exception e) {
+                  out.println("<tr><td colspan='8' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu dịch vụ: " + e.getMessage() + "</td></tr>");
+                }
+              %>
+            </tbody>
+          </table>
+        </div>
+      </div> 
     </main>
   </div>
   
@@ -1863,7 +2086,895 @@
         alert('❌ Lỗi: ' + error);
       });
     }
+    // Service Management Functions
+    function openAddCategoryModal() {
+      console.log('[v0] Opening add category modal');
+      // Create modal HTML
+      const modalHTML = `
+        <div id="addCategoryModal" class="service-modal">
+          <div class="service-modal-content">
+            <div class="service-modal-header">
+              <h3 class="service-modal-title">Thêm danh mục mới</h3>
+              <button class="service-modal-close" onclick="closeServiceModal('addCategoryModal')">&times;</button>
+            </div>
+            <div class="service-modal-body">
+              <form id="addCategoryForm">
+                <div class="service-form-group">
+                  <label class="service-form-label" for="categoryName">Tên danh mục *</label>
+                  <input type="text" class="service-form-input" id="categoryName" name="categoryName" required>
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="categoryStatus">Trạng thái</label>
+                  <select class="service-form-select" id="categoryStatus" name="categoryStatus">
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Không hoạt động</option>
+                  </select>
+                </div>
+              </form>
+            </div>
+            <div class="service-modal-footer">
+              <button class="service-btn service-btn-secondary" onclick="closeServiceModal('addCategoryModal')">Hủy</button>
+              <button class="service-btn service-btn-primary" onclick="saveCategory()">Lưu</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Add modal to body
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      // Show modal
+      document.getElementById('addCategoryModal').style.display = 'block';
+      
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function openEditCategoryModal(category) {
+      console.log('[v0] Opening edit category modal for:', category);
+      
+      // Create modal HTML
+      const modalHTML = `
+        <div id="editCategoryModal" class="service-modal">
+          <div class="service-modal-content">
+            <div class="service-modal-header">
+              <h3 class="service-modal-title">Chỉnh sửa danh mục</h3>
+              <button class="service-modal-close" onclick="closeServiceModal('editCategoryModal')">&times;</button>
+            </div>
+            <div class="service-modal-body">
+              <form id="editCategoryForm">
+                <input type="hidden" id="editCategoryId" name="categoryId" value="">
+                <div class="service-form-group">
+                  <label class="service-form-label" for="editCategoryName">Tên danh mục *</label>
+                  <input type="text" class="service-form-input" id="editCategoryName" name="categoryName" value="" required>
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="editCategorySlug">Slug</label>
+                  <input type="text" class="service-form-input" id="editCategorySlug" name="categorySlug" value="">
+                  <small class="form-text">Slug sẽ được tạo tự động từ tên danh mục</small>
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="editCategorySortOrder">Thứ tự sắp xếp</label>
+                  <input type="number" class="service-form-input" id="editCategorySortOrder" name="categorySortOrder" value="0" min="0">
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="editCategoryStatus">Trạng thái</label>
+                  <select class="service-form-select" id="editCategoryStatus" name="categoryStatus">
+                    <option value="true">Hoạt động</option>
+                    <option value="false">Không hoạt động</option>
+                  </select>
+                </div>
+              </form>
+            </div>
+            <div class="service-modal-footer">
+              <button class="service-btn service-btn-secondary" onclick="closeServiceModal('editCategoryModal')">Hủy</button>
+              <button class="service-btn service-btn-primary" onclick="updateCategory()">Cập nhật</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Add modal to body
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      // Show modal
+      document.getElementById('editCategoryModal').style.display = 'block';
+      
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+      
+      // Populate form fields with category data
+      document.getElementById('editCategoryId').value = category.categoryID || '';
+      document.getElementById('editCategoryName').value = category.name || '';
+      document.getElementById('editCategorySlug').value = category.slug || '';
+      document.getElementById('editCategorySortOrder').value = category.sortOrder || 0;
+      
+      // Set status
+      const statusSelect = document.getElementById('editCategoryStatus');
+      if (statusSelect) {
+        statusSelect.value = category.isActive ? 'true' : 'false';
+      }
+    }
+    
+    function openAddServiceModal() {
+      console.log('[v0] Opening add service modal');
+      // Create modal HTML
+      const modalHTML = `
+        <div id="addServiceModal" class="service-modal">
+          <div class="service-modal-content">
+            <div class="service-modal-header">
+              <h3 class="service-modal-title">Thêm dịch vụ mới</h3>
+              <button class="service-modal-close" onclick="closeServiceModal('addServiceModal')">&times;</button>
+            </div>
+            <div class="service-modal-body">
+              <form id="addServiceForm">
+                <div class="service-form-group">
+                  <label class="service-form-label" for="serviceName">Tên dịch vụ *</label>
+                  <input type="text" class="service-form-input" id="serviceName" name="serviceName" required>
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="serviceCategory">Danh mục *</label>
+                  <select class="service-form-select" id="serviceCategory" name="serviceCategory" required>
+                    <option value="">Chọn danh mục</option>
+                    <!-- Categories will be populated dynamically -->
+                  </select>
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="servicePrice">Giá (VNĐ) *</label>
+                  <input type="number" class="service-form-input" id="servicePrice" name="servicePrice" min="0" step="1000" required>
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="serviceDescription">Mô tả</label>
+                  <textarea class="service-form-textarea" id="serviceDescription" name="serviceDescription" rows="3"></textarea>
+                </div>
+                 <div class="service-form-group">
+                   <label class="service-form-label" for="serviceImage">Ảnh</label>
+                   <input type="file" class="service-form-input" id="serviceImage" name="serviceImage" accept="image/*">
+                   <div style="margin-top: 8px;">
+                     <img id="serviceImagePreview" src="" alt="Xem trước ảnh" style="display:none; max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 6px;" />
+                   </div>
+                 </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="serviceStatus">Trạng thái</label>
+                  <select class="service-form-select" id="serviceStatus" name="serviceStatus">
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Không hoạt động</option>
+                  </select>
+                </div>
+              </form>
+            </div>
+            <div class="service-modal-footer">
+              <button class="service-btn service-btn-secondary" onclick="closeServiceModal('addServiceModal')">Hủy</button>
+              <button class="service-btn service-btn-primary" onclick="saveService()">Lưu</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Add modal to body
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      // Show modal
+      document.getElementById('addServiceModal').style.display = 'block';
+      
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+      
+      // Populate category dropdown
+      populateServiceCategoryDropdown();
+
+       // Preview selected image
+       const imageInput = document.getElementById('serviceImage');
+       const imagePreview = document.getElementById('serviceImagePreview');
+       if (imageInput && imagePreview) {
+         imageInput.addEventListener('change', function(e) {
+           const file = e.target.files && e.target.files[0];
+           if (file) {
+             const url = URL.createObjectURL(file);
+             imagePreview.src = url;
+             imagePreview.style.display = 'block';
+           } else {
+             imagePreview.src = '';
+             imagePreview.style.display = 'none';
+           }
+         });
+       }
+    }
+    
+    function openEditServiceModal(service) {
+      console.log('[v0] Opening edit service modal for:', service);
+      
+      // Create modal HTML
+      const modalHTML = `
+        <div id="editServiceModal" class="service-modal">
+          <div class="service-modal-content">
+            <div class="service-modal-header">
+              <h3 class="service-modal-title">Chỉnh sửa dịch vụ</h3>
+              <button class="service-modal-close" onclick="closeServiceModal('editServiceModal')">&times;</button>
+            </div>
+            <div class="service-modal-body">
+              <form id="editServiceForm">
+                <input type="hidden" id="editServiceId" name="serviceId" value="">
+                <div class="service-form-group">
+                  <label class="service-form-label" for="editServiceName">Tên dịch vụ *</label>
+                  <input type="text" class="service-form-input" id="editServiceName" name="serviceName" value="" required>
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="editServiceCategory">Danh mục</label>
+                  <select class="service-form-select" id="editServiceCategory" name="serviceCategory">
+                    <option value="">Chọn danh mục</option>
+                    <!-- Categories will be populated dynamically -->
+                  </select>
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="editServicePrice">Giá (VNĐ) *</label>
+                  <input type="number" class="service-form-input" id="editServicePrice" name="servicePrice" value="0" min="0" step="1000" required>
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="editServiceDescription">Mô tả</label>
+                  <textarea class="service-form-textarea" id="editServiceDescription" name="serviceDescription" rows="3"></textarea>
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="editServiceImage">Ảnh mới</label>
+                  <input type="file" class="service-form-input" id="editServiceImage" name="serviceImage" accept="image/*">
+                  <div style="margin-top: 8px;">
+                    <div id="editCurrentImageContainer" style="margin-bottom: 8px;">
+                      <!-- Current image will be populated by JavaScript -->
+                    </div>
+                    <img id="editServiceImagePreview" src="" alt="Xem trước ảnh mới" style="display:none; max-width: 200px; height: auto; border: 1px solid #e5e7eb; border-radius: 6px;" />
+                  </div>
+                </div>
+                <div class="service-form-group">
+                  <label class="service-form-label" for="editServiceStatus">Trạng thái</label>
+                  <select class="service-form-select" id="editServiceStatus" name="serviceStatus">
+                    <option value="Hoạt động">Hoạt động</option>
+                    <option value="Không hoạt động">Không hoạt động</option>
+                  </select>
+                </div>
+              </form>
+            </div>
+            <div class="service-modal-footer">
+              <button class="service-btn service-btn-secondary" onclick="closeServiceModal('editServiceModal')">Hủy</button>
+              <button class="service-btn service-btn-primary" onclick="updateService()">Cập nhật</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Add modal to body
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      // Show modal
+      document.getElementById('editServiceModal').style.display = 'block';
+      
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+      
+      // Populate form fields with service data
+      document.getElementById('editServiceId').value = service.serviceId || '';
+      document.getElementById('editServiceName').value = service.name || '';
+      document.getElementById('editServicePrice').value = service.price || 0;
+      document.getElementById('editServiceDescription').value = service.description || '';
+      
+      // Set status
+      const statusSelect = document.getElementById('editServiceStatus');
+      if (statusSelect) {
+        statusSelect.value = service.status || 'Hoạt động';
+      }
+      
+      // Populate category dropdown
+      populateEditServiceCategoryDropdown(service.categoryID);
+
+      // Populate current image
+      const currentImageContainer = document.getElementById('editCurrentImageContainer');
+      if (currentImageContainer) {
+        if (service.imageURL && service.imageURL.trim() !== '') {
+          currentImageContainer.innerHTML = `
+            <img src="${service.imageURL}" alt="Ảnh hiện tại" style="max-width: 200px; height: auto; border: 1px solid #e5e7eb; border-radius: 6px;" />
+            <br><small>Ảnh hiện tại</small>
+          `;
+        } else {
+          currentImageContainer.innerHTML = '<small>Chưa có ảnh</small>';
+        }
+      }
+
+      // Preview selected image
+      const imageInput = document.getElementById('editServiceImage');
+      const imagePreview = document.getElementById('editServiceImagePreview');
+      if (imageInput && imagePreview) {
+        imageInput.addEventListener('change', function(e) {
+          const file = e.target.files && e.target.files[0];
+          if (file) {
+            const url = URL.createObjectURL(file);
+            imagePreview.src = url;
+            imagePreview.style.display = 'block';
+          } else {
+            imagePreview.src = '';
+            imagePreview.style.display = 'none';
+          }
+        });
+      }
+    }
+    
+    function populateServiceCategoryDropdown() {
+      // Fetch categories from the existing dropdown in the filter
+      const filterDropdown = document.getElementById('serviceCategoryFilter');
+      const modalDropdown = document.getElementById('serviceCategory');
+      
+      if (filterDropdown && modalDropdown) {
+        // Clear existing options except the first one
+        modalDropdown.innerHTML = '<option value="">Chọn danh mục</option>';
+        
+        // Copy options from filter dropdown
+        for (let i = 1; i < filterDropdown.options.length; i++) {
+          const option = filterDropdown.options[i];
+          const newOption = document.createElement('option');
+          newOption.value = option.value;
+          newOption.textContent = option.textContent;
+          modalDropdown.appendChild(newOption);
+        }
+      }
+    }
+    
+    function populateEditServiceCategoryDropdown(selectedCategoryId) {
+      // Fetch categories from the existing dropdown in the filter
+      const filterDropdown = document.getElementById('serviceCategoryFilter');
+      const modalDropdown = document.getElementById('editServiceCategory');
+      
+      if (filterDropdown && modalDropdown) {
+        // Clear existing options except the first one
+        modalDropdown.innerHTML = '<option value="">Chọn danh mục</option>';
+        
+        // Copy options from filter dropdown
+        for (let i = 1; i < filterDropdown.options.length; i++) {
+          const option = filterDropdown.options[i];
+          const newOption = document.createElement('option');
+          newOption.value = option.value;
+          newOption.textContent = option.textContent;
+          
+          // Select the current category if it matches
+          if (selectedCategoryId && option.value == selectedCategoryId) {
+            newOption.selected = true;
+          }
+          
+          modalDropdown.appendChild(newOption);
+        }
+      }
+    }
+    
+    function closeServiceModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.style.display = 'none';
+        modal.remove();
+        
+        // Restore body scroll when modal is closed
+        document.body.style.overflow = '';
+      }
+    }
+    
+     function saveCategory() {
+       const form = document.getElementById('addCategoryForm');
+       const formData = new FormData(form);
+       
+       const categoryData = {
+         name: formData.get('categoryName'),
+         status: formData.get('categoryStatus')
+       };
+       
+       console.log('[v0] Saving category:', categoryData);
+       
+       // Gọi ServiceCategoriesServlet để thêm category
+       const requestData = new URLSearchParams();
+       requestData.append('action', 'add');
+       requestData.append('name', categoryData.name);
+       requestData.append('isActive', categoryData.status === 'active' ? 'true' : 'false');
+       console.log(requestData);
+         fetch('<%=request.getContextPath()%>/admin/service-categories', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/x-www-form-urlencoded',
+           
+         },
+         body: requestData
+       })
+       .then(response => {
+         console.log('Response status:', response.status);
+         
+         if (!response.ok) {
+           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+         }
+         
+         return response.json();
+       })
+       .then(data => {
+         console.log('Server response:', data);
+         
+         if (data.success) {
+           showSuccessMessage(data.message || 'Đã thêm danh mục thành công!');
+           closeServiceModal('addCategoryModal');
+           
+           // Reload trang sau 1.5 giây để cập nhật danh sách
+           setTimeout(() => {
+             window.location.reload();
+           }, 1500);
+         } else {
+           showErrorMessage(data.message || 'Có lỗi xảy ra khi thêm danh mục.');
+         }
+       })
+       .catch(error => {
+         console.error('Fetch error:', error);
+         showErrorMessage('Có lỗi xảy ra khi thêm danh mục: ' + error.message);
+       });
+     }
+     
+     function updateCategory() {
+       const form = document.getElementById('editCategoryForm');
+       const formData = new FormData(form);
+       
+       const categoryData = {
+         id: formData.get('categoryId'),
+         name: formData.get('categoryName'),
+         slug: formData.get('categorySlug'),
+         sortOrder: formData.get('categorySortOrder'),
+         status: formData.get('categoryStatus')
+       };
+       
+       console.log('[v0] Updating category:', categoryData);
+       
+       // Validation
+       if (!categoryData.name || categoryData.name.trim() === '') {
+         showErrorMessage('Tên danh mục không được để trống');
+         return;
+       }
+       
+      // Chuẩn bị dữ liệu gửi đến ServiceCategoriesServlet
+      const requestData = new FormData();
+      requestData.append('action', 'update');
+      requestData.append('id', categoryData.id);
+      requestData.append('name', categoryData.name);
+      requestData.append('slug', categoryData.slug || '');
+      requestData.append('sortOrder', categoryData.sortOrder || '0');
+      requestData.append('isActive', categoryData.status);
+    
+      // Gửi request đến ServiceCategoriesServlet
+      fetch('<%=request.getContextPath()%>/admin/service-categories', {
+        method: 'POST',
+        body: requestData
+      })
+       .then(response => {
+         console.log('Response status:', response.status);
+         
+         if (!response.ok) {
+           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+         }
+         
+         return response.json();
+       })
+       .then(data => {
+         console.log('Server response:', data);
+         
+         if (data.success) {
+           showSuccessMessage(data.message || 'Đã cập nhật danh mục thành công!');
+           closeServiceModal('editCategoryModal');
+           
+           // Reload trang sau 1.5 giây để cập nhật danh sách
+           setTimeout(() => {
+             window.location.reload();
+           }, 1500);
+         } else {
+           showErrorMessage(data.message || 'Có lỗi xảy ra khi cập nhật danh mục.');
+         }
+       })
+       .catch(error => {
+         console.error('Fetch error:', error);
+         showErrorMessage('Có lỗi xảy ra khi cập nhật danh mục: ' + error.message);
+       });
+     }
+    
+     function saveService() {
+       const form = document.getElementById('addServiceForm');
+       const formData = new FormData(form);
+       
+       const serviceData = {
+         name: formData.get('serviceName'),
+         categoryId: formData.get('serviceCategory'),
+         price: formData.get('servicePrice'),
+         description: formData.get('serviceDescription'),
+         status: formData.get('serviceStatus')
+       };
+       
+       console.log('[v0] Saving service:', serviceData);
+       
+       // Validation
+       if (!serviceData.name || serviceData.name.trim() === '') {
+         showErrorMessage('Tên dịch vụ không được để trống');
+         return;
+       }
+       
+       if (!serviceData.price || serviceData.price <= 0) {
+         showErrorMessage('Giá dịch vụ phải lớn hơn 0');
+         return;
+       }
+       
+       // Chuẩn bị dữ liệu gửi đến ServiceCustomerServlet
+       const requestData = new FormData();
+       requestData.append('action', 'add');
+       requestData.append('name', serviceData.name);
+       requestData.append('categoryId', serviceData.categoryId || '');
+       requestData.append('price', serviceData.price);
+       requestData.append('description', serviceData.description || '');
+       requestData.append('status', serviceData.status === 'active' ? 'Hoạt động' : 'Không hoạt động');
+       
+       // Thêm ảnh nếu có
+       const imageFile = formData.get('serviceImage');
+       if (imageFile && imageFile.size > 0) {
+         requestData.append('image', imageFile);
+         console.log('[v0] Image file added:', imageFile.name, 'Size:', imageFile.size);
+       } else {
+         console.log('[v0] No image file found or file is empty');
+       }
+     
+       // Gửi request đến ServiceCustomerServlet
+       fetch('<%=request.getContextPath()%>/admin/services', {
+         method: 'POST',
+         body: requestData
+       })
+       .then(response => {
+         console.log('Response status:', response.status);
+         
+         if (!response.ok) {
+           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+         }
+         
+         return response.json();
+       })
+       .then(data => {
+         console.log('Server response:', data);
+         
+         if (data.success) {
+           showSuccessMessage(data.message || 'Đã thêm dịch vụ thành công!');
+           closeServiceModal('addServiceModal');
+           
+           // Reload trang sau 1.5 giây để cập nhật danh sách
+           setTimeout(() => {
+             window.location.reload();
+           }, 1500);
+         } else {
+           showErrorMessage(data.message || 'Có lỗi xảy ra khi thêm dịch vụ.');
+         }
+       })
+       .catch(error => {
+         console.error('Fetch error:', error);
+         showErrorMessage('Có lỗi xảy ra khi thêm dịch vụ: ' + error.message);
+       });
+     }
+     
+     function updateService() {
+       const form = document.getElementById('editServiceForm');
+       const formData = new FormData(form);
+       
+       const serviceData = {
+         id: formData.get('serviceId'),
+         name: formData.get('serviceName'),
+         categoryId: formData.get('serviceCategory'),
+         price: formData.get('servicePrice'),
+         description: formData.get('serviceDescription'),
+         status: formData.get('serviceStatus')
+       };
+       
+       console.log('[v0] Updating service:', serviceData);
+       
+       // Validation
+       if (!serviceData.name || serviceData.name.trim() === '') {
+         showErrorMessage('Tên dịch vụ không được để trống');
+         return;
+       }
+       
+       if (!serviceData.price || serviceData.price <= 0) {
+         showErrorMessage('Giá dịch vụ phải lớn hơn 0');
+         return;
+       }
+       
+       // Chuẩn bị dữ liệu gửi đến ServiceCustomerServlet
+       const requestData = new FormData();
+       requestData.append('action', 'update');
+       requestData.append('id', serviceData.id);
+       requestData.append('name', serviceData.name);
+       requestData.append('categoryId', serviceData.categoryId || '');
+       requestData.append('price', serviceData.price);
+       requestData.append('description', serviceData.description || '');
+       requestData.append('status', serviceData.status);
+       
+       // Thêm ảnh mới nếu có
+       const imageFile = formData.get('serviceImage');
+       if (imageFile && imageFile.size > 0) {
+         requestData.append('image', imageFile);
+         console.log('[v0] New image file added:', imageFile.name, 'Size:', imageFile.size);
+       } else {
+         console.log('[v0] No new image file found or file is empty');
+       }
+     
+       // Gửi request đến ServiceCustomerServlet
+       fetch('<%=request.getContextPath()%>/admin/services', {
+         method: 'POST',
+         body: requestData
+       })
+       .then(response => {
+         console.log('Response status:', response.status);
+         
+         if (!response.ok) {
+           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+         }
+         
+         return response.json();
+       })
+       .then(data => {
+         console.log('Server response:', data);
+         
+         if (data.success) {
+           showSuccessMessage(data.message || 'Đã cập nhật dịch vụ thành công!');
+           closeServiceModal('editServiceModal');
+           
+           // Reload trang sau 1.5 giây để cập nhật danh sách
+           setTimeout(() => {
+             window.location.reload();
+           }, 1500);
+         } else {
+           showErrorMessage(data.message || 'Có lỗi xảy ra khi cập nhật dịch vụ.');
+         }
+       })
+       .catch(error => {
+         console.error('Fetch error:', error);
+         showErrorMessage('Có lỗi xảy ra khi cập nhật dịch vụ: ' + error.message);
+       });
+     }
+    
+    function filterCategories() {
+      const searchTerm = document.getElementById('categorySearch').value.toLowerCase();
+      const statusFilter = document.getElementById('categoryStatusFilter').value;
+      const table = document.getElementById('categoriesTable');
+      const rows = table.querySelectorAll('tbody tr');
+      
+      rows.forEach(row => {
+        const categoryName = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+        const status = row.querySelector('td:nth-child(5)')?.textContent.toLowerCase() || '';
+        
+        const matchesSearch = !searchTerm || categoryName.includes(searchTerm);
+        const matchesStatus = !statusFilter || status.includes(statusFilter);
+        
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+    
+    function filterServices() {
+      const searchTerm = document.getElementById('serviceSearch').value.toLowerCase();
+      const categoryFilter = document.getElementById('serviceCategoryFilter').value;
+      const statusFilter = document.getElementById('serviceStatusFilter').value;
+      const table = document.getElementById('servicesTable');
+      const rows = table.querySelectorAll('tbody tr');
+      
+      rows.forEach(row => {
+        const serviceName = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+        const category = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+        const status = row.querySelector('td:nth-child(6)')?.textContent.toLowerCase() || '';
+        
+        const matchesSearch = !searchTerm || serviceName.includes(searchTerm);
+        const matchesCategory = !categoryFilter || category.includes(categoryFilter);
+        const matchesStatus = !statusFilter || status.includes(statusFilter);
+        
+        if (matchesSearch && matchesCategory && matchesStatus) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modals = document.querySelectorAll('.service-modal');
+      modals.forEach(modal => {
+        if (event.target === modal) {
+          modal.style.display = 'none';
+          modal.remove();
+          
+          // Restore body scroll when modal is closed
+          document.body.style.overflow = '';
+        }
+      });
+    };
+    
+    // Category management functions
+    function viewCategory(categoryId) {
+      console.log('[v0] Viewing category:', categoryId);
+      showSuccessMessage('Xem chi tiết danh mục ID: ' + categoryId);
+      // Implement view category logic
+    }
+    
+    function editCategory(categoryId) {
+      console.log('[v0] Editing category:', categoryId);
+      
+      // Fetch category data first using POST request
+      const formData = new FormData();
+      formData.append('action', 'get');
+      formData.append('id', categoryId);
+      
+      console.log('Sending request to:', '<%=request.getContextPath()%>/admin/service-categories');
+      console.log('FormData contents:');
+      for (let [key, value] of formData.entries()) {
+        console.log('  ' + key + ' = ' + value);
+      }
+      
+      fetch('<%=request.getContextPath()%>/admin/service-categories', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => {
+          console.log('Response status:', response.status);
+          console.log('Response headers:', response.headers);
+          return response.json();
+        })
+        .then(data => {
+          console.log('Received data:', data);
+          if (data.success) {
+            openEditCategoryModal(data.category);
+          } else {
+            showErrorMessage(data.message || 'Không thể tải thông tin danh mục');
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching category:', error);
+          showErrorMessage('Có lỗi xảy ra khi tải thông tin danh mục');
+        });
+    }
+    
+    function deleteCategory(categoryId) {
+      console.log('[v0] Deleting category:', categoryId);
+      
+      if (confirm('Bạn có chắc chắn muốn xóa danh mục này? Hành động này không thể hoàn tác.')) {
+        // Gọi ServiceCategoriesServlet để xóa category
+        const requestData = new URLSearchParams();
+        requestData.append('action', 'delete');
+        requestData.append('id', categoryId);
+        
+        fetch('<%=request.getContextPath()%>/admin/service-categories', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: requestData
+        })
+        .then(response => {
+          console.log('Response status:', response.status);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          return response.json();
+        })
+        .then(data => {
+          console.log('Server response:', data);
+          
+          if (data.success) {
+            showSuccessMessage(data.message || 'Đã xóa danh mục thành công!');
+            
+            // Reload trang sau 1.5 giây để cập nhật danh sách
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } else {
+            showErrorMessage(data.message || 'Có lỗi xảy ra khi xóa danh mục.');
+          }
+        })
+        .catch(error => {
+          console.error('Fetch error:', error);
+          showErrorMessage('Có lỗi xảy ra khi xóa danh mục: ' + error.message);
+        });
+      }
+    }
+    
+     // Service management functions
+     function viewService(serviceId) {
+       console.log('[v0] Viewing service:', serviceId);
+       showSuccessMessage('Xem chi tiết dịch vụ ID: ' + serviceId);
+       // Implement view service logic
+     }
+     
+     function editService(serviceId) {
+       console.log('[v0] Editing service:', serviceId);
+       
+       // Fetch service data first using POST request
+       const formData = new FormData();
+       formData.append('action', 'get');
+       formData.append('id', serviceId);
+       
+       fetch('<%=request.getContextPath()%>/admin/services', {
+         method: 'POST',
+         body: formData
+       })
+         .then(response => response.json())
+         .then(data => {
+           if (data.success) {
+             openEditServiceModal(data.service);
+           } else {
+             showErrorMessage(data.message || 'Không thể tải thông tin dịch vụ');
+           }
+         })
+         .catch(error => {
+           console.error('Error fetching service:', error);
+           showErrorMessage('Có lỗi xảy ra khi tải thông tin dịch vụ');
+         });
+     }
+     
+     function deleteService(serviceId) {
+       console.log('[v0] Deleting service:', serviceId);
+       
+       if (confirm('Bạn có chắc chắn muốn xóa dịch vụ này? Hành động này không thể hoàn tác.')) {
+         // Gọi ServiceCustomerServlet để xóa service
+         const requestData = new URLSearchParams();
+         requestData.append('action', 'delete');
+         requestData.append('id', serviceId);
+         
+         fetch('<%=request.getContextPath()%>/admin/services', {
+           method: 'POST',
+           headers: {
+             'Content-Type': 'application/x-www-form-urlencoded',
+             'X-Requested-With': 'XMLHttpRequest'
+           },
+           body: requestData
+         })
+         .then(response => {
+           console.log('Response status:', response.status);
+           
+           if (!response.ok) {
+             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+           }
+           
+           return response.json();
+         })
+         .then(data => {
+           console.log('Server response:', data);
+           
+           if (data.success) {
+             showSuccessMessage(data.message || 'Đã xóa dịch vụ thành công!');
+             
+             // Reload trang sau 1.5 giây để cập nhật danh sách
+             setTimeout(() => {
+               window.location.reload();
+             }, 1500);
+           } else {
+             showErrorMessage(data.message || 'Có lỗi xảy ra khi xóa dịch vụ.');
+           }
+         })
+         .catch(error => {
+           console.error('Fetch error:', error);
+           showErrorMessage('Có lỗi xảy ra khi xóa dịch vụ: ' + error.message);
+         });
+       }
+     }
+
+     // Add event listeners for search inputs
+     document.addEventListener('DOMContentLoaded', function() {
+       const categorySearch = document.getElementById('categorySearch');
+       const serviceSearch = document.getElementById('serviceSearch');
+       
+       if (categorySearch) {
+         categorySearch.addEventListener('input', filterCategories);
+       }
+       
+       if (serviceSearch) {
+         serviceSearch.addEventListener('input', filterServices);
+       }
+     });
   </script>
+  
   <script>
     // Tự động đóng alert sau 3 giây
     const alertBox = document.getElementById('autoDismissAlert');
