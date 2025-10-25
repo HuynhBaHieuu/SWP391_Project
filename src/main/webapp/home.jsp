@@ -192,7 +192,7 @@
 <body>
 <%@ include file="design/header.jsp" %>
 
-<main class="container mt-5 pt-4">
+<main class="mt-5 pt-4">
     <c:choose>
         <%-- ======= KẾT QUẢ TÌM KIẾM ======= --%>
         <c:when test="${not empty listings}">

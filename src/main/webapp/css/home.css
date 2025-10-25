@@ -22,7 +22,7 @@ body{
 }
 .header-top{
     display: flex;
-    max-width: 1820px;
+    max-width: 96%;
     margin: 0 auto;
     justify-content: space-between;
     align-items:  center
@@ -209,7 +209,7 @@ body {
 
 main {
     max-width: 100%;
-    padding: 0 10%;
+    padding: 0 2%;
 }
 
 h1 {

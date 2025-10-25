@@ -43,7 +43,7 @@
             /* Cải thiện style cho dropdown menu */
             .header-top {
                 display: flex;
-                max-width: 64%;
+                max-width: 96%;
                 margin: 0 auto;
                 justify-content: space-between;
                 align-items: center;
