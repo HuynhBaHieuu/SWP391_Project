@@ -49,7 +49,6 @@
       margin-right: 6px;
     }
   </style>
-  //---------------------------
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -454,9 +453,16 @@
               <td><%= rs.getDate("created_at") %></td>
               <td>
                 <div class="action-buttons">
-                  <button class="action-btn action-btn-view" data-listing-id="<%= rs.getInt("id") %>" onclick="viewListing(this.dataset.listingId)">Xem</button>
-                  <button class="action-btn action-btn-edit" data-listing-id="<%= rs.getInt("id") %>" onclick="approveListing(this.dataset.listingId)">Duyệt</button>
-                  <button class="action-btn action-btn-delete" data-listing-id="<%= rs.getInt("id") %>" onclick="rejectListing(this.dataset.listingId)">Từ chối</button>
+                  <% 
+                    String currentStatus = rs.getString("status");
+                    boolean isActive = "Active".equalsIgnoreCase(currentStatus);
+                  %>
+                  <button class="action-btn <%= isActive ? "action-btn-warning" : "action-btn-edit" %>" 
+                          data-listing-id="<%= rs.getInt("id") %>" 
+                          data-current-status="<%= currentStatus %>"
+                          onclick="toggleListingStatus(this.dataset.listingId, this.dataset.currentStatus)">
+                    <%= isActive ? "Khoá" : "Mở khoá" %>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -1530,12 +1536,42 @@
     
     function viewListing(id) {
       console.log('[v0] View listing:', id);
-      // Implement view listing logic
+      window.open('<%=request.getContextPath()%>/customer/detail.jsp?id=' + id, '_blank');
     }
     
-    function approveListing(id) {
-      console.log('[v0] Approve listing:', id);
-      // Implement approve listing logic
+    function toggleListingStatus(id, currentStatus) {
+      console.log('[v0] Toggle listing status:', id, 'current:', currentStatus);
+      
+      // Xác định trạng thái mới
+      const isCurrentlyActive = currentStatus.toLowerCase() === 'active';
+      const newStatus = isCurrentlyActive ? 'Inactive' : 'Active';
+      const actionText = isCurrentlyActive ? 'khoá' : 'mở khoá';
+      
+      if (!confirm('Bạn có chắc muốn ' + actionText + ' listing này?')) {
+        return;
+      }
+      
+      // Gửi request tới server
+      fetch('<%=request.getContextPath()%>/admin/toggleListingStatus', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'listingId=' + id + '&status=' + newStatus
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          location.reload(); // Reload trang để cập nhật UI
+        } else {
+          alert('Lỗi: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi cập nhật trạng thái');
+      });
     }
     
     function rejectListing(id) {

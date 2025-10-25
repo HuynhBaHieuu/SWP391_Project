@@ -411,6 +411,24 @@ body {
   color: #374151;
 }
 
+.action-btn-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.action-btn-warning:hover {
+  background: #fde68a;
+}
+
+.action-btn-success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.action-btn-success:hover {
+  background: #a7f3d0;
+}
+
 /* Chart Container */
 .chart-container {
   height: 300px;
