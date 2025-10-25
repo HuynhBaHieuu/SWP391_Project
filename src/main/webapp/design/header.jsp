@@ -12,7 +12,7 @@
 <%
     User currentUser = (User) session.getAttribute("user");
     String userImagePath = null;
-    
+
     // Lấy số tin nhắn chưa đọc
     int unreadMessageCount = 0;
     if (currentUser != null) {
@@ -167,6 +167,233 @@
                     transform: translateX(5px);
                 }
             }
+
+            /* ===== FILTER BUTTON & DROPDOWN (RIÊNG BIỆT) ===== */
+            .header-bottom-wrapper {
+                position: relative;
+            }
+
+            .header-bottom-container {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                width: 100%;
+                margin-left: 27%;
+            }
+
+            .header-bottom-container .header-bottom {
+                max-width: calc(100% - 200px); /* Để lại chỗ cho filter button */
+                margin: 0; /* Override margin từ home.css */
+            }
+
+            .filter-button {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 25px;
+                padding: 10px 20px;
+                margin-left: 0;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: 600;
+                color: #222;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                flex-shrink: 0;
+            }
+
+            .filter-button:hover {
+                background: #f7f7f7;
+                border-color: #222;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+
+            .filter-button i {
+                font-size: 16px;
+                color: #ff385c;
+            }
+
+            .filter-dropdown {
+                position: absolute;
+                top: calc(100% + 10px);
+                right: 2%;
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+                padding: 0;
+                min-width: 380px;
+                z-index: 1000;
+                animation: slideDown 0.3s ease;
+            }
+
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .filter-content {
+                padding: 24px;
+            }
+
+            .filter-content h5 {
+                margin: 0 0 20px 0;
+                font-size: 18px;
+                font-weight: 700;
+                color: #222;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .filter-content h5 i {
+                color: #ff385c;
+            }
+
+            .filter-section {
+                margin-bottom: 20px;
+            }
+
+            .filter-label {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-weight: 600;
+                font-size: 14px;
+                color: #222;
+                margin-bottom: 10px;
+            }
+
+            .filter-label i {
+                color: #ff385c;
+            }
+
+            .price-inputs {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .price-inputs input {
+                flex: 1;
+                padding: 10px 12px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 14px;
+                outline: none;
+                transition: border-color 0.3s ease;
+            }
+
+            .price-inputs input:focus {
+                border-color: #ff385c;
+                box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.1);
+            }
+
+            .price-inputs span {
+                color: #717171;
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            .price-examples {
+                margin-top: 6px;
+            }
+
+            .price-examples small {
+                color: #717171;
+                font-size: 12px;
+            }
+
+            .filter-select {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 14px;
+                outline: none;
+                cursor: pointer;
+                transition: border-color 0.3s ease;
+                background: white;
+            }
+
+            .filter-select:focus {
+                border-color: #ff385c;
+                box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.1);
+            }
+
+            .filter-actions {
+                display: flex;
+                gap: 12px;
+                margin-top: 24px;
+                padding-top: 20px;
+                border-top: 1px solid #ebebeb;
+            }
+
+            .btn-clear,
+            .btn-apply {
+                flex: 1;
+                padding: 12px;
+                border: none;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+            }
+
+            .btn-clear {
+                background: #f7f7f7;
+                color: #222;
+            }
+
+            .btn-clear:hover {
+                background: #e8e8e8;
+            }
+
+            .btn-apply {
+                background: #ff385c;
+                color: white;
+            }
+
+            .btn-apply:hover {
+                background: #e31c5f;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(255, 56, 92, 0.3);
+            }
+
+            /* Responsive cho filter */
+            @media (max-width: 768px) {
+                .header-bottom-container {
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .header-bottom-container .header-bottom {
+                    max-width: 100%;
+                }
+
+                .filter-button {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                .filter-dropdown {
+                    right: 2%;
+                    left: 2%;
+                    min-width: unset;
+                }
+            }
         </style>
     </head>
 
@@ -248,9 +475,9 @@
                             <path d="M2 16h28M2 24h28M2 8h28"></path>
                             </g>
                             </svg>
-                            <% if (unreadMessageCount > 0) { %>
-                            <span class="message-badge-1"><%= unreadMessageCount %></span>
-                            <% } %>
+                            <% if (unreadMessageCount > 0) {%>
+                            <span class="message-badge-1"><%= unreadMessageCount%></span>
+                            <% }%>
                         </button>   
 
                         <!-- Dropdown menu -->
@@ -313,48 +540,125 @@
             </div>
 
             <!--header bottom-->
-            <div class="header-bottom"> 
-                <form action="${pageContext.request.contextPath}/search" method="get" class="search-form">
-                    <div class="search-field" style="width:220px;">
-                        <div class="each-search-filter">
-                            <div class="search-filter" data-i18n="header.search.location_label">Địa điểm</div>
-                            <input type="text" name="keyword" class="search-input"
-                                   data-i18n-base="header.search.location"
-                                   data-i18n-attr="placeholder"
-                                   placeholder="Tìm kiếm điểm đến">
+            <div class="header-bottom-wrapper">
+                <div class="header-bottom-container">
+                    <div class="header-bottom"> 
+                        <form action="${pageContext.request.contextPath}/search" method="get" class="search-form">
+                            <div class="search-field" style="width:220px;">
+                                <div class="each-search-filter">
+                                    <div class="search-filter" data-i18n="header.search.location_label">Địa điểm</div>
+                                    <input type="text" name="keyword" class="search-input"
+                                           data-i18n-base="header.search.location"
+                                           data-i18n-attr="placeholder"
+                                           placeholder="Tìm kiếm điểm đến">
+                                </div>
+                            </div>
+                            <div class="search-field" style="width:144px;">
+                                <div class="each-search-filter">
+                                    <div class="search-filter" data-i18n="header.search.checkin_label">Nhận phòng</div>
+                                    <input type="date" name="checkin" class="search-input">
+                                </div>
+                            </div>
+                            <div class="search-field" style="width:120px;">
+                                <div class="each-search-filter">
+                                    <div class="search-filter" data-i18n="header.search.checkout_label">Trả phòng</div>
+                                    <input type="date" name="checkout" class="search-input">
+                                </div>
+                            </div>
+                            <div class="search-field" style="width:280px;">
+                                <div class="each-search-filter">
+                                    <div class="search-filter" data-i18n="header.search.guests_label">Khách</div>
+                                    <input type="number" name="guests" min="1" max="20" class="search-input"
+                                           data-i18n-base="header.search.guests"
+                                           data-i18n-attr="placeholder"
+                                           placeholder="Thêm khách">
+                                </div>
+                                <button class="search-button" type="submit"
+                                        data-i18n-base="header.search.button"
+                                        data-i18n-attr="aria-label"
+                                        aria-label="Tìm kiếm">
+                                    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="presentation" focusable="false" style="display:block; fill:none; height:16px; width:16px; stroke:currentcolor; stroke-width:4; overflow:visible;">
+                                    <path d="m20.666 20.666 10 10"></path>
+                                    <path d="m24.0002 12.6668c0 6.2593-5.0741 11.3334-11.3334 11.3334-6.2592 0-11.3333-5.0741-11.3333-11.3334 0-6.2592 5.0741-11.3333 11.3333-11.3333 6.2593 0 11.3334 5.0741 11.3334 11.3333z" fill="none"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Filter Button (Độc lập với Search) -->
+                    <button type="button" class="filter-button" onclick="toggleFilterDropdown()" title="Bộ lọc">
+                        <i class="bi bi-funnel"></i>
+                        <span>Bộ lọc</span>
+                    </button>
+                </div>
+
+
+                <!-- Filter Dropdown Panel (Độc lập) -->
+                <div id="filter-dropdown" class="filter-dropdown" style="display:none;">
+                    <div class="filter-content">
+                        <h5><i class="bi bi-sliders"></i> Bộ lọc nâng cao</h5>
+
+                        <!-- Price Range Filter -->
+                        <div class="filter-section">
+                            <label class="filter-label">
+                                <i class="bi bi-cash"></i> Khoảng giá (VNĐ / đêm)
+                            </label>
+                            <div class="price-inputs">
+                                <input type="number" id="filterMinPrice" placeholder="Từ" min="0" step="100000">
+                                <span>—</span>
+                                <input type="number" id="filterMaxPrice" placeholder="Đến" min="0" step="100000">
+                            </div>
+                            <div class="price-examples">
+                                <small>VD: 500,000 - 2,000,000</small>
+                            </div>
+                        </div>
+
+                        <!-- City Filter -->
+                        <div class="filter-section">
+                            <label class="filter-label">
+                                <i class="bi bi-geo-alt"></i> Thành phố
+                            </label>
+                            <select id="filterCity" class="filter-select">
+                                <option value="">Tất cả thành phố</option>
+                                <option value="Hà Nội">Hà Nội</option>
+                                <option value="Hồ Chí Minh">Hồ Chí Minh</option>
+                                <option value="Đà Nẵng">Đà Nẵng</option>
+                                <option value="Hải Phòng">Hải Phòng</option>
+                                <option value="Cần Thơ">Cần Thơ</option>
+                                <option value="Nha Trang">Nha Trang</option>
+                                <option value="Đà Lạt">Đà Lạt</option>
+                                <option value="Vũng Tàu">Vũng Tàu</option>
+                                <option value="Huế">Huế</option>
+                                <option value="Phú Quốc">Phú Quốc</option>
+                            </select>
+                        </div>
+
+                        <!-- Max Guests Filter -->
+                        <div class="filter-section">
+                            <label class="filter-label">
+                                <i class="bi bi-people"></i> Số khách tối đa
+                            </label>
+                            <select id="filterGuests" class="filter-select">
+                                <option value="">Không giới hạn</option>
+                                <option value="2">2+ khách</option>
+                                <option value="4">4+ khách</option>
+                                <option value="6">6+ khách</option>
+                                <option value="8">8+ khách</option>
+                                <option value="10">10+ khách</option>
+                            </select>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="filter-actions">
+                            <button type="button" class="btn-clear" onclick="clearFilters()">
+                                <i class="bi bi-x-circle"></i> Xóa bộ lọc
+                            </button>
+                            <button type="button" class="btn-apply" onclick="applyFilters()">
+                                <i class="bi bi-check-circle"></i> Áp dụng lọc
+                            </button>
                         </div>
                     </div>
-                    <div class="search-field" style="width:144px;">
-                        <div class="each-search-filter">
-                            <div class="search-filter" data-i18n="header.search.checkin_label">Nhận phòng</div>
-                            <input type="date" name="checkin" class="search-input">
-                        </div>
-                    </div>
-                    <div class="search-field" style="width:120px;">
-                        <div class="each-search-filter">
-                            <div class="search-filter" data-i18n="header.search.checkout_label">Trả phòng</div>
-                            <input type="date" name="checkout" class="search-input">
-                        </div>
-                    </div>
-                    <div class="search-field" style="width:280px;">
-                        <div class="each-search-filter">
-                            <div class="search-filter" data-i18n="header.search.guests_label">Khách</div>
-                            <input type="number" name="guests" min="1" max="20" class="search-input"
-                                   data-i18n-base="header.search.guests"
-                                   data-i18n-attr="placeholder"
-                                   placeholder="Thêm khách">
-                        </div>
-                        <button class="search-button" type="submit"
-                                data-i18n-base="header.search.button"
-                                data-i18n-attr="aria-label"
-                                aria-label="Tìm kiếm">
-                            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="presentation" focusable="false" style="display:block; fill:none; height:16px; width:16px; stroke:currentcolor; stroke-width:4; overflow:visible;">
-                            <path d="m20.666 20.666 10 10"></path>
-                            <path d="m24.0002 12.6668c0 6.2593-5.0741 11.3334-11.3334 11.3334-6.2592 0-11.3333-5.0741-11.3333-11.3334 0-6.2592 5.0741-11.3333 11.3333-11.3333 6.2593 0 11.3334 5.0741 11.3334 11.3333z" fill="none"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>                                                
         </div>
     </header>
@@ -408,11 +712,11 @@
         /*
          if (currentUser != null) {
          setInterval(function() {
-         fetch('<%= request.getContextPath() %>/chat?action=getUnreadCount')
+         fetch('<%= request.getContextPath()%>/chat?action=getUnreadCount')
          .then(response => response.json())
          .then(data => {
          if (data.success) {
-         const currentCount = <%= unreadMessageCount %>;
+         const currentCount = <%= unreadMessageCount%>;
          if (data.unreadCount !== currentCount && data.unreadCount > 0) {
          location.reload();
          }
@@ -422,5 +726,70 @@
          }, 30000);
          }
          */
+
+        // ===== FILTER FUNCTIONS (RIÊNG BIỆT VỚI SEARCH) =====
+        function toggleFilterDropdown() {
+            const filterDropdown = document.getElementById('filter-dropdown');
+            const isVisible = filterDropdown.style.display === 'block';
+            filterDropdown.style.display = isVisible ? 'none' : 'block';
+        }
+
+        function clearFilters() {
+            document.getElementById('filterMinPrice').value = '';
+            document.getElementById('filterMaxPrice').value = '';
+            document.getElementById('filterCity').value = '';
+            document.getElementById('filterGuests').value = '';
+        }
+
+        function applyFilters() {
+            const minPrice = document.getElementById('filterMinPrice').value;
+            const maxPrice = document.getElementById('filterMaxPrice').value;
+            const city = document.getElementById('filterCity').value;
+            const guests = document.getElementById('filterGuests').value;
+
+            // Xây dựng URL với filter parameters
+            const params = new URLSearchParams();
+            if (minPrice)
+                params.append('minPrice', minPrice);
+            if (maxPrice)
+                params.append('maxPrice', maxPrice);
+            if (city)
+                params.append('city', city);
+            if (guests)
+                params.append('guests', guests);
+
+            // Chuyển hướng đến trang filter (endpoint riêng)
+            const filterUrl = '<%= request.getContextPath()%>/filter?' + params.toString();
+            window.location.href = filterUrl;
+        }
+
+        // Close filter dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const filterDropdown = document.getElementById('filter-dropdown');
+            const filterButton = event.target.closest('.filter-button');
+            const filterContent = event.target.closest('.filter-dropdown');
+
+            if (!filterButton && !filterContent && filterDropdown && filterDropdown.style.display === 'block') {
+                filterDropdown.style.display = 'none';
+            }
+        });
+
+        // Load filter values from URL parameters on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const minPrice = urlParams.get('minPrice');
+            const maxPrice = urlParams.get('maxPrice');
+            const city = urlParams.get('city');
+            const guests = urlParams.get('guests');
+
+            if (minPrice)
+                document.getElementById('filterMinPrice').value = minPrice;
+            if (maxPrice)
+                document.getElementById('filterMaxPrice').value = maxPrice;
+            if (city)
+                document.getElementById('filterCity').value = city;
+            if (guests)
+                document.getElementById('filterGuests').value = guests;
+        });
     </script>
 </html>

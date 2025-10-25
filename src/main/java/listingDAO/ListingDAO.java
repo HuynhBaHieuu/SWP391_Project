@@ -657,4 +657,69 @@ public Map<String, List<Listing>> getListingsGroupedByCity() {
         }
         return -1;
     }
+
+    /**
+     * Filter listings by price range, city, and number of guests
+     * @param minPrice Minimum price per night (nullable)
+     * @param maxPrice Maximum price per night (nullable)
+     * @param city City name (nullable)
+     * @param minGuests Minimum number of guests (nullable)
+     * @return List of filtered listings
+     */
+    public List<Listing> filterListings(java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice, 
+                                       String city, Integer minGuests) {
+        List<Listing> listings = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT * FROM Listings WHERE Status='Active' AND (IsDeleted = 0 OR IsDeleted IS NULL)"
+        );
+        List<Object> params = new ArrayList<>();
+
+        // Filter by minimum price
+        if (minPrice != null) {
+            sql.append(" AND PricePerNight >= ?");
+            params.add(minPrice);
+        }
+
+        // Filter by maximum price
+        if (maxPrice != null) {
+            sql.append(" AND PricePerNight <= ?");
+            params.add(maxPrice);
+        }
+
+        // Filter by city
+        if (city != null && !city.trim().isEmpty()) {
+            sql.append(" AND City = ?");
+            params.add(city.trim());
+        }
+
+        // Filter by minimum guests
+        if (minGuests != null && minGuests > 0) {
+            sql.append(" AND MaxGuests >= ?");
+            params.add(minGuests);
+        }
+
+        sql.append(" ORDER BY CreatedAt DESC");
+
+        try (Connection con = DBConnection.getConnection(); 
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            // Set parameters
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    listings.add(mapResultSetToListing(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("🔍 FilterListings - Found " + listings.size() + " listings with filters: " +
+                          "minPrice=" + minPrice + ", maxPrice=" + maxPrice + 
+                          ", city=" + city + ", minGuests=" + minGuests);
+        return listings;
+    }
 }
