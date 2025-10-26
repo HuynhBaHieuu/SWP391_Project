@@ -5,6 +5,7 @@
 --%>
 <%@page import="model.User"%>
 <%@page import="userDAO.ConversationDAO"%>
+<%@page import="userDAO.NotificationDAO"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lang_modal.css?v=2">
 <script src="<%=request.getContextPath()%>/js/i18n.js?v=13"></script>
@@ -15,9 +16,17 @@
 
     // Lấy số tin nhắn chưa đọc
     int unreadMessageCount = 0;
+    int unreadNotificationCount = 0;
     if (currentUser != null) {
         unreadMessageCount = new ConversationDAO().getTotalUnreadCount(currentUser.getUserID());
+        // Lấy số thông báo chưa đọc
+        try {
+            unreadNotificationCount = new NotificationDAO().countUnreadNotifications(currentUser.getUserID());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+    int unreadTotal = unreadMessageCount + unreadNotificationCount;
 
     if (currentUser != null && currentUser.getProfileImage() != null) {
         String profileImage = currentUser.getProfileImage();
@@ -493,8 +502,8 @@
                             <path d="M2 16h28M2 24h28M2 8h28"></path>
                             </g>
                             </svg>
-                            <% if (unreadMessageCount > 0) {%>
-                            <span class="message-badge-1"><%= unreadMessageCount%></span>
+                            <% if (unreadTotal > 0) {%>
+                            <span class="message-badge-1"><%= unreadTotal%></span>
                             <% }%>
                         </button>   
 
@@ -527,9 +536,13 @@
                                 <span data-i18n="header.dropdown.profile">Hồ sơ</span>
                             </a>
 
-                            <a href="#" class="menu-item user-profile">
-                                <i class="bi bi-bell"></i>
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/notifications") : (request.getContextPath() + "/login.jsp")%>" 
+                               class="menu-item user-profile <%= (unreadNotificationCount > 0) ? "has-unread" : ""%>">
+                                <i class="bi bi-bell" id="notification-bell"></i>
                                 <span data-i18n="header.dropdown.notifications">Thông báo</span>
+                                <% if (unreadNotificationCount > 0) {%>
+                                <span class="message-badge-2" id="notification-badge"><%= unreadNotificationCount%></span>
+                                <% }%>
                             </a>
 
                             <a href="#" class="menu-item user-profile">

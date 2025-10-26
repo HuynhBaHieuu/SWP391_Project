@@ -657,6 +657,20 @@ public Map<String, List<Listing>> getListingsGroupedByCity() {
         }
         return -1;
     }
+    public int getHostIdByRequestId(int requestId) {
+        String sql = "SELECT HostID FROM ListingRequests WHERE RequestID = ?";
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("HostID");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 
     /**
      * Filter listings by price range, city, and number of guests

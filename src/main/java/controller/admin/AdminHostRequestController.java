@@ -14,6 +14,7 @@ import model.User;
 import model.HostRequest;
 import model.AdminStats;
 import userDAO.HostRequestDAO;
+import service.NotificationService;
 import adminDAO.AdminStatsDAO;
 
 @WebServlet(name = "AdminHostRequestController", urlPatterns = {"/admin/host-requests"})
@@ -83,24 +84,57 @@ public class AdminHostRequestController extends HttpServlet {
 
         try {
             HostRequestDAO hostRequestDAO = new HostRequestDAO();
+            NotificationService notificationService = new NotificationService();
             
-            if ("approve".equalsIgnoreCase(action)) {
-                success = hostRequestDAO.approveRequest(reqId);
-                if (success) {
-                    message = "Đã duyệt yêu cầu trở thành host.";
+            // Lấy thông tin host request để có userId
+            HostRequest hostRequest = hostRequestDAO.findById(reqId);
+            int userId = hostRequest.getUserId();
+                
+                if ("approve".equalsIgnoreCase(action)) {
+                    success = hostRequestDAO.approveRequest(reqId);
+                    if (success) {
+                        message = "Đã duyệt yêu cầu trở thành host.";
+                        
+                        // Tạo thông báo cho user
+                        try {
+                            notificationService.createNotification(
+                                userId,
+                                "Yêu cầu trở thành Host đã được duyệt",
+                                "Chúc mừng! Yêu cầu trở thành Host của bạn đã được phê duyệt. " +
+                                "Bạn có thể bắt đầu đăng các dịch vụ và trải nghiệm của mình ngay bây giờ.",
+                                "HostRequest"
+                            );
+                        } catch (SQLException ne) {
+                            // Log notification error but don't fail the main operation
+                            ne.printStackTrace();
+                        }
+                    } else {
+                        message = "Không thể duyệt yêu cầu.";
+                    }
+                } else if ("reject".equalsIgnoreCase(action)) {
+                    success = hostRequestDAO.rejectRequest(reqId);
+                    if (success) {
+                        message = "Đã từ chối yêu cầu trở thành host.";
+                        
+                        // Tạo thông báo cho user
+                        try {
+                            notificationService.createNotification(
+                                userId,
+                                "Yêu cầu trở thành Host đã bị từ chối",
+                                "Rất tiếc, yêu cầu trở thành Host của bạn chưa được phê duyệt. " +
+                                "Vui lòng liên hệ với bộ phận hỗ trợ để biết thêm chi tiết.",
+                                "HostRequest"
+                            );
+                        } catch (SQLException ne) {
+                            // Log notification error but don't fail the main operation
+                            ne.printStackTrace();
+                        }
+                    } else {
+                        message = "Không thể từ chối yêu cầu.";
+                    }
                 } else {
-                    message = "Không thể duyệt yêu cầu.";
+                    message = "Hành động không hợp lệ.";
                 }
-            } else if ("reject".equalsIgnoreCase(action)) {
-                success = hostRequestDAO.rejectRequest(reqId);
-                if (success) {
-                    message = "Đã từ chối yêu cầu trở thành host.";
-                } else {
-                    message = "Không thể từ chối yêu cầu.";
-                }
-            } else {
-                message = "Hành động không hợp lệ.";
-            }
         } catch (SQLException e) {
             e.printStackTrace();
             message = "Có lỗi hệ thống. Vui lòng thử lại sau.";

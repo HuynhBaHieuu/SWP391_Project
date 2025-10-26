@@ -1,0 +1,78 @@
+═══════════════════════════════════════════════════════════
+    HỆ THỐNG THÔNG BÁO - HƯỚNG DẪN ĐƠN GIẢN
+═══════════════════════════════════════════════════════════
+
+📌 ĐÃ HOÀN THÀNH:
+
+✅ Model + DAO + Controller
+   - Notification.java
+   - NotificationDAO.java  
+   - NotificationController.java
+
+✅ Giao diện
+   - Notifications.jsp (trang xem thông báo)
+   - notification-polling.js (tự động cập nhật mỗi 30s)
+   - header.jsp (hiển thị badge số thông báo)
+
+✅ Tích hợp Admin
+   - AdminHostRequestController.java tự động tạo thông báo
+     khi approve/reject host request
+
+═══════════════════════════════════════════════════════════
+
+🚀 CÀI ĐẶT (3 BƯỚC):
+
+BƯỚC 1: Tạo bảng trong SQL Server
+   - Mở file: database_notifications_table.sql
+   - Chạy script trong SQL Server Management Studio
+   
+BƯỚC 2: Build lại project
+   - Clean & Build trong NetBeans
+   - Hoặc: mvn clean install
+   
+BƯỚC 3: Deploy và test
+   - Deploy project
+   - Login với admin → approve/reject host request
+   - Login với user → xem thông báo
+
+═══════════════════════════════════════════════════════════
+
+🎯 CÁCH HOẠT ĐỘNG:
+
+1. Admin approve/reject host request
+   → Tự động tạo notification cho user đó
+
+2. User vào trang web
+   → Header hiển thị badge số thông báo chưa đọc
+   → Tự động cập nhật mỗi 30 giây
+   
+3. User click "Thông báo"  
+   → Xem danh sách thông báo
+   → Đánh dấu đã đọc / Xóa thông báo
+
+═══════════════════════════════════════════════════════════
+
+💡 THÊM NOTIFICATION Ở NƠI KHÁC:
+
+import userDAO.NotificationDAO;
+
+NotificationDAO dao = new NotificationDAO();
+dao.createNotification(
+    userId,           // ID user nhận
+    "Tiêu đề",       // Tiêu đề  
+    "Nội dung...",   // Nội dung
+    "Booking"        // Loại: Booking/HostRequest/Payment/Feedback/ListingRequest
+);
+
+═══════════════════════════════════════════════════════════
+
+📱 URL:
+   - Xem thông báo: /notifications
+   - Số chưa đọc (API): /notifications?action=getUnreadCount
+
+═══════════════════════════════════════════════════════════
+
+✅ XONG! Hệ thống sẵn sàng sử dụng.
+
+═══════════════════════════════════════════════════════════
+
