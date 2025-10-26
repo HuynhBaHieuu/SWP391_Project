@@ -216,16 +216,34 @@
             }
 
             .filter-dropdown {
-                position: absolute;
-                top: calc(100% + 10px);
+                position: fixed;
+                top: 140px;
                 right: 2%;
                 background: white;
                 border-radius: 16px;
+                z-index: 999;
                 box-shadow: 0 8px 28px rgba(0,0,0,0.15);
                 padding: 0;
                 min-width: 380px;
-                z-index: 1000;
+                max-height: calc(100vh - 160px);
+                overflow-y: auto;
                 animation: slideDown 0.3s ease;
+            }
+
+            /* Overlay khi mở filter */
+            .filter-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.3);
+                z-index: 998;
+            }
+
+            .filter-overlay.show {
+                display: block;
             }
 
             @keyframes slideDown {
@@ -414,21 +432,21 @@
                     <!-- Nơi lưu trú -->
                     <a href="${pageContext.request.contextPath}/home" class="menu-sub">
                         <span style="transform:none;">
-                            <img src="https://www.svgrepo.com/show/434116/house.svg" alt="Homestay Icon" width="40" height="40">
+                            <img src="${pageContext.request.contextPath}/image/icons/house.png" alt="Homestay Icon" width="40" height="40">
                         </span>
                         <span data-title="Nơi lưu trú" data-i18n="header.nav.stay">Nơi lưu trú</span>
                     </a>
                     <!-- Trải nghiệm -->
                     <a href="${pageContext.request.contextPath}/experiences" class="menu-sub">
                         <span class="w14w6ssu atm_mk_h2mmj6 dir dir-ltr" style="transform:none;" aria-hidden="true">
-                            <img src="https://www.svgrepo.com/show/484353/balloon.svg" alt="Experience Icon" width="40" height="40">
+                            <img src="${pageContext.request.contextPath}/image/icons/balloon.png" alt="Experience Icon" width="40" height="40">
                         </span>
                         <span data-title="Trải nghiệm" aria-hidden="true" data-i18n="header.nav.experience">Trải nghiệm</span>
                     </a>
                     <!-- Dịch vụ -->
                     <a href="${pageContext.request.contextPath}/services.jsp" class="menu-sub">
                         <span class="w14w6ssu atm_mk_h2mmj6 dir dir-ltr" style="transform:none;" aria-hidden="true">
-                            <img src="https://www.svgrepo.com/show/206293/meal-lunch.svg" alt="Service Icon" width="40" height="40">
+                            <img src="${pageContext.request.contextPath}/image/icons/service-bell.png" alt="Service Icon" width="40" height="40">
                         </span>
                         <span data-title="Dịch vụ" aria-hidden="true" data-i18n="header.nav.service">Dịch vụ</span>
                     </a>
@@ -593,6 +611,9 @@
                 </div>
 
 
+                <!-- Filter Overlay -->
+                <div id="filter-overlay" class="filter-overlay" onclick="toggleFilterDropdown()"></div>
+                
                 <!-- Filter Dropdown Panel (Độc lập) -->
                 <div id="filter-dropdown" class="filter-dropdown" style="display:none;">
                     <div class="filter-content">
@@ -730,8 +751,16 @@
         // ===== FILTER FUNCTIONS (RIÊNG BIỆT VỚI SEARCH) =====
         function toggleFilterDropdown() {
             const filterDropdown = document.getElementById('filter-dropdown');
+            const filterOverlay = document.getElementById('filter-overlay');
             const isVisible = filterDropdown.style.display === 'block';
-            filterDropdown.style.display = isVisible ? 'none' : 'block';
+            
+            if (isVisible) {
+                filterDropdown.style.display = 'none';
+                filterOverlay.classList.remove('show');
+            } else {
+                filterDropdown.style.display = 'block';
+                filterOverlay.classList.add('show');
+            }
         }
 
         function clearFilters() {
@@ -766,11 +795,13 @@
         // Close filter dropdown when clicking outside
         document.addEventListener('click', function (event) {
             const filterDropdown = document.getElementById('filter-dropdown');
+            const filterOverlay = document.getElementById('filter-overlay');
             const filterButton = event.target.closest('.filter-button');
             const filterContent = event.target.closest('.filter-dropdown');
 
             if (!filterButton && !filterContent && filterDropdown && filterDropdown.style.display === 'block') {
                 filterDropdown.style.display = 'none';
+                filterOverlay.classList.remove('show');
             }
         });
 
