@@ -545,7 +545,8 @@
                                 <% }%>
                             </a>
 
-                            <a href="#" class="menu-item user-profile">
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>" 
+                                class="menu-item user-profile">
                                 <i class="bi bi-gear"></i>
                                 <span data-i18n="header.dropdown.settings">Cài đặt tài khoản</span>
                             </a>
@@ -788,6 +789,12 @@
             const maxPrice = document.getElementById('filterMaxPrice').value;
             const city = document.getElementById('filterCity').value;
             const guests = document.getElementById('filterGuests').value;
+            
+            // Lấy dates từ search form nếu có
+            const checkinInput = document.querySelector('input[name="checkin"]');
+            const checkoutInput = document.querySelector('input[name="checkout"]');
+            const checkin = checkinInput ? checkinInput.value : '';
+            const checkout = checkoutInput ? checkoutInput.value : '';
 
             // Xây dựng URL với filter parameters
             const params = new URLSearchParams();
@@ -799,6 +806,10 @@
                 params.append('city', city);
             if (guests)
                 params.append('guests', guests);
+            if (checkin)
+                params.append('checkin', checkin);
+            if (checkout)
+                params.append('checkout', checkout);
 
             // Chuyển hướng đến trang filter (endpoint riêng)
             const filterUrl = '<%= request.getContextPath()%>/filter?' + params.toString();

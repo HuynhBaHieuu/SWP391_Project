@@ -1,7 +1,9 @@
 package listingDAO;
 
 import dao.DBConnection;
+import paymentDAO.BookingDAO;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -583,7 +585,35 @@ public Map<String, List<Listing>> getListingsGroupedByCity() {
         return l;
     }
 
-// ====== SEARCH LISTINGS BY KEYWORD (Title, City, Address, Description) + GUESTS ======
+    // ====== FILTER LISTINGS BY AVAILABILITY FOR DATES ======
+    /**
+     * Lọc danh sách listings để chỉ hiển thị những phòng trống trong khoảng thời gian
+     * @param listings Danh sách listings ban đầu
+     * @param checkInDate Ngày check-in
+     * @param checkOutDate Ngày check-out
+     * @return Danh sách listings trống
+     */
+    public List<Listing> filterAvailableListings(List<Listing> listings, LocalDate checkInDate, LocalDate checkOutDate) {
+        if (checkInDate == null || checkOutDate == null) {
+            return listings; // Nếu không có ngày, trả về tất cả
+        }
+        
+        List<Listing> availableListings = new ArrayList<>();
+        BookingDAO bookingDAO = new BookingDAO();
+        
+        for (Listing listing : listings) {
+            boolean isAvailable = bookingDAO.isDateRangeAvailable(listing.getListingID(), checkInDate, checkOutDate);
+            if (isAvailable) {
+                availableListings.add(listing);
+            }
+        }
+        
+        System.out.println("📅 Filtered listings for dates " + checkInDate + " to " + checkOutDate + 
+                          ": " + listings.size() + " → " + availableListings.size() + " available");
+        return availableListings;
+    }
+
+    // ====== SEARCH LISTINGS BY KEYWORD (Title, City, Address, Description) + GUESTS ======
     public List<Listing> searchByCity(String keyword, int guests) {
         List<Listing> list = new ArrayList<>();
         if (keyword == null || keyword.trim().isEmpty()) {

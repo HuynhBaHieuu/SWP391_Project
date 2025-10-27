@@ -280,6 +280,16 @@
                             <span>Kết quả lọc</span>
                         </h2>
                         <div class="filter-tags">
+                            <c:if test="${not empty checkInDate}">
+                                <span class="filter-tag">
+                                    <i class="bi bi-calendar-check"></i> Nhận: ${checkInDate}
+                                </span>
+                            </c:if>
+                            <c:if test="${not empty checkOutDate}">
+                                <span class="filter-tag">
+                                    <i class="bi bi-calendar-x"></i> Trả: ${checkOutDate}
+                                </span>
+                            </c:if>
                             <c:if test="${not empty minPrice}">
                                 <span class="filter-tag">
                                     <i class="bi bi-cash"></i> Từ ${minPrice} VNĐ
@@ -338,7 +348,8 @@
                         <span class="text-danger fw-bold">${keyword}</span>
                         <small class="text-muted">
                             (${fn:length(listings)} kết quả
-                            <c:if test="${guests > 0}">, từ ${guests} khách trở lên</c:if>)
+                            <c:if test="${guests > 0}">, từ ${guests} khách trở lên</c:if>
+                            <c:if test="${not empty checkInDate and not empty checkOutDate}">, từ ${checkInDate} đến ${checkOutDate}</c:if>)
                             </small>
                         </h2>
 

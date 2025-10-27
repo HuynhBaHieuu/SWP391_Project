@@ -25,29 +25,35 @@ public class BookingDAO {
     public boolean isDateRangeAvailable(int listingId, LocalDate checkIn, LocalDate checkOut) {
         // Kiểm tra xem có booking nào OVERLAP với khoảng thời gian này không
         // Hai khoảng thời gian OVERLAP nếu:
-        // - Booking mới bắt đầu trước khi booking cũ kết thúc VÀ
-        // - Booking mới kết thúc sau khi booking cũ bắt đầu
+        // - Booking cũ bắt đầu trước khi booking mới kết thúc VÀ
+        // - Booking cũ kết thúc sau khi booking mới bắt đầu
         String sql = "SELECT COUNT(*) FROM Bookings " +
                      "WHERE ListingID = ? " +
                      "AND Status IN ('Processing', 'Completed') " + // Chỉ check booking đang active
-                     "AND CheckInDate < ? " +  // Booking cũ bắt đầu trước khi booking mới kết thúc
-                     "AND CheckOutDate > ?";   // Booking cũ kết thúc sau khi booking mới bắt đầu
+                     "AND ((CheckInDate <= ? AND CheckOutDate >= ?) OR " +  // Overlap bình thường
+                          "(CheckInDate >= ? AND CheckOutDate <= ?))"; // Hoặc bao phủ hoàn toàn
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setInt(1, listingId);
-            ps.setDate(2, Date.valueOf(checkOut));
-            ps.setDate(3, Date.valueOf(checkIn));
+            ps.setDate(2, Date.valueOf(checkOut));  // CheckInDate <= checkOut
+            ps.setDate(3, Date.valueOf(checkIn));   // CheckOutDate >= checkIn
+            ps.setDate(4, Date.valueOf(checkIn));   // CheckInDate >= checkIn
+            ps.setDate(5, Date.valueOf(checkOut));  // CheckOutDate <= checkOut
             
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     int count = rs.getInt(1);
-                    return count == 0; // Available nếu không có booking nào overlap
+                    boolean available = count == 0;
+                    System.out.println("📅 Listing " + listingId + " check " + checkIn + " to " + checkOut + 
+                                      ": " + count + " conflicting bookings → " + (available ? "AVAILABLE" : "OCCUPIED"));
+                    return available;
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            System.err.println("❌ Error checking date availability: " + e.getMessage());
         }
         return false; // Mặc định không available nếu có lỗi
     }

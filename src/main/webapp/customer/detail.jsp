@@ -1,7 +1,8 @@
-<%@ page import="listingDAO.ListingDAO, listingDAO.ListingImageDAO, model.Listing, model.User, reviewDAO.ReviewDAO, model.Review, java.util.List" %>
+<%@ page import="listingDAO.ListingDAO, listingDAO.ListingImageDAO, model.Listing, model.User, reviewDAO.ReviewDAO, model.Review, userDAO.UserDAO, java.util.List" %>
 <%
     String idParam = request.getParameter("id");
     Listing listing = null;
+    User host = null; // Thông tin host
     java.util.List<String> images = new java.util.ArrayList<>();
     List<Review> reviews = new java.util.ArrayList<>();
     double averageRating = 0.0;
@@ -17,8 +18,19 @@
         ListingDAO dao = new ListingDAO();
         ListingImageDAO imgDao = new ListingImageDAO();
         ReviewDAO reviewDao = new ReviewDAO();
+        UserDAO userDao = new UserDAO();
         
         listing = dao.getListingById(listingId);
+        
+        // Lấy thông tin host
+        if (listing != null && listing.getHostID() > 0) {
+            try {
+                host = userDao.findById(listing.getHostID());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
         images = imgDao.getImagesForListing(listingId);
         reviews = reviewDao.getReviewsByListing(listingId);
         averageRating = reviewDao.getAverageRating(listingId);
@@ -580,14 +592,21 @@
             <div class="host-info">
                 <h3><i class="bi bi-person-circle"></i> Thông tin Host</h3>
                 <div class="d-flex align-items-center">
-                    <div class="host-avatar">
-                        H
-                    </div>
+                    <% if (host != null && host.getProfileImage() != null && !host.getProfileImage().isEmpty()) { %>
+                        <img src="<%= host.getProfileImage() %>" alt="Host Avatar" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px;">
+                    <% } else { %>
+                        <div class="host-avatar">
+                            <%= host != null && host.getFullName() != null && !host.getFullName().isEmpty() ? host.getFullName().charAt(0) : "H" %>
+                        </div>
+                    <% } %>
                     <div>
-                        <div class="host-name">GO2BNB Host Team</div>
-                        <div class="host-title">Chủ nhà siêu cấp • Đã tham gia từ 2020</div>
+                        <div class="host-name"><%= host != null ? host.getFullName() : "GO2BNB Host Team" %></div>
+                        <div class="host-title">
+                            Chủ nhà siêu cấp • Đã tham gia từ <%= host != null && host.getCreatedAt() != null ? 
+                                new java.text.SimpleDateFormat("yyyy").format(host.getCreatedAt()) : "2020" %>
+                        </div>
                         <div class="text-muted">
-                            <i class="bi bi-star-fill text-warning"></i> 4.9 • 127 đánh giá • 
+                            <!-- <i class="bi bi-star-fill text-warning"></i> <%= String.format("%.1f", averageRating) %> • <%= reviews.size() %> đánh giá •  -->
                             <i class="bi bi-patch-check-fill text-primary"></i> Đã xác minh danh tính
                         </div>
                     </div>

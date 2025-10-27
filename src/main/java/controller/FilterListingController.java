@@ -7,6 +7,8 @@ import listingDAO.ListingDAO;
 import model.Listing;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 /**
@@ -32,10 +34,14 @@ public class FilterListingController extends HttpServlet {
         String maxPriceStr = request.getParameter("maxPrice");
         String city = request.getParameter("city");
         String guestsStr = request.getParameter("guests");
+        String checkInStr = request.getParameter("checkin");
+        String checkOutStr = request.getParameter("checkout");
 
         BigDecimal minPrice = null;
         BigDecimal maxPrice = null;
         Integer guests = null;
+        LocalDate checkInDate = null;
+        LocalDate checkOutDate = null;
 
         // Parse parameters
         try {
@@ -52,6 +58,24 @@ public class FilterListingController extends HttpServlet {
             System.err.println("❌ Error parsing filter parameters: " + e.getMessage());
         }
 
+        // Parse check-in date
+        try {
+            if (checkInStr != null && !checkInStr.trim().isEmpty()) {
+                checkInDate = LocalDate.parse(checkInStr);
+            }
+        } catch (DateTimeParseException e) {
+            checkInDate = null;
+        }
+
+        // Parse check-out date
+        try {
+            if (checkOutStr != null && !checkOutStr.trim().isEmpty()) {
+                checkOutDate = LocalDate.parse(checkOutStr);
+            }
+        } catch (DateTimeParseException e) {
+            checkOutDate = null;
+        }
+
         // Validate city parameter
         if (city != null && city.trim().isEmpty()) {
             city = null;
@@ -59,6 +83,11 @@ public class FilterListingController extends HttpServlet {
 
         // Gọi DAO để lọc listings
         List<Listing> filteredListings = listingDAO.filterListings(minPrice, maxPrice, city, guests);
+        
+        // ✅ Lọc theo ngày nếu có
+        if (checkInDate != null && checkOutDate != null) {
+            filteredListings = listingDAO.filterAvailableListings(filteredListings, checkInDate, checkOutDate);
+        }
 
         // Set attributes để hiển thị trong JSP
         request.setAttribute("listings", filteredListings);
@@ -67,10 +96,17 @@ public class FilterListingController extends HttpServlet {
         request.setAttribute("maxPrice", maxPrice);
         request.setAttribute("city", city);
         request.setAttribute("guests", guests);
+        if (checkInDate != null) {
+            request.setAttribute("checkInDate", checkInDate);
+        }
+        if (checkOutDate != null) {
+            request.setAttribute("checkOutDate", checkOutDate);
+        }
 
         // Log
         System.out.println("🔍 Filter - minPrice=" + minPrice + ", maxPrice=" + maxPrice + 
                           ", city=" + city + ", guests=" + guests + 
+                          ", check-in=" + checkInDate + ", check-out=" + checkOutDate +
                           " → Found " + filteredListings.size() + " listings");
 
         // Forward to home.jsp để hiển thị kết quả
