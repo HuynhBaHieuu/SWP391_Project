@@ -8,6 +8,7 @@ import model.Listing;
 import model.Payment;
 import model.User;
 import service.VNPayService;
+import service.NotificationService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -20,7 +21,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 
 @WebServlet("/booking")
 public class BookingController extends HttpServlet {
@@ -29,6 +29,7 @@ public class BookingController extends HttpServlet {
     private ListingDAO listingDAO = new ListingDAO();
     private PaymentDAO paymentDAO = new PaymentDAO();
     private VNPayService vnpayService = new VNPayService();
+    private NotificationService notificationService = new NotificationService();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -187,6 +188,33 @@ public class BookingController extends HttpServlet {
             System.out.println("Attempting to create booking...");
             if (bookingDAO.createBooking(booking)) {
                 System.out.println("Booking created successfully with ID: " + booking.getBookingID());
+                
+                // Tạo thông báo cho Guest (người đặt phòng)
+                try {
+                    notificationService.createNotification(
+                        user.getUserID(),
+                        "Đặt phòng thành công",
+                        "Bạn đã đặt phòng \"" + listing.getTitle() + "\" thành công từ ngày " + checkInDate + " đến " + checkOutDate +
+                        ". Vui lòng hoàn tất thanh toán để xác nhận đặt phòng.",
+                        "Booking"
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                
+                // Tạo thông báo cho Host (chủ nhà)
+                try {
+                    notificationService.createNotification(
+                        listing.getHostID(),
+                        "Có đặt phòng mới",
+                        "Bạn có một đặt phòng mới cho \"" + listing.getTitle() + "\" " +
+                        "từ ngày " + checkInDate + " đến " + checkOutDate + ".",
+                        "Booking"
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                
                 // Redirect to payment
                 response.sendRedirect("booking?action=payment&bookingId=" + booking.getBookingID());
             } else {
