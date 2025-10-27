@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="java.sql.*" %>
+<%@ page import="java.util.*" %>
 <%@ page import="dao.DBConnection" %>
 <!DOCTYPE html>
 <html>
@@ -23,7 +24,12 @@
             ResultSet rs = null;
 
             // Lưu trữ dữ liệu dịch vụ theo danh mục
-            java.util.Map<String, java.util.List<java.util.Map<String, Object>>> servicesByCategory = new java.util.HashMap<>();
+            java.util.Map<String, java.util.List<java.util.Map<String, Object>>> servicesByCategory = 
+                (java.util.Map<String, java.util.List<java.util.Map<String, Object>>>) request.getAttribute("servicesByCategory");
+            
+            // Nếu không có data từ controller (trang load bình thường), query từ database
+            if (servicesByCategory == null) {
+                servicesByCategory = new java.util.HashMap<>();
 
             try {
                 conn = DBConnection.getConnection();
@@ -138,11 +144,26 @@
                     out.println("<!-- Error closing connection: " + e.getMessage() + " -->");
                 }
             }
+            } // End if servicesByCategory == null
         %>
 
         <%@ include file="design/header.jsp" %>
         <main>
+            <% 
+                // Hiển thị thông báo search nếu có keyword
+                String searchKeyword = (String) request.getAttribute("keyword");
+                if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            %>
+            <div class="search-result-header" style="text-align: center; margin: 30px auto; padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 16px; max-width: 800px;">
+                <h2 style="font-size: 28px; font-weight: 700; color: #222; margin-bottom: 15px;">
+                    <i class="bi bi-search text-danger"></i>
+                    Kết quả tìm kiếm: "<span class="text-danger"><%= searchKeyword %></span>"
+                </h2>
+                <p style="font-size: 16px; color: #666;">Tìm thấy <%= servicesByCategory.values().stream().mapToInt(List::size).sum() %> dịch vụ</p>
+            </div>
             <%
+                }
+                
                 // Hiển thị dịch vụ theo từng danh mục
                 int categoryIndex = 0;
                 for (java.util.Map.Entry<String, java.util.List<java.util.Map<String, Object>>> entry : servicesByCategory.entrySet()) {
