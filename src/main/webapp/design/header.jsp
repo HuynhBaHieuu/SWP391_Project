@@ -574,7 +574,7 @@
             <div class="header-bottom-wrapper">
                 <div class="header-bottom-container">
                     <div class="header-bottom"> 
-                        <form action="${pageContext.request.contextPath}/search" method="get" class="search-form">
+                        <form id="searchForm" action="${pageContext.request.contextPath}/search" method="get" class="search-form">
                             <div class="search-field" style="width:220px;">
                                 <div class="each-search-filter">
                                     <div class="search-filter" data-i18n="header.search.location_label">Địa điểm</div>
@@ -816,6 +816,27 @@
                 filterDropdown.style.display = 'none';
                 filterOverlay.classList.remove('show');
             }
+        });
+
+        // ===== SMART SEARCH - Tự động search theo trang hiện tại =====
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchForm = document.getElementById('searchForm');
+            const currentPath = window.location.pathname;
+            const contextPath = '<%= request.getContextPath()%>';
+            
+            // Xác định endpoint search dựa trên trang hiện tại
+            if (currentPath.includes('/experiences')) {
+                // Nếu đang ở trang Trải nghiệm
+                searchForm.action = contextPath + '/search-experiences';
+            } else if (currentPath.includes('/services')) {
+                // Nếu đang ở trang Dịch vụ
+                searchForm.action = contextPath + '/search-services';
+            } else {
+                // Mặc định: trang Home (Nơi lưu trú)
+                searchForm.action = contextPath + '/search';
+            }
+            
+            console.log('Search form action set to:', searchForm.action);
         });
 
         // Load filter values from URL parameters on page load

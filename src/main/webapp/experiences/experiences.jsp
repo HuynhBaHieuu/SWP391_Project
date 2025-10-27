@@ -23,6 +23,17 @@
         <%@ include file="/design/header.jsp" %>
 
         <main class="xp-main">
+            <!-- Search Result Header -->
+            <c:if test="${isSearchResult and not empty keyword}">
+                <div class="search-result-header" style="text-align: center; margin: 30px auto; padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 16px; max-width: 800px;">
+                    <h2 style="font-size: 28px; font-weight: 700; color: #222; margin-bottom: 15px;">
+                        <i class="bi bi-search text-danger"></i>
+                        Kết quả tìm kiếm: "<span class="text-danger">${keyword}</span>"
+                    </h2>
+                    <p style="font-size: 16px; color: #666;">Tìm thấy ${totalResults} trải nghiệm</p>
+                </div>
+            </c:if>
+            
             <!-- GO2BNB Original -->
             <c:if test="${not empty originalExperiences}">
                 <section class="xp-row">

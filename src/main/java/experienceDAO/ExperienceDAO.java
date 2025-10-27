@@ -273,6 +273,45 @@ public class ExperienceDAO {
     }
 
     /**
+     * Tìm kiếm experiences theo keyword
+     */
+    public List<Experience> searchExperiences(String keyword) {
+        List<Experience> experiences = new ArrayList<>();
+        String sql = "SELECT * FROM Experience " +
+                    "WHERE status = 'active' " +
+                    "AND (title LIKE ? OR location LIKE ? OR category LIKE ?) " +
+                    "ORDER BY category, display_order";
+        
+        System.out.println("🔎 ExperienceDAO - searchExperiences(keyword='" + keyword + "')");
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            stmt.setString(3, searchPattern);
+            
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Experience exp = mapResultSetToExperience(rs);
+                experiences.add(exp);
+                System.out.println("  Found: [" + exp.getCategory() + "] " + exp.getTitle());
+            }
+            
+            System.out.println("📈 Total search results: " + experiences.size());
+            rs.close();
+            
+        } catch (SQLException e) {
+            System.err.println("❌ Search Error: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error searching experiences", e);
+            e.printStackTrace();
+        }
+        return experiences;
+    }
+
+    /**
      * Helper method: Map ResultSet sang Experience object
      */
     private Experience mapResultSetToExperience(ResultSet rs) throws SQLException {
