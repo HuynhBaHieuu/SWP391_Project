@@ -9,8 +9,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import paymentDAO.BookingDAO;
 import com.google.gson.Gson;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import model.Booking;
+import model.BookingDetail;
+import service.NotificationService;
 
 @WebServlet("/admin/bookings")
 public class AdminBookingController extends HttpServlet {
@@ -40,11 +44,48 @@ public class AdminBookingController extends HttpServlet {
                 int bookingId = Integer.parseInt(request.getParameter("bookingId"));
                 String status = request.getParameter("status");
                 
+                NotificationService notificationService = new NotificationService();
+                BookingDetail bookingDetail = bookingDAO.getBookingDetailByBookingId(bookingId);
+                Booking booking = bookingDAO.getBookingById(bookingId);
+                
                 boolean success = bookingDAO.updateBookingStatus(bookingId, status);
                 
                 if (success) {
                     result.put("success", true);
                     result.put("message", "Cập nhật trạng thái đặt phòng thành công!");
+                    // Tạo thông báo 
+                    if (bookingDetail != null) {
+                        String title = "";
+                        String message = "";
+
+                        switch (status) {
+                            case "Completed":
+                                title = "Đặt phòng của bạn đã được xác nhận";
+                                message = "Cảm ơn bạn đã đặt phòng \"" + bookingDetail.getListingTitle() + "\" của host "+ bookingDetail.getHostName()
+                                        + ". Hy vọng bạn đã có trải nghiệm tuyệt vời! Hãy để lại đánh giá cho chủ nhà nhé.";
+                                break;
+                            case "Failed":
+                                title = "Đặt phòng của bạn đã bị hủy bỏ";
+                                message = "Đặt phòng \"" + bookingDetail.getListingTitle() + "\" của bạn đã bị hủy. "
+                                        + "Nếu có thắc mắc, vui lòng liên hệ với chủ nhà hoặc bộ phận hỗ trợ.";
+                                break;
+                            default:
+                                title = "Cập nhật trạng thái đặt phòng của bạn";
+                                message = "Trạng thái đặt phòng \"" + bookingDetail.getListingTitle() + "\" đã được cập nhật sang: " + status + " thành công.";
+                                break;
+                        }
+
+                        try {
+                            notificationService.createNotification(
+                                    booking.getGuestID(),
+                                    title,
+                                    message,
+                                    "Booking"
+                            );
+                        } catch (SQLException ne) {
+                            ne.printStackTrace(); 
+                        }
+                    }
                 } else {
                     result.put("success", false);
                     result.put("message", "Không thể cập nhật trạng thái đặt phòng. Vui lòng thử lại.");

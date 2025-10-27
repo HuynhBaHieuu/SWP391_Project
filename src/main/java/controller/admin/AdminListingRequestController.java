@@ -18,7 +18,9 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import listingDAO.ListingDAO;
+import model.Listing;
 import model.User;
+import service.NotificationService;
 
 /**
  *
@@ -58,13 +60,29 @@ public class AdminListingRequestController extends HttpServlet {
         try {
             ListingDAO listingDAO = new ListingDAO();
             String status;
-
+            NotificationService notificationService = new NotificationService();
+            // lấy hostID vs listing
+            int hostId = listingDAO.getHostIdByRequestId(requestId);
+            Listing listing = new ListingDAO().getListingById(new ListingDAO().getListingIdByRequestId(requestId));
             if ("approve".equalsIgnoreCase(action)) {
                 status = "Approved";
                 boolean success = listingDAO.createOrRejectListingRequest(requestId, status);
                 if (success && session != null) {
                     request.setAttribute("message", "Đã duyệt yêu cầu bài đăng thành công.");
-                    request.setAttribute("type", "success");
+                    request.setAttribute("type", "success");                              
+                        // Tạo thông báo cho user
+                        try {
+                            notificationService.createNotification(
+                                hostId,
+                                "Bài đăng của bạn đã được duyệt",
+                                "Chúc mừng! Bài đăng có tiêu đề \"" + listing.getTitle() + "\" của bạn đã được phê duyệt. " +
+                                "Bạn có thể xem bài đăng của mình trên trang chủ ngay bây giờ.",
+                                "ListingRequest"
+                            );
+                        } catch (SQLException ne) {
+                            // Log notification error but don't fail the main operation
+                            ne.printStackTrace();
+                        }
                 } else if (session != null) {
                     request.setAttribute("message", "Không thể duyệt yêu cầu bài đăng.");
                     request.setAttribute("type", "error");
@@ -77,6 +95,19 @@ public class AdminListingRequestController extends HttpServlet {
                 if (success && session != null) {
                     request.setAttribute("message", "Đã từ chối yêu cầu duyệt bài đăng.");
                     request.setAttribute("type", "error");
+                    // Tạo thông báo cho user
+                        try {
+                            notificationService.createNotification(
+                                hostId,
+                                "Bài đăng của bạn đã bị từ chối",
+                                "Rất tiếc! Bài đăng có tiêu đề \"" + listing.getTitle() + "\" của bạn chưa được phê duyệt. " +
+                                "Vui lòng kiểm tra lại nội dung hoặc liên hệ với quản trị viên để biết thêm chi tiết.",
+                                "ListingRequest"
+                            );
+                        } catch (SQLException ne) {
+                            // Log notification error but don't fail the main operation
+                            ne.printStackTrace();
+                        }
                 } else if (session != null) {
                     request.setAttribute("message", "Không thể từ chối yêu cầu duyệt bài đăng.");
                     request.setAttribute("type", "error");
