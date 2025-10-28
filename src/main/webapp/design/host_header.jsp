@@ -1,11 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@page import="model.User"%>
 <%
-    User currentUser = (User) session.getAttribute("user");
+    // Get currentUser from session - reuse the variable from including page
+    User hostUser = (User) session.getAttribute("user");
     String hostImagePath = null;
 
-    if (currentUser != null && currentUser.getProfileImage() != null) {
-        String profileImage = currentUser.getProfileImage();
+    if (hostUser != null && hostUser.getProfileImage() != null) {
+        String profileImage = hostUser.getProfileImage();
         if (profileImage.startsWith("http")) {
             // Ảnh từ Google (đường dẫn tuyệt đối)
             hostImagePath = profileImage;
@@ -35,7 +36,7 @@
     <div class="host-header-right">
         <a href="${pageContext.request.contextPath}/host/switch-to-guest" class="switch-mode" data-i18n="header.host.switch_to_guest">Chuyển sang chế độ du lịch</a>
         <div class="avatar">
-            <img src="<%= hostImagePath %>" alt="Host Avatar" class="avatar-img">
+            <img src="<%= hostImagePath%>" alt="Host Avatar" class="avatar-img">
         </div>
     </div>
 </div>
