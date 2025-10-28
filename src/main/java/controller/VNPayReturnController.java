@@ -2,10 +2,13 @@ package controller;
 
 import paymentDAO.BookingDAO;
 import paymentDAO.PaymentDAO;
+import listingDAO.ListingDAO;
 import model.Booking;
+import model.Listing;
 import model.Payment;
 import model.User;
 import service.VNPayService;
+import service.NotificationService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -22,7 +25,9 @@ public class VNPayReturnController extends HttpServlet {
     
     private BookingDAO bookingDAO = new BookingDAO();
     private PaymentDAO paymentDAO = new PaymentDAO();
+    private ListingDAO listingDAO = new ListingDAO();
     private VNPayService vnpayService = new VNPayService();
+    private NotificationService notificationService = new NotificationService();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -96,6 +101,39 @@ public class VNPayReturnController extends HttpServlet {
                 Booking booking = bookingDAO.getBookingById(payment.getBookingID());
                 if (booking != null) {
                     bookingDAO.confirmBooking(booking.getBookingID());
+                    
+                    // Lấy thông tin listing
+                    Listing listing = listingDAO.getListingById(booking.getListingID());
+                    
+                    // Tạo thông báo cho Guest (người đặt phòng)
+                    try {
+                        notificationService.createNotification(
+                            booking.getGuestID(),
+                            "Thanh toán thành công",
+                            "Thanh toán cho đặt phòng \"" + (listing != null ? listing.getTitle() : "") + "\" " +
+                            "đã được xác nhận. Chuyến đi của bạn từ " + booking.getCheckInDate() + 
+                            " đến " + booking.getCheckOutDate() + " đã được đặt thành công!",
+                            "Payment"
+                        );
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    
+                    // Tạo thông báo cho Host (chủ nhà)
+                    if (listing != null) {
+                        try {
+                            notificationService.createNotification(
+                                listing.getHostID(),
+                                "Xác nhận thanh toán từ khách",
+                                "Khách hàng đã thanh toán thành công cho đặt phòng \"" + listing.getTitle() + "\" " +
+                                "từ " + booking.getCheckInDate() + " đến " + booking.getCheckOutDate() + ". " +
+                                "Vui lòng chuẩn bị đón khách.",
+                                "Payment"
+                            );
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
                 
                 request.setAttribute("success", "Thanh toán thành công!");
@@ -126,6 +164,47 @@ public class VNPayReturnController extends HttpServlet {
         if (paymentId != null) {
             // Update payment status to failed
             paymentDAO.updatePaymentStatus(paymentId, "Failed");
+            
+            // Lấy thông tin payment và booking
+            try {
+                Payment payment = paymentDAO.getPaymentById(paymentId);
+                if (payment != null) {
+                    Booking booking = bookingDAO.getBookingById(payment.getBookingID());
+                    if (booking != null) {
+                        Listing listing = listingDAO.getListingById(booking.getListingID());
+                        
+                        // Tạo thông báo cho Guest về thanh toán thất bại
+                        try {
+                            notificationService.createNotification(
+                                booking.getGuestID(),
+                                "Thanh toán thất bại",
+                                "Thanh toán cho đặt phòng \"" + (listing != null ? listing.getTitle() : "") + "\" " + 
+                                " từ " + booking.getCheckInDate() + " đến " + booking.getCheckOutDate() +
+                                " không thành công. Vui lòng thử lại hoặc liên hệ hỗ trợ.",
+                                "Payment"
+                            );
+                            
+                            // Thông báo cho Host về thanh toán thất bại
+                            if (listing != null) {
+                                notificationService.createNotification(
+                                    listing.getHostID(),
+                                    "Thanh toán thất bại từ khách",
+                                    "Thanh toán cho đặt phòng \"" + listing.getTitle() + "\" " +
+                                    " từ " + booking.getCheckInDate() + " đến " + booking.getCheckOutDate() +        
+                                    " không thành công. " +
+                                    "Đặt phòng có thể bị hủy nếu khách không thanh toán lại.",
+                                    "Payment"
+                                );
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
             session.removeAttribute("currentPaymentId");
         }
         
