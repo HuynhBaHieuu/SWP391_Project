@@ -82,7 +82,7 @@
                                 <div class="col-md-6">
                                     <p><strong>Tổng tiền:</strong> 
                                         <span class="text-success h5">
-                                            <fmt:formatNumber value="${booking.totalPrice}" type="currency" currencyCode="VND"/>
+                                            <fmt:formatNumber value="${booking.totalPrice}" type="number" maxFractionDigits="0"/> đ
                                         </span>
                                     </p>
                                 </div>
@@ -104,7 +104,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <p><strong>Số tiền:</strong> 
-                                        <fmt:formatNumber value="${payment.amount}" type="currency" currencyCode="VND"/>
+                                        <fmt:formatNumber value="${payment.amount}" type="number" maxFractionDigits="0"/> đ
                                     </p>
                                     <p><strong>Ngày thanh toán:</strong> ${payment.formattedPaymentDate}</p>
                                 </div>
@@ -139,17 +139,14 @@
             <div class="action-buttons">
                 <c:choose>
                     <c:when test="${not empty success}">
-                        <a href="booking?action=list" class="btn btn-primary btn-action">
-                            <i class="fas fa-list"></i> Xem đặt phòng
+                        <a href="${pageContext.request.contextPath}/home" class="btn btn-primary btn-action">
+                            <i class="fas fa-home"></i> Về trang chủ
                         </a>
-                        <a href="booking?action=detail&bookingId=${booking.bookingID}" class="btn btn-outline-primary btn-action">
+                        <a href="${pageContext.request.contextPath}/booking?action=detail&bookingId=${booking.bookingID}" class="btn btn-outline-primary btn-action">
                             <i class="fas fa-info-circle"></i> Chi tiết đặt phòng
                         </a>
                     </c:when>
                     <c:otherwise>
-                        <a href="booking?action=list" class="btn btn-primary btn-action">
-                            <i class="fas fa-list"></i> Xem đặt phòng
-                        </a>
                         <a href="${pageContext.request.contextPath}/home" class="btn btn-outline-primary btn-action">
                             <i class="fas fa-home"></i> Về trang chủ
                         </a>

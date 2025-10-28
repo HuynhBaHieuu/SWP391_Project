@@ -93,32 +93,24 @@ img{
     display:flex;
     gap:36px
 }
-.host-header-nav .nav-link{
-    border-bottom:none!important
-}
 .nav-link{
     position:relative;
-    color:#666;
-    font-size:16px;
-    font-weight:500;
-    padding:8px 0
+    color:#6b6b6b;
+    font-size:17px;
+    font-weight:bold;
+    padding:8px 0;
+    transition: color 0.3s ease;
+    text-decoration: none;
 }
 .nav-link:hover{
-    color:var(--ink)
+    color:var(--brand);
 }
 .nav-link.active{
-    color:var(--ink);
-    border-bottom:none!important
+    color:#000;
+    border-bottom: 2px solid #000;
 }
 .nav-link.active::after{
-    content:"";
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:-12px;
-    height:2px;
-    background:#000;
-    border-radius:2px
+    display: none;
 }
 
 /* Container */

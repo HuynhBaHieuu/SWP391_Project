@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -69,9 +70,9 @@
                 <i class="fas fa-info-circle"></i> Chi tiết đặt phòng
             </h2>
             <div>
-                <a href="booking?action=list" class="btn btn-outline-secondary">
+                <!-- <a href="booking?action=list" class="btn btn-outline-secondary">
                     <i class="fas fa-list"></i> Danh sách
-                </a>
+                </a>  -->
                 <a href="${pageContext.request.contextPath}/home" class="btn btn-outline-primary">
                     <i class="fas fa-home"></i> Trang chủ
                 </a>
@@ -162,7 +163,7 @@
                         <div class="row">
                             <div class="col-4"><strong>Giá/đêm:</strong></div>
                             <div class="col-8">
-                                <fmt:formatNumber value="${booking.pricePerNight}" type="currency" currencyCode="VND"/>
+                                <fmt:formatNumber value="${booking.pricePerNight}" type="number" maxFractionDigits="0" groupingUsed="true" /> ₫
                             </div>
                         </div>
                     </div>
@@ -172,7 +173,7 @@
                             <div class="col-4"><strong>Tổng tiền:</strong></div>
                             <div class="col-8">
                                 <span class="h5 text-success">
-                                    <fmt:formatNumber value="${booking.totalPrice}" type="currency" currencyCode="VND"/>
+                                    <fmt:formatNumber value="${booking.totalPrice}" type="number" maxFractionDigits="0" groupingUsed="true" /> ₫
                                 </span>
                             </div>
                         </div>
@@ -234,7 +235,7 @@
                         <div class="mb-3">
                             <strong>Số tiền:</strong><br>
                             <span class="h6 text-success">
-                                <fmt:formatNumber value="${payment.amount}" type="currency" currencyCode="VND"/>
+                                <fmt:formatNumber value="${payment.amount}" type="number" maxFractionDigits="0" groupingUsed="true" /> ₫
                             </span>
                         </div>
                         

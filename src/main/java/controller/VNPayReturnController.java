@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.Map;
+import java.time.temporal.ChronoUnit;
 
 @WebServlet("/vnpay-return")
 public class VNPayReturnController extends HttpServlet {
@@ -104,6 +105,23 @@ public class VNPayReturnController extends HttpServlet {
                     
                     // Lấy thông tin listing
                     Listing listing = listingDAO.getListingById(booking.getListingID());
+                    
+                    // Populate booking với thông tin listing
+                    if (listing != null) {
+                        booking.setListingTitle(listing.getTitle());
+                        booking.setListingAddress(listing.getAddress() + ", " + listing.getCity());
+                        booking.setPricePerNight(listing.getPricePerNight());
+                        booking.setListing(listing);
+                        
+                        // Calculate number of nights
+                        if (booking.getCheckInDate() != null && booking.getCheckOutDate() != null) {
+                            long days = ChronoUnit.DAYS.between(
+                                booking.getCheckInDate(), 
+                                booking.getCheckOutDate()
+                            );
+                            booking.setNumberOfNights((int) days);
+                        }
+                    }
                     
                     // Tạo thông báo cho Guest (người đặt phòng)
                     try {

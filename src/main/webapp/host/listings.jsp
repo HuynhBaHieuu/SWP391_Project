@@ -6,6 +6,7 @@
         <meta charset="UTF-8">
         <title>Listings</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css?v=7">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/host-header.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/lang_modal.css">
         <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     </head>

@@ -95,12 +95,13 @@
                 <div class="row">
                     <div class="col-md-2">
                         <c:choose>
-                            <c:when test="${not empty booking.listingTitle}">
-                                <img src="image/placeholder.jpg" class="booking-image" alt="${booking.listingTitle}">
+                            <c:when test="${not empty booking.listing.firstImage}">
+                                <img src="${booking.listing.firstImage}" class="booking-image" alt="${booking.listingTitle}">
                             </c:when>
                             <c:otherwise>
-                                <div class="booking-image bg-light d-flex align-items-center justify-content-center">
-                                    <i class="fas fa-image text-muted"></i>
+                                <div class="booking-image bg-light d-flex align-items-center justify-content-center" style="flex-direction: column;">
+                                    <i class="fas fa-home text-muted mb-1" style="font-size: 24px;"></i>
+                                    <small class="text-muted" style="font-size: 10px; text-align: center; padding: 0 2px;">${booking.listingTitle}</small>
                                 </div>
                             </c:otherwise>
                         </c:choose>
@@ -159,7 +160,7 @@
                         <div class="text-center">
                             <small class="text-muted">Tổng tiền</small>
                             <div class="h5 text-success">
-                                <fmt:formatNumber value="${booking.totalPrice}" type="currency" currencyCode="VND"/>
+                                <fmt:formatNumber value="${booking.totalPrice}" type="number" maxFractionDigits="0"/> đ
                             </div>
                         </div>
                     </div>
@@ -188,12 +189,12 @@
                     </div>
                     
                     <div class="col-md-4 text-end">
-                        <a href="booking?action=detail&bookingId=${booking.bookingID}" class="btn btn-outline-primary btn-sm">
+                        <a href="${pageContext.request.contextPath}/booking?action=detail&bookingId=${booking.bookingID}" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-eye"></i> Chi tiết
                         </a>
                         
                         <c:if test="${userType == 'guest' && booking.status == 'Processing'}">
-                            <a href="booking?action=cancel&bookingId=${booking.bookingID}" 
+                            <a href="${pageContext.request.contextPath}/booking?action=cancel&bookingId=${booking.bookingID}" 
                                class="btn btn-outline-danger btn-sm ms-1"
                                onclick="return confirm('Bạn có chắc muốn hủy đặt phòng này?')">
                                 <i class="fas fa-times"></i> Hủy

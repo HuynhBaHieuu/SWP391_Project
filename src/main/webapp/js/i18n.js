@@ -35,7 +35,8 @@
                         today: {vi: "Hôm nay", en: "Today"},
                         calendar: {vi: "Lịch", en: "Calendar"},
                         listings: {vi: "Bài đăng", en: "Listings"},
-                        inbox: {vi: "Tin nhắn", en: "Inbox"}
+                        inbox: {vi: "Tin nhắn", en: "Inbox"},
+                        bookings: {vi: "Phòng đặt", en: "Bookings"}
                     },
                     switch_to_guest: {vi: "Chuyển sang chế độ du lịch", en: "Switch to guest mode"}
                 },

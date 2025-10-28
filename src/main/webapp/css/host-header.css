@@ -31,7 +31,14 @@
     padding: 8px 0;
     font-size: 17px;
     font-weight: bold;
+    transition: color 0.3s ease;
+    position: relative;
 }
+
+.nav-link:hover {
+    color: #ff385c;
+}
+
 .nav-link.active {
     color: #000;
     border-bottom: 2px solid #000;

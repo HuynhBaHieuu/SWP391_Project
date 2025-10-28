@@ -1,6 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ page import="model.User" %>
+<%
+    User currentUser = (User) session.getAttribute("user");
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -480,9 +485,25 @@
             </div>
             
             <div class="sidebar-section">
-                <div class="section-card" onclick="showSection('type')">
-                    <div class="section-title">Property type</div>
-                    <div class="section-content">Entire home - House</div>
+                <div class="section-card" onclick="showSection('description')">
+                    <div class="section-title">Description</div>
+                    <div class="section-content">${fn:substring(listing.description, 0, 50)}${fn:length(listing.description) > 50 ? '...' : ''}</div>
+                    <span class="section-arrow">></span>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="section-card" onclick="showSection('location')">
+                    <div class="section-title">Location</div>
+                    <div class="section-content">${listing.city}, ${listing.address}</div>
+                    <span class="section-arrow">></span>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="section-card" onclick="showSection('guests')">
+                    <div class="section-title">Guests</div>
+                    <div class="section-content">${listing.maxGuests} guests</div>
                     <span class="section-arrow">></span>
                 </div>
             </div>
@@ -491,15 +512,16 @@
                 <div class="section-card" onclick="showSection('pricing')">
                     <div class="section-title">Pricing</div>
                     <div class="section-content">
-                        <span data-price="${listing.pricePerNight}"></span>
-                        <span data-i18n="host.edit_listing.per_night">/night</span>
+                        <c:set var="price" value="${listing.pricePerNight}" />
+                        <fmt:formatNumber value="${price}" type="number" maxFractionDigits="0" var="formattedPrice" />
+                        ${formattedPrice} ₫ /đêm
                     </div>
                     <span class="section-arrow">></span>
                 </div>
             </div>
             
-            <button class="view-btn" onclick="window.open('${pageContext.request.contextPath}/host/listing/view?id=${listing.listingID}', '_blank')">
-                👁️ View
+            <button class="view-btn" onclick="showPreviewModal()">
+                View
             </button>
         </div>
         
@@ -591,6 +613,25 @@
                 </form>
             </div>
             
+            <!-- Description Form -->
+            <div id="description-content" class="form-content">
+                <h3 class="content-title">Edit description</h3>
+                <form method="post" action="${pageContext.request.contextPath}/host/listing/edit">
+                    <input type="hidden" name="listingId" value="${listing.listingID}">
+                    <input type="hidden" name="section" value="description">
+                    
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description" rows="10" required>${listing.description}</textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="showSection('photos')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+            
             <!-- Pricing Form -->
             <div id="pricing-content" class="form-content">
                 <h3 class="content-title">Edit pricing</h3>
@@ -622,6 +663,153 @@
                     </div>
                 </form>
             </div>
+            
+            <!-- Property Type Form -->
+            <div id="type-content" class="form-content">
+                <h3 class="content-title">Edit property type</h3>
+                <p style="color: #666; margin-bottom: 30px;">Information will be available soon.</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="showSection('photos')">Cancel</button>
+                </div>
+            </div>
+            
+            <!-- Location Form -->
+            <div id="location-content" class="form-content">
+                <h3 class="content-title">Edit location</h3>
+                <form method="post" action="${pageContext.request.contextPath}/host/listing/edit">
+                    <input type="hidden" name="listingId" value="${listing.listingID}">
+                    <input type="hidden" name="section" value="location">
+                    
+                    <div class="form-group">
+                        <label for="address">Address:</label>
+                        <input type="text" id="address" name="address" value="${listing.address}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="city">City:</label>
+                        <input type="text" id="city" name="city" value="${listing.city}" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="showSection('photos')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Guests Form -->
+            <div id="guests-content" class="form-content">
+                <h3 class="content-title">Edit guests</h3>
+                <form method="post" action="${pageContext.request.contextPath}/host/listing/edit">
+                    <input type="hidden" name="listingId" value="${listing.listingID}">
+                    <input type="hidden" name="section" value="guests">
+                    
+                    <div class="form-group">
+                        <label for="maxGuests">Maximum guests:</label>
+                        <input type="number" id="maxGuests" name="maxGuests" 
+                               value="${listing.maxGuests}" min="1" max="50" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="showSection('photos')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Guest Guide Content -->
+            <div id="guide-content" class="form-content" style="max-width: 700px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h3 class="content-title" style="margin: 0;">Hướng dẫn khách khi đến</h3>
+                    <button id="save-guide-btn" class="btn btn-primary" style="background: #000; color: white; border: none; padding: 8px 16px; border-radius: 6px;" onclick="saveGuestGuide()">Lưu</button>
+                </div>
+                
+                <p style="color: #666; margin-bottom: 30px; line-height: 1.6;">
+                    Cung cấp thông tin chi tiết để khách dễ dàng tìm và vào chỗ ở của bạn. Thông tin này sẽ được gửi tự động cho khách sau khi họ xác nhận đặt phòng.
+                </p>
+                
+                <div class="guide-section" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #333; display: flex; align-items: center; gap: 10px;">
+                        📍 Địa chỉ và cách di chuyển
+                    </h4>
+                    <div class="form-group">
+                        <label for="full-address">Địa chỉ đầy đủ:</label>
+                        <textarea id="full-address" rows="3" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" placeholder="VD: Số 123, Ngõ 45, Đường XYZ, Phường ABC, Quận 1, TP. Hồ Chí Minh">${listing.address}</textarea>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label for="arrival-instructions">Hướng dẫn tìm đường:</label>
+                        <textarea id="arrival-instructions" rows="4" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" placeholder="VD: Đi vào cổng lớn màu xanh, sau đó rẽ phải, đi thẳng khoảng 50m sẽ thấy nhà số 123 ở bên phải. Có thể gửi xe máy tại khu vực..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="guide-section" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #333; display: flex; align-items: center; gap: 10px;">
+                        🚪 Cách vào và lấy khóa
+                    </h4>
+                    <div class="form-group">
+                        <label for="check-in-method">Phương thức nhận khóa:</label>
+                        <select id="check-in-method" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" onchange="updateCheckInDetails()">
+                            <option value="meet">Chủ nhà gặp trực tiếp</option>
+                            <option value="smart-lock">Ổ khóa thông minh (mã PIN)</option>
+                            <option value="key-box">Hộp khóa an toàn</option>
+                            <option value="concierge">Tiếp tân / Bảo vệ</option>
+                            <option value="other">Khác</option>
+                        </select>
+                    </div>
+                    <div id="check-in-details" class="form-group" style="margin-top: 15px;">
+                        <label for="check-in-info">Chi tiết (PIN, mật khẩu, vị trí hộp khóa...):</label>
+                        <textarea id="check-in-info" rows="3" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" placeholder="Nhập thông tin chi tiết..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="guide-section" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #333; display: flex; align-items: center; gap: 10px;">
+                        ⏰ Giờ check-in / check-out
+                    </h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label for="check-in-time">Giờ check-in:</label>
+                            <select id="check-in-time" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                                <option value="flexible">Linh hoạt</option>
+                                <option value="14:00" selected>14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="custom">Giờ khác</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="check-out-time">Giờ check-out:</label>
+                            <select id="check-out-time" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                                <option value="flexible">Linh hoạt</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="12:00" selected>12:00</option>
+                                <option value="custom">Giờ khác</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="guide-section" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #333; display: flex; align-items: center; gap: 10px;">
+                        🏠 Thông tin chỗ ở
+                    </h4>
+                    <div class="form-group">
+                        <label for="house-rules">Quy tắc của chỗ ở:</label>
+                        <textarea id="house-rules" rows="4" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" placeholder="VD: Không hút thuốc, không tiếng ồn sau 22h, không tiệc tùng..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="guide-section" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #333; display: flex; align-items: center; gap: 10px;">
+                        📞 Liên hệ trong trường hợp khẩn cấp
+                    </h4>
+                    <div class="form-group">
+                        <label for="emergency-contact">Số điện thoại:</label>
+                        <input type="tel" id="emergency-contact" value="<%= currentUser != null && currentUser.getPhoneNumber() != null ? currentUser.getPhoneNumber() : "" %>" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" placeholder="Nhập số điện thoại liên hệ">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -631,12 +819,32 @@
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             // Add active class to clicked tab
             event.target.classList.add('active');
+            
+            // Hide all content sections
+            document.querySelectorAll('.content-card, .form-content').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Show content based on selected tab
+            if (tab === 'property') {
+                // Show photos section by default when viewing property tab
+                document.getElementById('photos-content').style.display = 'block';
+            } else if (tab === 'guide') {
+                // Show guest guide content
+                document.getElementById('guide-content').style.display = 'block';
+            }
         }
         
         function showSection(section) {
             // Hide all content
             document.querySelectorAll('.content-card, .form-content').forEach(el => {
                 el.style.display = 'none';
+            });
+            
+            // Remove active state from all section cards
+            document.querySelectorAll('.section-card').forEach(card => {
+                card.style.border = '1px solid #e0e0e0';
+                card.style.background = 'white';
             });
             
             // Show selected content
@@ -973,6 +1181,81 @@
                 alert('Error deleting photo');
             });
         }
+        
+        // Guest Guide functions
+        function updateCheckInDetails() {
+            const method = document.getElementById('check-in-method').value;
+            const detailsLabel = document.querySelector('#check-in-details label');
+            const detailsTextarea = document.getElementById('check-in-info');
+            
+            switch(method) {
+                case 'meet':
+                    detailsLabel.textContent = 'Thông tin gặp mặt:';
+                    detailsTextarea.placeholder = 'VD: Liên hệ trước khi đến 30 phút qua số điện thoại...';
+                    break;
+                case 'smart-lock':
+                    detailsLabel.textContent = 'Mã PIN hoặc mật khẩu:';
+                    detailsTextarea.placeholder = 'VD: Mã PIN: 1234, hoặc quét ứng dụng...';
+                    break;
+                case 'key-box':
+                    detailsLabel.textContent = 'Vị trí và mã hộp khóa:';
+                    detailsTextarea.placeholder = 'VD: Hộp khóa màu đỏ ở bên phải cửa chính, mã: #5678';
+                    break;
+                case 'concierge':
+                    detailsLabel.textContent = 'Thông tin tiếp tân:';
+                    detailsTextarea.placeholder = 'VD: Đến quầy lễ tân, báo tên và mã đặt phòng...';
+                    break;
+                default:
+                    detailsLabel.textContent = 'Chi tiết:';
+                    detailsTextarea.placeholder = 'Nhập thông tin chi tiết...';
+            }
+        }
+        
+        function saveGuestGuide() {
+            const guideData = {
+                listingId: ${listing.listingID},
+                fullAddress: document.getElementById('full-address').value,
+                arrivalInstructions: document.getElementById('arrival-instructions').value,
+                checkInMethod: document.getElementById('check-in-method').value,
+                checkInInfo: document.getElementById('check-in-info').value,
+                checkInTime: document.getElementById('check-in-time').value,
+                checkOutTime: document.getElementById('check-out-time').value,
+                houseRules: document.getElementById('house-rules').value,
+                emergencyContact: document.getElementById('emergency-contact').value
+            };
+            
+            // Show loading state
+            const saveBtn = document.getElementById('save-guide-btn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Đang lưu...';
+            saveBtn.disabled = true;
+            
+            // Send data to server (you'll need to create this endpoint)
+            fetch('${pageContext.request.contextPath}/host/listing/save-guide', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(guideData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Đã lưu hướng dẫn khách thành công!');
+                    showToast('Đã lưu thành công', 'success');
+                } else {
+                    throw new Error(data.message || 'Không thể lưu thông tin');
+                }
+            })
+            .catch(error => {
+                console.error('Save guide error:', error);
+                alert('Lỗi khi lưu: ' + error.message);
+            })
+            .finally(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            });
+        }
     </script>
     
     <!-- Language Selector Button -->
@@ -1004,6 +1287,92 @@
                     originalSetLang.call(this, lang);
                     updateLangButton();
                 };
+            }
+        });
+    </script>
+    
+    <!-- Preview Modal -->
+    <div id="previewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; overflow-y: auto;">
+        <div style="max-width: 1200px; margin: 20px auto; background: white; border-radius: 16px; padding: 40px; position: relative;">
+            <button onclick="closePreviewModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 28px; cursor: pointer; color: #666;">&times;</button>
+            
+            <h1 style="font-size: 30px; margin-bottom: 5px; font-weight: 700;">${listing.title}</h1>
+            <div style="color: #666; font-size: 15px; margin-bottom: 20px;">${listing.city}</div>
+            
+            <!-- Gallery -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 250px 250px; gap: 10px; border-radius: 16px; overflow: hidden; margin-bottom: 30px; height: 510px;">
+                <c:choose>
+                    <c:when test="${not empty images}">
+                        <c:forEach var="image" items="${images}" varStatus="status" end="4">
+                            <c:choose>
+                                <c:when test="${status.index == 0}">
+                                    <img src="${image}" style="width: 100%; height: 100%; object-fit: cover; grid-row: span 2;">
+                                </c:when>
+                                <c:when test="${status.index >= 1}">
+                                    <img src="${image}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </c:when>
+                            </c:choose>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise>
+                        <div style="grid-row: span 2; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999;">No images</div>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+            
+            <!-- Price -->
+            <div style="font-size: 26px; font-weight: 600; margin-bottom: 20px;">
+                <c:set var="previewPrice" value="${listing.pricePerNight}" />
+                <fmt:formatNumber value="${previewPrice}" type="number" maxFractionDigits="0" var="formattedPrice2" />
+                ${formattedPrice2} ₫ <span style="font-size: 18px; font-weight: 400;">/ đêm</span>
+            </div>
+            
+            <!-- Description -->
+            <div style="margin-bottom: 30px; line-height: 1.6; color: #333;">
+                ${listing.description}
+            </div>
+            
+            <!-- Details -->
+            <div style="border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; padding: 20px 0; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                    <div>
+                        <strong>📍 Location</strong>
+                        <div style="color: #666; margin-top: 5px;">${listing.address}, ${listing.city}</div>
+                    </div>
+                    <div>
+                        <strong>👥 Guests</strong>
+                        <div style="color: #666; margin-top: 5px;">${listing.maxGuests} guests</div>
+                    </div>
+                    <div>
+                        <strong>💰 Price</strong>
+                        <div style="color: #666; margin-top: 5px;">${formattedPrice2} ₫ / đêm</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="closePreviewModal()" style="padding: 12px 24px; background: #f0f0f0; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Close</button>
+                <a href="${pageContext.request.contextPath}/customer/detail.jsp?id=${listing.listingID}" target="_blank" style="padding: 12px 24px; background: #000; color: white; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; font-weight: 600;">View Full Page</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showPreviewModal() {
+            document.getElementById('previewModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closePreviewModal() {
+            document.getElementById('previewModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('previewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePreviewModal();
             }
         });
     </script>

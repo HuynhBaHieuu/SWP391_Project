@@ -3,7 +3,6 @@ package paymentDAO;
 import model.Booking;
 import model.Payment;
 import dao.DBConnection;
-import dao.DBConnection;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -149,7 +148,7 @@ public class BookingDAO {
     }
     
     public List<Booking> getBookingsByGuestId(int guestId) {
-        String sql = "SELECT b.*, u.FullName as GuestName, l.Title as ListingTitle, l.Address as ListingAddress, l.PricePerNight " +
+        String sql = "SELECT b.*, u.FullName as GuestName, l.Title as ListingTitle, l.Address as ListingAddress, l.City as ListingCity, l.PricePerNight " +
                      "FROM Bookings b " +
                      "LEFT JOIN Users u ON b.GuestID = u.UserID " +
                      "LEFT JOIN Listings l ON b.ListingID = l.ListingID " +
@@ -165,7 +164,18 @@ public class BookingDAO {
             
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    bookings.add(mapResultSetToBooking(rs));
+                    Booking booking = mapResultSetToBooking(rs);
+                    
+                    // Get first image for this listing
+                    int listingId = booking.getListingID();
+                    if (listingId > 0) {
+                        String firstImage = getFirstImageForListing(listingId);
+                        if (firstImage != null && booking.getListing() != null) {
+                            booking.getListing().setFirstImage(firstImage);
+                        }
+                    }
+                    
+                    bookings.add(booking);
                 }
             }
         } catch (SQLException e) {
@@ -175,7 +185,7 @@ public class BookingDAO {
     }
     
     public List<Booking> getBookingsByHostId(int hostId) {
-        String sql = "SELECT b.*, u.FullName as GuestName, l.Title as ListingTitle, l.Address as ListingAddress, l.PricePerNight " +
+        String sql = "SELECT b.*, u.FullName as GuestName, l.Title as ListingTitle, l.Address as ListingAddress, l.City as ListingCity, l.PricePerNight " +
                      "FROM Bookings b " +
                      "LEFT JOIN Users u ON b.GuestID = u.UserID " +
                      "LEFT JOIN Listings l ON b.ListingID = l.ListingID " +
@@ -191,13 +201,41 @@ public class BookingDAO {
             
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    bookings.add(mapResultSetToBooking(rs));
+                    Booking booking = mapResultSetToBooking(rs);
+                    
+                    // Get first image for this listing
+                    int listingId = booking.getListingID();
+                    if (listingId > 0) {
+                        String firstImage = getFirstImageForListing(listingId);
+                        if (firstImage != null && booking.getListing() != null) {
+                            booking.getListing().setFirstImage(firstImage);
+                        }
+                    }
+                    
+                    bookings.add(booking);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return bookings;
+    }
+    
+    private String getFirstImageForListing(int listingId) {
+        String sql = "SELECT TOP 1 ImageUrl FROM ListingImages WHERE ListingID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, listingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("ImageUrl");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
     public boolean updateBookingStatus(int bookingId, String status) {
@@ -249,6 +287,23 @@ public class BookingDAO {
         long nights = java.time.temporal.ChronoUnit.DAYS.between(
             booking.getCheckInDate(), booking.getCheckOutDate());
         booking.setNumberOfNights((int) nights);
+        
+        // Create Listing object
+        Listing listing = new Listing();
+        listing.setListingID(rs.getInt("ListingID"));
+        listing.setTitle(rs.getString("ListingTitle"));
+        listing.setAddress(rs.getString("ListingAddress"));
+        
+        // Try to get city, but handle if it doesn't exist
+        try {
+            int cityIndex = rs.findColumn("ListingCity");
+            listing.setCity(rs.getString(cityIndex));
+        } catch (SQLException e) {
+            // City field not present in some queries - ignore
+        }
+        
+        listing.setPricePerNight(rs.getBigDecimal("PricePerNight"));
+        booking.setListing(listing);
         
         return booking;
     }
