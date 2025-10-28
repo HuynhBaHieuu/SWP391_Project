@@ -83,7 +83,10 @@ public class BookingDAO {
                     booking.setCheckInDate(rs.getDate("CheckInDate").toLocalDate());
                     booking.setCheckOutDate(rs.getDate("CheckOutDate").toLocalDate());
                     bookings.add(booking);
+                    System.out.println("📅 Found booking for listing " + listingId + ": " + 
+                                      booking.getCheckInDate() + " to " + booking.getCheckOutDate());
                 }
+                System.out.println("📅 Total bookings found for listing " + listingId + ": " + bookings.size());
             }
         } catch (SQLException e) {
             e.printStackTrace();
