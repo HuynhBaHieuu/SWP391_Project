@@ -9,7 +9,42 @@
         <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/image/logo.jpg">
         <title>Danh sách yêu thích</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
         <link rel="stylesheet" href="<%= request.getContextPath() %>/css/home.css">
+        <style>
+            .wishlist-item {
+                position: relative;
+                transition: opacity 0.3s ease;
+            }
+            
+            .remove-wishlist-btn {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: white;
+                border: none;
+                border-radius: 50%;
+                width: 35px;
+                height: 35px;
+                cursor: pointer;
+                z-index: 10;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+            
+            .remove-wishlist-btn:hover {
+                background-color: #dc3545;
+                color: white;
+                transform: scale(1.1);
+            }
+            
+            .remove-wishlist-btn i {
+                font-size: 18px;
+            }
+        </style>
     </head>
     <body>
         <%@ include file="../design/header.jsp" %>
@@ -20,11 +55,18 @@
             List<Listing> wishlist = (List<Listing>) request.getAttribute("wishlist");
             if (wishlist != null && !wishlist.isEmpty()) {
         %>
-        <div class="row">
+        <div class="row" id="wishlist-container">
             <% for (Listing l : wishlist) {%>
-            <div class="col-md-3 mb-4 d-flex">
+            <div class="col-md-3 mb-4 d-flex wishlist-item" data-listing-id="<%= l.getListingID()%>">
                 <div class="card h-100 flex-fill border-0 overflow-hidden d-flex flex-column"
                      style="border-radius: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.08); height: 400px;">
+                    
+                    <!-- Nút xóa -->
+                    <button class="remove-wishlist-btn" 
+                            data-listing-id="<%= l.getListingID()%>"
+                            title="Xóa khỏi danh sách yêu thích">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
 
                     <!-- Ảnh vuông, luôn fill toàn bộ vùng -->
                     <div class="w-100" style="aspect-ratio: 1 / 1; overflow: hidden; flex-shrink: 0;">
@@ -53,5 +95,61 @@
         <% }%>
         </main>
         <%@ include file="../design/footer.jsp" %>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Xử lý sự kiện click nút xóa
+                document.querySelectorAll('.remove-wishlist-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const listingId = this.dataset.listingId;
+                        const wishlistItem = this.closest('.wishlist-item');
+                        
+                        // Hiển thị popup xác nhận
+                        if (confirm('Bạn có chắc muốn xóa khỏi danh sách yêu thích?')) {
+                            removeFromWishlist(listingId, wishlistItem);
+                        }
+                    });
+                });
+            });
+            
+            function removeFromWishlist(listingId, wishlistItem) {
+                // Gửi request xóa
+                fetch('${pageContext.request.contextPath}/WishlistServlet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'listingId=' + listingId + '&action=remove'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Hiệu ứng fade out
+                        wishlistItem.style.opacity = '0';
+                        
+                        // Xóa element sau khi fade out
+                        setTimeout(() => {
+                            wishlistItem.remove();
+                            
+                            // Kiểm tra nếu không còn item nào
+                            const container = document.getElementById('wishlist-container');
+                            if (container && container.children.length === 0) {
+                                // Hiển thị thông báo danh sách trống
+                                container.parentElement.innerHTML = '<p>Bạn chưa có danh sách yêu thích nào.</p>';
+                            }
+                        }, 300);
+                    } else {
+                        alert('Có lỗi xảy ra, vui lòng thử lại!');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Có lỗi xảy ra, vui lòng thử lại!');
+                });
+            }
+        </script>
     </body>
 </html>
