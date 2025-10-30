@@ -114,8 +114,8 @@ public class ExperienceDAO {
      * Thêm experience mới
      */
     public boolean insertExperience(Experience experience) {
-        String sql = "INSERT INTO Experience (category, title, location, price, rating, image_url, badge, time_slot, status, display_order) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Experience (category, title, location, price, rating, image_url, badge, time_slot, status, display_order, description, additional_images, video_url, content_sections) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         System.out.println("📝 ExperienceDAO - insertExperience()");
         System.out.println("SQL: " + sql);
@@ -142,6 +142,7 @@ public class ExperienceDAO {
     public boolean updateExperience(Experience experience) {
         String sql = "UPDATE Experience SET category = ?, title = ?, location = ?, price = ?, " +
                     "rating = ?, image_url = ?, badge = ?, time_slot = ?, status = ?, display_order = ?, " +
+                    "description = ?, additional_images = ?, video_url = ?, content_sections = ?, " +
                     "updated_at = GETDATE() WHERE experience_id = ?";
         
         System.out.println("========================================");
@@ -157,7 +158,7 @@ public class ExperienceDAO {
             
             System.out.println("Setting parameters...");
             setExperienceParameters(pstmt, experience);
-            pstmt.setInt(11, experience.getExperienceId());
+            pstmt.setInt(15, experience.getExperienceId());
             System.out.println("Parameters set! Executing update...");
             
             int rowsAffected = pstmt.executeUpdate();
@@ -270,6 +271,10 @@ public class ExperienceDAO {
         pstmt.setString(8, experience.getTimeSlot());
         pstmt.setString(9, experience.getStatus());
         pstmt.setInt(10, experience.getDisplayOrder());
+        pstmt.setString(11, experience.getDescription());
+        pstmt.setString(12, experience.getAdditionalImages());
+        pstmt.setString(13, experience.getVideoUrl());
+        pstmt.setString(14, experience.getContentSections());
     }
 
     /**
@@ -327,6 +332,10 @@ public class ExperienceDAO {
         exp.setTimeSlot(rs.getString("time_slot"));
         exp.setStatus(rs.getString("status"));
         exp.setDisplayOrder(rs.getInt("display_order"));
+        exp.setDescription(rs.getString("description"));
+        exp.setAdditionalImages(rs.getString("additional_images"));
+        exp.setVideoUrl(rs.getString("video_url"));
+        exp.setContentSections(rs.getString("content_sections"));
         exp.setCreatedAt(rs.getTimestamp("created_at"));
         exp.setUpdatedAt(rs.getTimestamp("updated_at"));
         return exp;

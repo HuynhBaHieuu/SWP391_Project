@@ -18,6 +18,10 @@ public class Experience {
     private String timeSlot;        // '07:00', '08:00', etc. (chỉ dùng cho category 'tomorrow')
     private String status;          // 'active', 'inactive'
     private int displayOrder;       // Thứ tự hiển thị trong category
+    private String description;     // Nội dung mô tả chi tiết (blog content)
+    private String additionalImages; // Chuỗi JSON chứa danh sách ảnh phụ
+    private String videoUrl;        // URL video giới thiệu
+    private String contentSections; // JSON chứa các section nội dung phong phú
     private Date createdAt;
     private Date updatedAt;
 
@@ -28,7 +32,9 @@ public class Experience {
     // Constructor đầy đủ
     public Experience(int experienceId, String category, String title, String location, 
                      BigDecimal price, double rating, String imageUrl, String badge, 
-                     String timeSlot, String status, int displayOrder, Date createdAt, Date updatedAt) {
+                     String timeSlot, String status, int displayOrder, String description,
+                     String additionalImages, String videoUrl, String contentSections,
+                     Date createdAt, Date updatedAt) {
         this.experienceId = experienceId;
         this.category = category;
         this.title = title;
@@ -40,6 +46,10 @@ public class Experience {
         this.timeSlot = timeSlot;
         this.status = status;
         this.displayOrder = displayOrder;
+        this.description = description;
+        this.additionalImages = additionalImages;
+        this.videoUrl = videoUrl;
+        this.contentSections = contentSections;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -131,6 +141,38 @@ public class Experience {
 
     public void setDisplayOrder(int displayOrder) {
         this.displayOrder = displayOrder;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getAdditionalImages() {
+        return additionalImages;
+    }
+
+    public void setAdditionalImages(String additionalImages) {
+        this.additionalImages = additionalImages;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    public String getContentSections() {
+        return contentSections;
+    }
+
+    public void setContentSections(String contentSections) {
+        this.contentSections = contentSections;
     }
 
     public Date getCreatedAt() {

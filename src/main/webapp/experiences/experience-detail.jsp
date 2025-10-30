@@ -11,8 +11,8 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="<c:url value='/css/home.css'/>"/>
-    <link rel="stylesheet" href="<c:url value='/css/chatbot.css'/>"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     
     <style>
         * {
@@ -386,7 +386,7 @@
             <div class="main-content">
                 <!-- Location Section -->
                 <div class="section">
-                    <h2 class="section-title">Địa điểm</h2>
+                    <h2 class="section-title" data-i18n="experience_detail.location">Địa điểm</h2>
                     <div class="location-info">
                         <i class="bi bi-geo-alt-fill location-icon"></i>
                         <div>
@@ -425,7 +425,7 @@
                     </div>
                 </div>
 
-                <!-- Description - DYNAMIC cho từng experience -->
+                <!-- Description -->
                 <div class="section">
                     <h2 class="section-title">Giới thiệu về trải nghiệm này</h2>
                     <div class="section-content">
@@ -439,23 +439,18 @@
                             <c:choose>
                                 <c:when test="${experience.category == 'original'}">
                                     Được thiết kế riêng biệt và độc quyền, trải nghiệm này kết hợp nghệ thuật, 
-                                    văn hóa và sự sáng tạo để mang đến những khoảnh khắc khó quên. Bạn sẽ được 
-                                    hướng dẫn bởi chuyên gia trong lĩnh vực và tham gia vào các hoạt động thực hành độc đáo.
+                                    văn hóa và sự sáng tạo để mang đến những khoảnh khắc khó quên.
                                 </c:when>
                                 <c:when test="${experience.category == 'tomorrow'}">
                                     Hãy sẵn sàng cho một ngày phiêu lưu đầy năng lượng với các hoạt động ngoài trời 
-                                    và khám phá thiên nhiên tuyệt vời. Hướng dẫn viên địa phương sẽ đưa bạn đến những 
-                                    địa điểm đẹp nhất và chia sẻ những câu chuyện thú vị về vùng đất này.
+                                    và khám phá thiên nhiên tuyệt vời.
                                 </c:when>
                                 <c:when test="${experience.category == 'food'}">
                                     Đắm mình trong hương vị ẩm thực địa phương với trải nghiệm nấu ăn và thưởng thức 
-                                    đầy cảm hứng. Bạn sẽ học cách chế biến món ăn truyền thống, tìm hiểu về nguyên liệu 
-                                    đặc sản và thưởng thức những món ăn tuyệt vời do chính tay mình làm ra.
+                                    đầy cảm hứng.
                                 </c:when>
                                 <c:when test="${experience.category == 'workshop'}">
-                                    Khơi dậy khả năng sáng tạo của bạn trong workshop thú vị này. Nghệ nhân sẽ hướng dẫn 
-                                    bạn từng bước, chia sẻ bí quyết trong nghề và giúp bạn tạo ra sản phẩm độc đáo mang 
-                                    dấu ấn cá nhân.
+                                    Khơi dậy khả năng sáng tạo của bạn trong workshop thú vị này.
                                 </c:when>
                             </c:choose>
                         </p>
@@ -468,9 +463,39 @@
                                 <li>Trải nghiệm độc đáo được thiết kế riêng cho ${experience.location}</li>
                                 <li>Hướng dẫn viên/Nghệ nhân chuyên nghiệp và nhiệt tình</li>
                                 <li>Nhóm nhỏ (tối đa 10 khách) để đảm bảo chất lượng trải nghiệm</li>
-                                <li>Tương tác trực tiếp và cơ hội học hỏi văn hóa địa phương</li>
-                                <li>Tạo ra kỷ niệm đáng nhớ và có thể mang về sản phẩm tự làm</li>
                             </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Section -->
+                <div class="section">
+                    <h2 class="section-title">Vị trí</h2>
+                    <div class="section-content">
+                        <div class="location-info">
+                            <i class="bi bi-geo-alt-fill location-icon"></i>
+                            <div>
+                                <div style="font-weight: 600; font-size: 16px;" data-i18n="experience_detail.meeting_location">Địa điểm hẹn gặp</div>
+                                <div style="color: #717171; font-size: 14px;">${experience.location}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Google Maps Embed -->
+                        <div style="margin-top: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            <iframe 
+                                src="https://www.google.com/maps?q=${experience.location}&output=embed"
+                                width="100%" 
+                                height="400" 
+                                style="border:0;" 
+                                allowfullscreen="" 
+                                loading="lazy" 
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                        
+                        <div style="margin-top: 12px; padding: 12px; background-color: #F0F8FF; border-radius: 8px; font-size: 14px; color: #0066CC;">
+                            <i class="bi bi-info-circle"></i>
+                            <strong data-i18n="experience_detail.note_label">Lưu ý:</strong> <span data-i18n="experience_detail.note_text">Địa điểm chính xác sẽ được gửi qua email sau khi đặt chỗ thành công.</span>
                         </div>
                     </div>
                 </div>
@@ -612,10 +637,10 @@
             <div class="sidebar">
                 <div class="info-card">
                     <div class="price-info">
-                        <div class="price">
+                        <div class="price" data-price="${experience.price}">
                             <fmt:formatNumber value="${experience.price}" type="number" groupingUsed="true"/>₫
                         </div>
-                        <div class="price-label">/ khách</div>
+                        <div class="price-label" data-i18n="experiences.per_guest">/ khách</div>
                     </div>
 
                     <button class="btn-reserve" onclick="showContactForm()">
@@ -643,7 +668,7 @@
                                 <i class="bi bi-envelope"></i> support@go2bnb.vn
                             </div>
                             <div>
-                                <i class="bi bi-telephone"></i> 1900-xxxx
+                                <i class="bi bi-telephone"></i> 0905033546
                             </div>
                         </div>
                     </div>
@@ -652,12 +677,10 @@
         </div>
     </div>
 
-    <!-- Chatbot -->
-    <jsp:include page="../chatbot/chatbot.jsp"/>
-
     <!-- Scripts -->
     <script src="<c:url value='/js/i18n.js'/>"></script>
-    <script src="<c:url value='/js/chatbot.js'/>"></script>
+    
+    
     
     <script>
         function showContactForm() {
@@ -667,16 +690,16 @@
             
             const formattedPrice = new Intl.NumberFormat('vi-VN').format(expPrice);
             
-            const message = 'Xin chào! Tôi muốn tư vấn về trải nghiệm:\n\n' +
+            const message = I18N.t('experience_detail.contact_message') + ':\n\n' +
                           '📍 ' + expTitle + '\n' +
-                          '💰 Giá: ' + formattedPrice + '₫\n' +
-                          '📌 Địa điểm: ' + expLocation + '\n\n' +
-                          'Vui lòng liên hệ tôi để biết thêm chi tiết và đặt phòng kèm trải nghiệm này.';
+                          '💰 ' + I18N.t('experience_detail.price') + ': ' + formattedPrice + '₫\n' +
+                          '📌 ' + I18N.t('experience_detail.location') + ': ' + expLocation + '\n\n' +
+                          I18N.t('experience_detail.contact_request');
             
             // Copy to clipboard
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(message).then(function() {
-                    alert('✅ Đã copy thông tin!\n\nBạn có thể:\n1. Gửi email đến: support@go2bnb.vn\n2. Gọi hotline: 1900-xxxx\n3. Chat với chúng tôi (góc dưới phải)\n\nThông tin trải nghiệm đã được copy vào clipboard!');
+                    alert('✅ Đã copy thông tin!\n\nBạn có thể:\n1. Gửi email đến: support@go2bnb.vn\n2. Gọi hotline: 0905033546\n3. Chat với chúng tôi (góc dưới phải)\n\nThông tin trải nghiệm đã được copy vào clipboard!');
                 }).catch(function() {
                     showContactInfo();
                 });
@@ -688,7 +711,7 @@
         function showContactInfo() {
             alert('📞 LIÊN HỆ TƯ VẤN\n\n' +
                   '📧 Email: support@go2bnb.vn\n' +
-                  '📱 Hotline: 1900-xxxx\n' +
+                  '📱 Hotline: 0905033546\n' +
                   '💬 Chat trực tuyến (góc dưới phải)\n\n' +
                   'Chúng tôi sẽ tư vấn chi tiết về trải nghiệm và hỗ trợ đặt phòng kèm theo!');
         }

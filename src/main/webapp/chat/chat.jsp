@@ -12,7 +12,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GO2BNB - Tin nhắn</title>
+    <title>GO2BNB - <span data-i18n="chat.title"></span></title>
     <link rel="icon" type="image/jpg" href="${pageContext.request.contextPath}/image/logo.jpg">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/css/home.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -301,9 +301,9 @@
     <div class="chat-container">
         <div class="chat-header position-relative">
             <a href="${pageContext.request.contextPath}/search" class="back-btn">
-                <i class="bi bi-arrow-left"></i> Quay lại
+                <i class="bi bi-arrow-left"></i> <span data-i18n="chat.go_back"></span>
             </a>
-            <h1><i class="bi bi-chat-dots"></i> Tin nhắn</h1>
+            <h1><i class="bi bi-chat-dots"></i> <span data-i18n="chat.title"></span></h1>
             <c:if test="${totalUnreadCount > 0}">
                 <span class="badge bg-danger position-absolute top-0 end-0 m-4">
                     ${totalUnreadCount}
@@ -312,7 +312,7 @@
         </div>
 
         <div class="search-box">
-            <input type="text" class="search-input-message" placeholder="Tìm kiếm cuộc hội thoại..." id="searchInput">
+            <input type="text" class="search-input-message" placeholder="Search conversations..." id="searchInput" data-i18n-placeholder="chat.search_conversations">
         </div>
 
         <div class="chat-content">
@@ -340,10 +340,10 @@
                                         <div class="conversation-title">
                                             <c:choose>
                                                 <c:when test="${currentUser.userID == conversation.guestID}">
-                                                    ${conversation.hostName} (Host)
+                                                    ${conversation.hostName} (<span data-i18n="chat.host"></span>)
                                                 </c:when>
                                                 <c:otherwise>
-                                                    ${conversation.guestName} (Guest)
+                                                    ${conversation.guestName} (<span data-i18n="chat.guest"></span>)
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
@@ -353,7 +353,7 @@
                                                     ${conversation.lastMessageText}
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <em>Chưa có tin nhắn nào</em>
+                                                    <em data-i18n="chat.no_messages_yet"></em>
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
@@ -378,7 +378,7 @@
                                         <div class="dropdown-menu-custom" id="menu-${conversation.conversationID}">
                                             <div class="dropdown-item-custom delete" onclick="confirmDeleteConversation(${conversation.conversationID})">
                                                 <i class="bi bi-trash"></i>
-                                                Xóa cuộc trò chuyện
+                                                <span data-i18n="chat.delete_conversation"></span>
                                             </div>
                                         </div>
                                     </div>
@@ -390,10 +390,10 @@
                 <c:otherwise>
                     <div class="empty-state">
                         <i class="bi bi-chat-square-text"></i>
-                        <h3>Bạn không có tin nhắn nào</h3>
-                        <p>Khi bạn nhắn tin với host, các cuộc hội thoại sẽ xuất hiện ở đây.</p>
+                        <h3 data-i18n="chat.no_messages"></h3>
+                        <p data-i18n="chat.no_messages_desc"></p>
                         <a href="${pageContext.request.contextPath}/search" class="btn btn-primary mt-3 fs-4">
-                            <i class="bi bi-search fs-3"></i> Tìm kiếm nơi lưu trú
+                            <i class="bi bi-search fs-3"></i> <span data-i18n="chat.search_accommodations"></span>
                         </a>
                     </div>
                 </c:otherwise>
@@ -404,6 +404,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     <script>
         function openConversation(conversationId) {
             window.location.href = '${pageContext.request.contextPath}/chat?action=view&conversationId=' + conversationId;
@@ -437,14 +438,14 @@
         // Confirm và xóa conversation
         function confirmDeleteConversation(conversationId) {
             Swal.fire({
-                title: 'Xóa cuộc trò chuyện?',
-                text: "Bạn có chắc muốn xóa cuộc trò chuyện này không?Tin nhắn sẽ bị ẩn khỏi hộp thoại của bạn.",
+                title: I18N.t('chat.confirm_delete'),
+                text: I18N.t('chat.confirm_delete_desc'),
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Xóa',
-                cancelButtonText: 'Hủy',
+                confirmButtonText: I18N.t('chat.delete'),
+                cancelButtonText: I18N.t('chat.cancel'),
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -457,8 +458,8 @@
         function deleteConversation(conversationId) {
             // Show loading
             Swal.fire({
-                title: 'Đang xóa...',
-                text: 'Vui lòng đợi',
+                title: I18N.t('chat.deleting'),
+                text: I18N.t('chat.please_wait'),
                 allowOutsideClick: false,
                 didOpen: () => {
                     Swal.showLoading();
@@ -496,16 +497,16 @@
                     }
                     
                     Swal.fire({
-                        title: 'Đã xóa!',
-                        text: data.message || 'Cuộc trò chuyện đã được xóa thành công.',
+                        title: I18N.t('chat.deleted'),
+                        text: data.message || I18N.t('chat.delete_success'),
                         icon: 'success',
                         timer: 2000,
                         showConfirmButton: false
                     });
                 } else {
                     Swal.fire({
-                        title: 'Lỗi!',
-                        text: data.message || 'Không thể xóa cuộc trò chuyện. Vui lòng thử lại.',
+                        title: I18N.t('chat.error'),
+                        text: data.message || I18N.t('chat.delete_error'),
                         icon: 'error'
                     });
                 }
@@ -514,8 +515,8 @@
                 Swal.close();
                 console.error('Error:', error);
                 Swal.fire({
-                    title: 'Lỗi!',
-                    text: 'Đã xảy ra lỗi khi xóa cuộc trò chuyện. Vui lòng thử lại.',
+                    title: I18N.t('chat.error'),
+                    text: I18N.t('chat.delete_error_general'),
                     icon: 'error'
                 });
             });

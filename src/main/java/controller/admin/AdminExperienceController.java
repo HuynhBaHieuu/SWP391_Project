@@ -178,6 +178,10 @@ public class AdminExperienceController extends HttpServlet {
         System.out.println("  timeSlot: " + request.getParameter("timeSlot"));
         System.out.println("  status: " + request.getParameter("status"));
         System.out.println("  displayOrder: " + request.getParameter("displayOrder"));
+        System.out.println("  description: " + request.getParameter("description"));
+        System.out.println("  additionalImages: " + request.getParameter("additionalImages"));
+        System.out.println("  videoUrl: " + request.getParameter("videoUrl"));
+        System.out.println("  contentSections: " + request.getParameter("contentSections"));
         
         experience.setCategory(request.getParameter("category"));
         experience.setTitle(request.getParameter("title"));
@@ -188,6 +192,10 @@ public class AdminExperienceController extends HttpServlet {
         experience.setBadge(request.getParameter("badge"));
         experience.setTimeSlot(request.getParameter("timeSlot"));
         experience.setStatus(request.getParameter("status"));
+        experience.setDescription(request.getParameter("description"));
+        experience.setAdditionalImages(request.getParameter("additionalImages"));
+        experience.setVideoUrl(request.getParameter("videoUrl"));
+        experience.setContentSections(request.getParameter("contentSections"));
         
         String displayOrderStr = request.getParameter("displayOrder");
         experience.setDisplayOrder(displayOrderStr != null && !displayOrderStr.isEmpty() 

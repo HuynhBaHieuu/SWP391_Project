@@ -10,12 +10,13 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>GO2BNB - Trang chủ</title>
+        <title>GO2BNB - <span data-i18n="home.title">Home</span></title>
         <link rel="stylesheet" href="css/home.css">
         <link rel="stylesheet" href="<c:url value='/css/chatbot.css'/>"/>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+        <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
 
         <style>
             /* ===== Hiệu ứng Fade-in ===== */
@@ -307,7 +308,7 @@
                             </c:if>
                             <c:if test="${not empty guests}">
                                 <span class="filter-tag">
-                                    <i class="bi bi-people-fill"></i> ${guests}+ khách
+                                    <i class="bi bi-people-fill"></i> ${guests}+ <span data-i18n="home.card.guests"></span>
                                 </span>
                             </c:if>
                         </div>
@@ -329,11 +330,11 @@
                                         <p class="card-text"><i class="bi bi-geo-alt"></i> ${item.city}</p>
                                         <p class="fw-bold text-danger">
                                             <span data-price="${item.pricePerNight}"></span>
-                                            <span>/ đêm</span>
+                                            <span data-i18n="home.card.per_night">/ đêm</span>
                                         </p>
-                                        <p class="text-muted"><i class="bi bi-people"></i> Tối đa ${item.maxGuests} khách</p>
+                                        <p class="text-muted"><i class="bi bi-people"></i> <span data-i18n="home.card.max_guests">Tối đa</span> ${item.maxGuests} <span data-i18n="home.card.guests">khách</span></p>
                                         <a href="${pageContext.request.contextPath}/customer/detail.jsp?id=${item.listingID}" 
-                                           class="btn btn-outline-primary">Xem chi tiết</a>
+                                           class="btn btn-outline-primary" data-i18n="home.card.view_detail">Xem chi tiết</a>
                                     </div>
                                 </div>
                             </div>
@@ -348,7 +349,7 @@
                         <span class="text-danger fw-bold">${keyword}</span>
                         <small class="text-muted">
                             (${fn:length(listings)} kết quả
-                            <c:if test="${guests > 0}">, từ ${guests} khách trở lên</c:if>
+                            <c:if test="${guests > 0}">, từ ${guests} <span data-i18n="home.card.guests"></span> trở lên</c:if>
                             <c:if test="${not empty checkInDate and not empty checkOutDate}">, từ ${checkInDate} đến ${checkOutDate}</c:if>)
                             </small>
                         </h2>
@@ -368,11 +369,11 @@
                                         <p class="card-text">${item.city}</p>
                                         <p class="fw-bold text-danger">
                                             <span data-price="${item.pricePerNight}"></span>
-                                            <span data-i18n="home.card.per_night">/ đêm</span>
+                                            <span data-i18n="home.card.per_night"><span data-i18n="home.card.per_night"></span></span>
                                         </p>
-                                        <p class="text-muted">Tối đa ${item.maxGuests} khách</p>
+                                        <p class="text-muted"><span data-i18n="home.card.max_guests"></span> ${item.maxGuests} <span data-i18n="home.card.guests"></span></p>
                                         <a href="${pageContext.request.contextPath}/customer/detail.jsp?id=${item.listingID}" 
-                                           class="btn btn-outline-primary" data-i18n="home.card.view_detail">Xem chi tiết</a>
+                                           class="btn btn-outline-primary" data-i18n="home.card.view_detail"><span data-i18n="home.card.view_detail"></span></a>
                                     </div>
                                 </div>
                             </div>
@@ -396,7 +397,7 @@
                                 <span class="filter-tag"><i class="bi bi-geo-alt-fill"></i> ${city}</span>
                             </c:if>
                             <c:if test="${not empty guests}">
-                                <span class="filter-tag"><i class="bi bi-people-fill"></i> ${guests}+ khách</span>
+                                <span class="filter-tag"><i class="bi bi-people-fill"></i> ${guests}+ <span data-i18n="home.card.guests"></span></span>
                             </c:if>
                         </div>
                         <p class="mt-3">Vui lòng thử điều chỉnh bộ lọc hoặc xóa một số tiêu chí</p>
@@ -411,7 +412,7 @@
                     <div class="no-result">
                         <h5>Không tìm thấy nơi lưu trú phù hợp với "<strong>${keyword}</strong>"</h5>
                         <c:if test="${guests > 0}">
-                            <p>(Bao gồm điều kiện từ ${guests} khách trở lên)</p>
+                            <p>(Bao gồm điều kiện từ ${guests} <span data-i18n="home.card.guests"></span> trở lên)</p>
                         </c:if>
                         <a href="${pageContext.request.contextPath}/home" class="btn btn-outline-primary mt-3">
                             <i class="bi bi-arrow-left"></i> Quay lại trang chủ
@@ -447,7 +448,7 @@
                                             <div class="price-info d-flex justify-content-between align-items-center">
                                                 <span class="price-from text-danger fw-semibold">
                                                     <span data-price="${item.pricePerNight}"></span>
-                                                    <span data-i18n="home.card.per_night">/ đêm</span>
+                                                    <span data-i18n="home.card.per_night"><span data-i18n="home.card.per_night"></span></span>
                                                 </span>
                                                 <c:set var="avgRating" value="${reviewDAO.getAverageRating(item.listingID)}" />
                                                 <c:choose>
@@ -459,7 +460,7 @@
                                                     </c:otherwise>
                                                 </c:choose>
                                             </div>
-                                            <p class="text-muted">Tối đa ${item.maxGuests} khách</p>
+                                            <p class="text-muted"><span data-i18n="home.card.max_guests">Tối đa</span> ${item.maxGuests} <span data-i18n="home.card.guests">khách</span></p>
                                             <a href="${pageContext.request.contextPath}/customer/detail.jsp?id=${item.listingID}"
                                                class="btn btn-outline-primary" data-i18n="home.card.view_detail">Xem chi tiết</a>
                                         </div>

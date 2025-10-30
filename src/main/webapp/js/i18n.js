@@ -1,12 +1,7 @@
 (function () {
     const I18N = {
         // Ngôn ngữ hiện tại
-        lang:
-                localStorage.getItem("lang") ||
-                (navigator.language &&
-                        navigator.language.toLowerCase().startsWith("vi")
-                        ? "vi"
-                        : "en"),
+        lang: localStorage.getItem("lang") || "vi",
 
         // ================= DICTIONARY =================
         dict: {
@@ -283,16 +278,275 @@
                     tiktok: {"aria-label": {vi: "Tiktok", en: "Tiktok"}},
                     youtube: {"aria-label": {vi: "Youtube", en: "YouTube"}}
                 }
+            },
+
+            // ===== EXPERIENCES =====
+            experiences: {
+                title: {vi: "Trải nghiệm", en: "Experiences"},
+                search_result: {vi: "Kết quả tìm kiếm", en: "Search results"},
+                found_experiences: {vi: "Tìm thấy", en: "Found"},
+                experiences_count: {vi: "trải nghiệm", en: "experiences"},
+                go2bnb_original: {vi: "GO2BNB Original", en: "GO2BNB Original"},
+                tomorrow_danang: {vi: "Ngày mai, tại Đà Nẵng", en: "Tomorrow in Da Nang"},
+                local_food: {vi: "Ẩm thực địa phương", en: "Local Cuisine"},
+                workshops_classes: {vi: "Workshop và lớp học", en: "Workshops & Classes"},
+                from_price: {vi: "Từ", en: "From"},
+                per_guest: {vi: "/khách", en: "/guest"},
+                wishlist_feature: {vi: "Chức năng yêu thích đang phát triển!", en: "Favorite feature is under development!"}
+            },
+
+            // ===== PROFILE =====
+            profile: {
+                title: {vi: "Hồ sơ", en: "Profile"},
+                edit_profile: {vi: "Chỉnh sửa hồ sơ", en: "Edit Profile"},
+                save: {vi: "Lưu", en: "Save"},
+                cancel: {vi: "Hủy", en: "Cancel"},
+                user_profile: {vi: "Hồ sơ người dùng", en: "User Profile"},
+                role: {vi: "Vai trò:", en: "Role:"},
+                contact_info: {vi: "Thông tin liên lạc", en: "Contact Information"},
+                email: {vi: "Email", en: "Email"},
+                phone_number: {vi: "Số điện thoại", en: "Phone Number"},
+                not_provided: {vi: "Not provided", en: "Not provided"},
+                detailed_info: {vi: "Thông tin chi tiết", en: "Detailed Information"},
+                joined_since: {vi: "Tham gia từ", en: "Joined since"},
+                account_status: {vi: "Trạng thái tài khoản", en: "Account Status"},
+                active: {vi: "Active", en: "Active"},
+                inactive: {vi: "Inactive", en: "Inactive"},
+                permissions_roles: {vi: "Quyền & Vai trò", en: "Permissions & Roles"},
+                role_info: {vi: "Thông tin vai trò được hiển thị ở tiêu đề hồ sơ phía trên.", en: "Role information is displayed in the profile header above."},
+                update_success: {vi: "Cập nhật thành công", en: "Update Successful"},
+                avatar_updated: {vi: "Đã cập nhật ảnh đại diện thành công!", en: "Avatar updated successfully!"},
+                remove_avatar: {vi: "Xóa ảnh", en: "Remove Avatar"},
+                confirm_remove_avatar: {vi: "Bạn có chắc muốn xóa ảnh đại diện?", en: "Are you sure you want to remove your avatar?"},
+                upload_error: {vi: "Lỗi: Không thể upload ảnh", en: "Error: Cannot upload image"},
+                upload_error_msg: {vi: "Có lỗi khi tải ảnh đại diện. Vui lòng thử lại.", en: "Error uploading avatar. Please try again."},
+                remove_error: {vi: "Xóa ảnh thất bại!", en: "Failed to remove avatar!"},
+                personal_info: {vi: "Thông tin cá nhân", en: "Personal Information"},
+                full_name: {vi: "Họ & tên", en: "Full Name"},
+                required: {vi: "*", en: "*"},
+                name_required: {vi: "Cần phải nhập đầy đủ họ tên.", en: "Please enter your full name."},
+                email_required: {vi: "Vui lòng nhập địa chỉ email.", en: "Please enter your email address."},
+                phone_optional: {vi: "Số điện thoại (không bắt buộc)", en: "Phone Number (optional)"},
+                account_settings: {vi: "Cài đặt tài khoản", en: "Account Settings"},
+                account_status_label: {vi: "Trạng thái tài khoản", en: "Account Status"},
+                account_status_desc: {vi: "Kích hoạt hoặc hủy kích hoạt tài khoản này", en: "Activate or deactivate this account"},
+                change_password: {vi: "Thay đổi mật khẩu", en: "Change Password"},
+                current_password: {vi: "Nhập mật khẩu hiện tại", en: "Enter current password"},
+                new_password: {vi: "Nhập mật khẩu mới", en: "Enter new password"},
+                confirm_password: {vi: "Xác nhận mật khẩu mới", en: "Confirm new password"},
+                password_note: {vi: "Note: Để trống trường mật khẩu nếu bạn không muốn thay đổi mật khẩu.", en: "Note: Leave password fields empty if you don't want to change your password."},
+                cancel_changes: {vi: "Hủy bỏ", en: "Cancel"},
+                save_changes: {vi: "Lưu thay đổi", en: "Save Changes"},
+                saving: {vi: "Đang lưu...", en: "Saving..."},
+                success: {vi: "Success", en: "Success"},
+                profile_updated: {vi: "Hồ sơ đã được cập nhật thành công!", en: "Profile updated successfully!"},
+                error: {vi: "Error", en: "Error"},
+                update_error: {vi: "Đã xảy ra lỗi khi cập nhật hồ sơ.", en: "An error occurred while updating profile."},
+                current_password_required: {vi: "Vui lòng nhập mật khẩu hiện tại", en: "Please enter current password"},
+                new_password_required: {vi: "Vui lòng nhập mật khẩu mới", en: "Please enter new password"},
+                password_min_length: {vi: "Mật khẩu mới phải có ít nhất 6 ký tự", en: "New password must be at least 6 characters"},
+                confirm_password_required: {vi: "Vui lòng xác nhận mật khẩu mới của bạn", en: "Please confirm your new password"},
+                password_mismatch: {vi: "Mật khẩu không khớp", en: "Passwords do not match"}
+            },
+
+            // ===== BOOKING =====
+            booking: {
+                title: {vi: "Đặt phòng", en: "Booking"},
+                booking_form: {vi: "Mẫu đặt phòng", en: "Booking Form"},
+                booking_list: {vi: "Danh sách đặt phòng", en: "Booking List"},
+                booking_detail: {vi: "Chi tiết đặt phòng", en: "Booking Detail"},
+                payment_result: {vi: "Kết quả thanh toán", en: "Payment Result"},
+                check_in: {vi: "Nhận phòng", en: "Check-in"},
+                check_out: {vi: "Trả phòng", en: "Check-out"},
+                guests: {vi: "Khách", en: "Guests"},
+                total_price: {vi: "Tổng giá", en: "Total Price"},
+                pay_now: {vi: "Thanh toán ngay", en: "Pay Now"},
+                continue_payment: {vi: "Tiếp tục thanh toán", en: "Continue Payment"},
+                price_per_night: {vi: "Giá/đêm", en: "Price/night"},
+                max_guests: {vi: "Tối đa", en: "Max"},
+                nights: {vi: "Số đêm", en: "Nights"},
+                total_amount: {vi: "Tổng cộng", en: "Total"},
+                guest_bookings: {vi: "Đặt phòng của khách", en: "Guest Bookings"},
+                my_bookings: {vi: "Đặt phòng của tôi", en: "My Bookings"},
+                no_bookings: {vi: "Chưa có đặt phòng nào", en: "No bookings yet"},
+                no_guest_bookings: {vi: "Chưa có khách nào đặt phòng của bạn", en: "No guests have booked your rooms"},
+                no_my_bookings: {vi: "Bạn chưa đặt phòng nào", en: "You haven't booked any rooms"},
+                find_rooms: {vi: "Tìm phòng ngay", en: "Find Rooms Now"},
+                home_page: {vi: "Về trang chủ", en: "Home"},
+                check_in_date: {vi: "Ngày nhận phòng", en: "Check-in Date"},
+                check_out_date: {vi: "Ngày trả phòng", en: "Check-out Date"},
+                number_of_guests: {vi: "Số khách", en: "Number of Guests"},
+                guest_count: {vi: "khách", en: "guests"},
+                room_deleted: {vi: "Phòng đã bị xóa", en: "Room deleted"},
+                address_unavailable: {vi: "Địa chỉ không khả dụng", en: "Address unavailable"},
+                guest_name: {vi: "Khách:", en: "Guest:"},
+                status_processing: {vi: "Đang xử lý", en: "Processing"},
+                status_completed: {vi: "Hoàn thành", en: "Completed"},
+                status_failed: {vi: "Thất bại", en: "Failed"},
+                details: {vi: "Chi tiết", en: "Details"},
+                cancel: {vi: "Hủy", en: "Cancel"},
+                confirm_cancel: {vi: "Bạn có chắc muốn hủy đặt phòng này?", en: "Are you sure you want to cancel this booking?"},
+                room_info: {vi: "Thông tin phòng", en: "Room Information"},
+                room_name: {vi: "Tên phòng:", en: "Room Name:"},
+                address: {vi: "Địa chỉ:", en: "Address:"},
+                nights_count: {vi: "đêm", en: "nights"},
+                guest_info: {vi: "Thông tin khách", en: "Guest Information"},
+                guest_name_label: {vi: "Tên:", en: "Name:"},
+                status_info: {vi: "Trạng thái", en: "Status"},
+                booking_status: {vi: "Đặt phòng:", en: "Booking:"},
+                payment_status: {vi: "Thanh toán:", en: "Payment:"},
+                payment_success: {vi: "Thành công", en: "Success"},
+                payment_failed: {vi: "Thất bại", en: "Failed"},
+                payment_pending: {vi: "Chờ xử lý", en: "Pending"},
+                payment_refunded: {vi: "Đã hoàn tiền", en: "Refunded"},
+                amount: {vi: "Số tiền:", en: "Amount:"},
+                payment_date: {vi: "Ngày thanh toán:", en: "Payment Date:"},
+                booking_date: {vi: "Ngày đặt:", en: "Booking Date:"},
+                payment_section: {vi: "Thanh toán", en: "Payment"},
+                not_paid: {vi: "Chưa thanh toán hoặc thanh toán thất bại", en: "Not paid or payment failed"},
+                pay_now_button: {vi: "Thanh toán ngay", en: "Pay Now"},
+                payment_processing: {vi: "Đang chờ xử lý thanh toán", en: "Payment processing"},
+                payment_success_msg: {vi: "Đã thanh toán thành công", en: "Payment successful"},
+                cancel_booking: {vi: "Hủy đặt phòng", en: "Cancel Booking"},
+                can_cancel: {vi: "Bạn có thể hủy đặt phòng này", en: "You can cancel this booking"},
+                confirm_cancel_booking: {vi: "Bạn có chắc muốn hủy đặt phòng này?", en: "Are you sure you want to cancel this booking?"},
+                admin_management: {vi: "Quản lý (Admin)", en: "Management (Admin)"},
+                confirm_booking: {vi: "Xác nhận đặt phòng", en: "Confirm Booking"},
+                cancel_booking_admin: {vi: "Hủy đặt phòng", en: "Cancel Booking"},
+                restore_booking: {vi: "Khôi phục đặt phòng", en: "Restore Booking"},
+                back_dashboard: {vi: "Quay lại Dashboard", en: "Back to Dashboard"},
+                list_bookings: {vi: "Danh sách", en: "List"},
+                home: {vi: "Trang chủ", en: "Home"},
+                success: {vi: "Thành công", en: "Success"},
+                error: {vi: "Lỗi", en: "Error"},
+                missing_info: {vi: "Thiếu thông tin", en: "Missing Information"},
+                missing_dates: {vi: "Vui lòng chọn ngày check-in và check-out!", en: "Please select check-in and check-out dates!"},
+                invalid_dates: {vi: "Ngày không hợp lệ", en: "Invalid Dates"},
+                check_out_after_check_in: {vi: "Ngày check-out phải sau ngày check-in!", en: "Check-out date must be after check-in date!"},
+                date_already_booked: {vi: "Ngày đã được đặt", en: "Date Already Booked"},
+                room_booked_period: {vi: "Phòng này đã được đặt từ", en: "This room is already booked from"},
+                to: {vi: "đến", en: "to"},
+                please_choose_other: {vi: "Vui lòng chọn ngày khác.", en: "Please choose other dates."},
+                understood: {vi: "Đã hiểu", en: "Understood"},
+                cannot_book_own: {vi: "Không thể đặt phòng", en: "Cannot Book"},
+                cannot_book_own_msg: {vi: "Bạn không thể đặt phòng của chính mình!", en: "You cannot book your own room!"},
+                room_already_booked: {vi: "Phòng đã được đặt trong khoảng thời gian này. Vui lòng chọn ngày khác.", en: "Room is already booked during this period. Please choose other dates."},
+                check_in_past: {vi: "Ngày check-in không thể trong quá khứ!", en: "Check-in date cannot be in the past!"},
+                invalid_range: {vi: "Ngày check-out phải sau ngày check-in!", en: "Check-out date must be after check-in date!"}
+            },
+
+            // ===== SIDEBAR =====
+            sidebar: {
+                wishlist: {vi: "Danh sách yêu thích", en: "Wishlist"},
+                trips: {vi: "Chuyến đi", en: "Trips"},
+                notifications: {vi: "Thông báo", en: "Notifications"}
+            },
+
+            // ===== CHAT =====
+            chat: {
+                title: {vi: "Tin nhắn", en: "Messages"},
+                chat_detail: {vi: "Chi tiết tin nhắn", en: "Chat Detail"},
+                send_message: {vi: "Gửi tin nhắn", en: "Send message"},
+                type_message: {vi: "Nhập tin nhắn...", en: "Type a message..."},
+                go_back: {vi: "Quay lại", en: "Go back"},
+                search_conversations: {vi: "Tìm kiếm cuộc hội thoại...", en: "Search conversations..."},
+                no_messages: {vi: "Bạn không có tin nhắn nào", en: "You have no messages"},
+                no_messages_desc: {vi: "Khi bạn nhắn tin với host, các cuộc hội thoại sẽ xuất hiện ở đây.", en: "When you message hosts, conversations will appear here."},
+                search_accommodations: {vi: "Tìm kiếm nơi lưu trú", en: "Search accommodations"},
+                host: {vi: "Host", en: "Host"},
+                guest: {vi: "Guest", en: "Guest"},
+                no_messages_yet: {vi: "Chưa có tin nhắn nào", en: "No messages yet"},
+                first_message: {vi: "Hãy gửi tin nhắn đầu tiên để bắt đầu cuộc hội thoại!", en: "Send your first message to start the conversation!"},
+                typing: {vi: "Đang nhập...", en: "Typing..."},
+                delete_conversation: {vi: "Xóa cuộc trò chuyện", en: "Delete conversation"},
+                confirm_delete: {vi: "Xóa cuộc trò chuyện?", en: "Delete conversation?"},
+                confirm_delete_desc: {vi: "Bạn có chắc muốn xóa cuộc trò chuyện này không?Tin nhắn sẽ bị ẩn khỏi hộp thoại của bạn.", en: "Are you sure you want to delete this conversation? Messages will be hidden from your inbox."},
+                delete: {vi: "Xóa", en: "Delete"},
+                cancel: {vi: "Hủy", en: "Cancel"},
+                deleting: {vi: "Đang xóa...", en: "Deleting..."},
+                please_wait: {vi: "Vui lòng đợi", en: "Please wait"},
+                deleted: {vi: "Đã xóa!", en: "Deleted!"},
+                delete_success: {vi: "Cuộc trò chuyện đã được xóa thành công.", en: "Conversation has been deleted successfully."},
+                error: {vi: "Lỗi!", en: "Error!"},
+                delete_error: {vi: "Không thể xóa cuộc trò chuyện. Vui lòng thử lại.", en: "Cannot delete conversation. Please try again."},
+                delete_error_general: {vi: "Đã xảy ra lỗi khi xóa cuộc trò chuyện. Vui lòng thử lại.", en: "An error occurred while deleting the conversation. Please try again."}
+            },
+
+            // ===== EXPERIENCE DETAIL =====
+            experience_detail: {
+                location: {vi: "Địa điểm", en: "Location"},
+                meeting_location: {vi: "Địa điểm hẹn gặp", en: "Meeting location"},
+                note_label: {vi: "Lưu ý:", en: "Note:"},
+                note_text: {vi: "Địa điểm chính xác sẽ được gửi qua email sau khi đặt chỗ thành công.", en: "The exact meeting location will be sent via email after successful booking."},
+                what_included: {vi: "Bao gồm", en: "What's included"},
+                meeting_point: {vi: "Điểm hẹn gặp", en: "Meeting point"},
+                back_button: {vi: "Quay lại", en: "Go back"},
+                contact_message: {vi: "Xin chào! Tôi muốn tư vấn về trải nghiệm", en: "Hello! I would like to consult about the experience"},
+                price: {vi: "Giá", en: "Price"},
+                contact_request: {vi: "Vui lòng liên hệ tôi để biết thêm chi tiết và đặt phòng kèm trải nghiệm này.", en: "Please contact me for more details and to book accommodation with this experience."}
+            },
+
+            // ===== SERVICES =====
+            services: {
+                page_title: {vi: "Dịch vụ", en: "Services"},
+                minimum: {vi: "Tối thiểu", en: "Minimum"},
+                view_details: {vi: "Xem chi tiết", en: "View Details"},
+                book_now: {vi: "Đặt ngay", en: "Book Now"},
+                no_services: {vi: "Không có dịch vụ nào", en: "No services available"},
+                no_services_desc: {vi: "Hiện tại chưa có dịch vụ nào được cung cấp.", en: "Currently no services are available."}
+            },
+
+            // ===== HOME =====
+            home: {
+                title: {vi: "Trang chủ", en: "Home"},
+                card: {
+                    view_detail: {vi: "Xem chi tiết", en: "View Details"},
+                    book_now: {vi: "Đặt ngay", en: "Book Now"},
+                    max_guests: {vi: "Tối đa", en: "Max"},
+                    guests: {vi: "khách", en: "guests"},
+                    per_night: {vi: "/đêm", en: "/night"}
+                }
+            },
+
+            // ===== RESET PASSWORD =====
+            resetpass: {
+                forgot_title: {vi: "Quên mật khẩu", en: "Forgot Password"},
+                reset_title: {vi: "Đặt lại mật khẩu", en: "Reset Password"},
+                email_sent_title: {vi: "Email đã được gửi", en: "Email Sent"},
+                enter_email: {vi: "Nhập email của bạn", en: "Enter your email"},
+                send_reset_link: {vi: "Gửi liên kết đặt lại", en: "Send Reset Link"},
+                new_password: {vi: "Mật khẩu mới", en: "New Password"},
+                confirm_password: {vi: "Xác nhận mật khẩu", en: "Confirm Password"},
+                reset_password: {vi: "Đặt lại mật khẩu", en: "Reset Password"},
+                check_email: {vi: "Kiểm tra email của bạn", en: "Check your email"},
+                email_sent_desc: {vi: "Chúng tôi đã gửi liên kết đặt lại mật khẩu đến email của bạn.", en: "We've sent a password reset link to your email."},
+                back_to_login: {vi: "Quay lại đăng nhập", en: "Back to Login"}
+            },
+
+            // ===== SERVICE DETAIL =====
+            service_detail: {
+                title: {vi: "Chi tiết dịch vụ", en: "Service Detail"},
+                provider_info: {vi: "Thông tin nhà cung cấp", en: "Provider Information"},
+                provider_title: {vi: "Nhà cung cấp dịch vụ chuyên nghiệp", en: "Professional Service Provider"},
+                verified: {vi: "Đã xác minh dịch vụ", en: "Verified service"},
+                category: {vi: "Danh mục:", en: "Category:"},
+                status: {vi: "Trạng thái:", en: "Status:"},
+                created_at: {vi: "Ngày tạo:", en: "Created:"},
+                per_guest: {vi: "/ khách", en: "/ guest"},
+                unknown: {vi: "Không xác định", en: "Unknown"}
             }
         },
 
         // ================= CORE =================
         setLang(l) {
+            console.log('Setting language to:', l);
             I18N.lang = l;
             localStorage.setItem("lang", l);
             I18N.apply();
             document.documentElement.setAttribute("lang", l);
             I18N.updateBadge();
+            I18N.convertAllPrices(); // Tự động chuyển đổi giá tiền
+            console.log('Language set to:', l, 'Applied translations and converted prices');
         },
 
         // lấy text theo key
@@ -326,7 +580,7 @@
                 flag.textContent = flagEmoji;
         },
 
-        // Format giá tiền theo chuẩn Việt Nam
+        // Format giá tiền và tự động chuyển đổi VND -> USD
         formatPrice(price) {
             if (typeof price !== 'number') {
                 price = parseFloat(price) || 0;
@@ -336,10 +590,61 @@
                 // Format theo chuẩn Việt Nam: 5.000.000 ₫
                 return new Intl.NumberFormat('vi-VN').format(price) + ' ₫';
             } else {
-                // Chuyển đổi VND sang USD (tỷ giá khoảng 25.450 VND = 1 USD)
-                const usdPrice = Math.round(price / 25450);
+                // Chuyển đổi VND sang USD (tỷ giá khoảng 24.500 VND = 1 USD)
+                const usdPrice = price / 24500;
                 // Format theo chuẩn quốc tế: $500
-                return '$' + new Intl.NumberFormat('en-US').format(usdPrice);
+                return '$' + new Intl.NumberFormat('en-US', {maximumFractionDigits: 2}).format(usdPrice);
+            }
+        },
+
+        // Tự động chuyển đổi tất cả giá tiền trên trang
+        convertAllPrices() {
+            const vndToUsdRate = 24500; // 1 USD = 24,500 VND
+            
+            // Xử lý các element có data-price attribute trước
+            document.querySelectorAll('[data-price]').forEach(el => {
+                const price = parseFloat(el.getAttribute('data-price')) || 0;
+                const formattedPrice = I18N.formatPrice(price);
+                el.textContent = formattedPrice;
+            });
+            
+            // Tìm tất cả text chứa ₫ (chỉ xử lý text nodes)
+            const walker = document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            let node;
+            while (node = walker.nextNode()) {
+                const text = node.textContent;
+                if (text && text.includes('₫') && text.match(/\d/)) {
+                    // Lưu text gốc
+                    let originalText = node.getAttribute ? node.getAttribute('data-original-text') : null;
+                    if (!originalText) {
+                        originalText = text;
+                        if (node.parentElement) {
+                            node.parentElement.setAttribute('data-original-text', originalText);
+                        }
+                    }
+                    
+                    if (I18N.lang === 'en') {
+                        // Chuyển ₫ sang $
+                        const match = originalText.match(/(\d[\d\s,\.]*)\s*₫/);
+                        if (match) {
+                            let vndPrice = match[1];
+                            // Parse số VND
+                            vndPrice = vndPrice.replace(/\./g, '').replace(/\s/g, '').replace(/,/g, '');
+                            const usdPrice = parseFloat(vndPrice) / vndToUsdRate;
+                            const formattedPrice = new Intl.NumberFormat('en-US', {maximumFractionDigits: 2}).format(usdPrice);
+                            node.textContent = originalText.replace(/[\d\s,\.]*\s*₫/, '$' + formattedPrice);
+                        }
+                    } else {
+                        // Restore text gốc
+                        node.textContent = originalText;
+                    }
+                }
             }
         },
 
@@ -350,10 +655,12 @@
             scope.querySelectorAll("[data-i18n]").forEach((el) => {
                 const key = el.getAttribute("data-i18n");
                 const txt = I18N.t(key);
-                if (el.tagName === "INPUT" || el.tagName === "TEXTAREA")
-                    el.value = txt;
-                else
-                    el.textContent = txt;
+                if (txt && txt !== key) { // Chỉ thay đổi nếu có translation
+                    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA")
+                        el.value = txt;
+                    else
+                        el.textContent = txt;
+                }
             });
 
             // Format giá tiền cho các element có data-price
@@ -471,6 +778,7 @@
         init() {
             I18N.ensureModal();
             I18N.apply();
+            console.log('I18N initialized, current lang:', I18N.lang);
 
             document
                     .querySelectorAll("[data-open-lang-modal]")

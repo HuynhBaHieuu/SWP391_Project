@@ -468,7 +468,6 @@
                             <input type="text" class="form-control" id="timeSlot" name="timeSlot" placeholder="07:00">
                             <div class="hint">Chỉ dùng cho category "tomorrow"</div>
                         </div>
-                    </div>
                 </form>
             </div>
             <div class="modal-footer">

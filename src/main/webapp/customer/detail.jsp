@@ -1088,18 +1088,18 @@
                                     '</div>' +
                                     '<div class="recommendation-price">' +
                                         '<span data-price="' + listing.pricePerNight + '"></span>' +
-                                        '<span>/ đêm</span>' +
+                                        '<span data-i18n="home.card.per_night"></span>' +
                                     '</div>' +
                                     '<div class="recommendation-guests">' +
                                         '<i class="bi bi-people"></i>' +
-                                        'Tối đa ' + listing.maxGuests + ' khách' +
+                                        '<span data-i18n="home.card.max_guests"></span> ' + listing.maxGuests + ' <span data-i18n="home.card.guests"></span>' +
                                     '</div>' +
                                     '<div class="recommendation-actions">' +
                                         '<a href="' + baseUrl + listing.listingID + '" ' +
                                            'class="recommendation-btn recommendation-view-btn" ' +
                                            'onclick="event.stopPropagation()">' +
                                             '<i class="bi bi-eye"></i>' +
-                                            'Xem chi tiết' +
+                                            '<span data-i18n="home.card.view_detail"></span>' +
                                         '</a>' +
                                         '<button class="recommendation-btn recommendation-wishlist-btn" ' +
                                                 'onclick="toggleWishlist(' + listing.listingID + ', this); event.stopPropagation()">' +

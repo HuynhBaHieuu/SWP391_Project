@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đặt phòng - ${listing.title}</title>
+    <title data-i18n="booking.title"></title> - ${listing.title}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -312,7 +312,7 @@
             <div class="col-md-8">
                 <div class="form-container">
                     <h2 class="mb-4">
-                        <i class="fas fa-calendar-check"></i> Đặt phòng
+                        <i class="fas fa-calendar-check"></i> <span data-i18n="booking.title"></span>
                     </h2>
                     
                     <c:if test="${not empty error}">
@@ -329,7 +329,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="checkInDate" class="form-label">
-                                        <i class="fas fa-calendar-day"></i> Ngày nhận phòng
+                                        <i class="fas fa-calendar-day"></i> <span data-i18n="booking.check_in_date"></span>
                                     </label>
                                     <input type="date" class="form-control" id="checkInDate" name="checkInDate" required>
                                 </div>
@@ -337,7 +337,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="checkOutDate" class="form-label">
-                                        <i class="fas fa-calendar-day"></i> Ngày trả phòng
+                                        <i class="fas fa-calendar-day"></i> <span data-i18n="booking.check_out_date"></span>
                                     </label>
                                     <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required>
                                 </div>
@@ -346,18 +346,18 @@
                         
                         <div class="mb-3">
                             <label for="guests" class="form-label">
-                                <i class="fas fa-users"></i> Số khách
+                                <i class="fas fa-users"></i> <span data-i18n="booking.number_of_guests"></span>
                             </label>
                             <select class="form-control" id="guests" name="guests">
                                 <c:forEach begin="1" end="${listing.maxGuests}" var="i">
-                                    <option value="${i}">${i} khách</option>
+                                    <option value="${i}">${i} <span data-i18n="booking.guest_count"></span></option>
                                 </c:forEach>
                             </select>
                         </div>
                         
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary btn-book">
-                                <i class="fas fa-credit-card"></i> Tiếp tục thanh toán
+                                <i class="fas fa-credit-card"></i> <span data-i18n="booking.continue_payment"></span>
                             </button>
                         </div>
                     </form>
@@ -378,27 +378,27 @@
                     <div class="price-display">
                         <div class="row">
                             <div class="col-6">
-                                <small class="text-muted">Giá/đêm</small>
+                                <small class="text-muted" data-i18n="booking.price_per_night"></small>
                                 <div class="h5 text-primary">
                                     <fmt:formatNumber value="${listing.pricePerNight}" type="currency" currencyCode="VND"/>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <small class="text-muted">Tối đa</small>
-                                <div class="h6">${listing.maxGuests} khách</div>
+                                <small class="text-muted" data-i18n="booking.max_guests"></small>
+                                <div class="h6">${listing.maxGuests} <span data-i18n="booking.guest_count"></span></div>
                             </div>
                         </div>
                     </div>
                     
                     <div id="priceSummary" class="price-display" style="display: none;">
-                        <h5>Tổng tiền</h5>
+                        <h5 data-i18n="booking.total_amount"></h5>
                         <div class="row">
                             <div class="col-6">
-                                <small>Số đêm</small>
+                                <small data-i18n="booking.nights"></small>
                                 <div id="nights">0</div>
                             </div>
                             <div class="col-6">
-                                <small>Tổng cộng</small>
+                                <small data-i18n="booking.total_amount"></small>
                                 <div id="totalPrice" class="h5 text-success">0 VND</div>
                             </div>
                         </div>
@@ -410,6 +410,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     <script>
         const pricePerNight = ${listing.pricePerNight};
         const listingId = ${listing.listingID};
@@ -484,9 +485,9 @@
                 if (overlap.overlap) {
                     Swal.fire({
                         icon: 'warning',
-                        title: 'Ngày đã được đặt',
-                        html: 'Phòng này đã được đặt từ <strong>' + overlap.bookedCheckIn + '</strong> đến <strong>' + overlap.bookedCheckOut + '</strong>.<br>Vui lòng chọn ngày khác.',
-                        confirmButtonText: 'Đã hiểu'
+                        title: I18N.t('booking.date_already_booked'),
+                        html: I18N.t('booking.room_booked_period') + ' <strong>' + overlap.bookedCheckIn + '</strong> ' + I18N.t('booking.to') + ' <strong>' + overlap.bookedCheckOut + '</strong>.<br>' + I18N.t('booking.please_choose_other'),
+                        confirmButtonText: I18N.t('booking.understood')
                     });
                 }
             } else {
@@ -510,8 +511,8 @@
                 e.preventDefault();
                 Swal.fire({
                     icon: 'error',
-                    title: 'Thiếu thông tin',
-                    text: 'Vui lòng chọn ngày check-in và check-out!',
+                    title: I18N.t('booking.missing_info'),
+                    text: I18N.t('booking.missing_dates'),
                 });
                 return;
             }
@@ -523,8 +524,8 @@
                 e.preventDefault();
                 Swal.fire({
                     icon: 'error',
-                    title: 'Ngày không hợp lệ',
-                    text: 'Ngày check-out phải sau ngày check-in!',
+                    title: I18N.t('booking.invalid_dates'),
+                    text: I18N.t('booking.check_out_after_check_in'),
                 });
                 return;
             }
@@ -534,9 +535,9 @@
                 e.preventDefault();
                 Swal.fire({
                     icon: 'error',
-                    title: 'Ngày đã được đặt',
-                    html: 'Phòng này đã được đặt từ <strong>' + overlap.bookedCheckIn + '</strong> đến <strong>' + overlap.bookedCheckOut + '</strong>.<br>Vui lòng chọn ngày khác.',
-                    confirmButtonText: 'Đã hiểu'
+                    title: I18N.t('booking.date_already_booked'),
+                    html: I18N.t('booking.room_booked_period') + ' <strong>' + overlap.bookedCheckIn + '</strong> ' + I18N.t('booking.to') + ' <strong>' + overlap.bookedCheckOut + '</strong>.<br>' + I18N.t('booking.please_choose_other'),
+                    confirmButtonText: I18N.t('booking.understood')
                 });
                 return;
             }
@@ -548,30 +549,30 @@
         if (errorType === 'self_booking') {
             Swal.fire({
                 icon: 'warning',
-                title: 'Không thể đặt phòng',
-                text: 'Bạn không thể đặt phòng của chính mình!',
-                confirmButtonText: 'Đã hiểu'
+                title: I18N.t('booking.cannot_book_own'),
+                text: I18N.t('booking.cannot_book_own_msg'),
+                confirmButtonText: I18N.t('booking.understood')
             }).then(() => {
                 window.location.href = '${pageContext.request.contextPath}/home';
             });
         } else if (errorType === 'date_overlap') {
             Swal.fire({
                 icon: 'error',
-                title: 'Ngày đã được đặt',
-                text: 'Phòng đã được đặt trong khoảng thời gian này. Vui lòng chọn ngày khác.',
-                confirmButtonText: 'Đã hiểu'
+                title: I18N.t('booking.date_already_booked'),
+                text: I18N.t('booking.room_already_booked'),
+                confirmButtonText: I18N.t('booking.understood')
             });
         } else if (errorType === 'past_date') {
             Swal.fire({
                 icon: 'error',
-                title: 'Ngày không hợp lệ',
-                text: 'Ngày check-in không thể trong quá khứ!',
+                title: I18N.t('booking.invalid_dates'),
+                text: I18N.t('booking.check_in_past'),
             });
         } else if (errorType === 'invalid_range') {
             Swal.fire({
                 icon: 'error',
-                title: 'Ngày không hợp lệ',
-                text: 'Ngày check-out phải sau ngày check-in!',
+                title: I18N.t('booking.invalid_dates'),
+                text: I18N.t('booking.invalid_range'),
             });
         }
     </script>

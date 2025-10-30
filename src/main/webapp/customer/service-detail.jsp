@@ -16,7 +16,7 @@
     <head>
         <meta charset="UTF-8">
         <title>
-            <%= (service != null) ? service.getName() : "Chi tiết dịch vụ"%>
+            <%= (service != null) ? service.getName() : "Service Detail"%>
         </title>
         <link rel="icon" type="image/jpg" href="../image/logo.jpg">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -37,7 +37,7 @@
                 <% if (category != null) {%>
                 <%= category.getName()%>
                 <% } else { %>
-                Dịch vụ
+                <span data-i18n="service_detail.title"></span>
                 <% } %>
             </div>
 
@@ -53,7 +53,7 @@
                     // Hiển thị cùng một ảnh cho tất cả các vị trí trong gallery
                     for (int i = 0; i < 5; i++) {
                 %>
-                <img src="<%= serviceImage%>" alt="Hình ảnh dịch vụ">
+                <img src="<%= serviceImage%>" alt="Service Image">
                 <%
                     }
                 %>
@@ -61,7 +61,7 @@
 
             <div class="price">
                 <span data-price="<%= service.getPrice()%>"></span>
-                <span>/ khách</span>
+                <span data-i18n="service_detail.per_guest"></span>
             </div>
 
             <div class="desc">
@@ -70,32 +70,32 @@
 
             <!-- Service Provider Information -->
             <div class="provider-info">
-                <h3><i class="bi bi-person-circle"></i> Thông tin nhà cung cấp</h3>
+                <h3><i class="bi bi-person-circle"></i> <span data-i18n="service_detail.provider_info"></span></h3>
                 <div class="d-flex align-items-center">
                     <div class="provider-avatar">
                         G
                     </div>
                     <div>
                         <div class="provider-name">GO2BNB Service Team</div>
-                        <div class="provider-title">Nhà cung cấp dịch vụ chuyên nghiệp • Đã tham gia từ 2020
+                        <div class="provider-title"><span data-i18n="service_detail.provider_title"></span> • <span data-i18n="service_detail.joined_since"></span> 2020
                         </div>
                         <div class="text-muted">
                             <i class="bi bi-star-fill text-warning"></i> 4.8 • 89 đánh giá •
-                            <i class="bi bi-patch-check-fill text-primary"></i> Đã xác minh dịch vụ
+                            <i class="bi bi-patch-check-fill text-primary"></i> <span data-i18n="service_detail.verified"></span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="info-box">
-                <p><b>Danh mục:</b>
-                    <%= (category != null) ? category.getName() : "Không xác định"%>
+                <p><b data-i18n="service_detail.category"></b>
+                    <%= (category != null) ? category.getName() : "Unknown"%>
                 </p>
-                <p><b>Trạng thái:</b>
+                <p><b data-i18n="service_detail.status"></b>
                     <%= service.getStatus()%>
                 </p>
-                <p><b>Ngày tạo:</b>
-                    <%= service.getCreatedAt() != null ? service.getCreatedAt().toString() : "Không xác định"%>
+                <p><b data-i18n="service_detail.created_at"></b>
+                    <%= service.getCreatedAt() != null ? service.getCreatedAt().toString() : "Unknown"%>
                 </p>
             </div>
 
@@ -176,6 +176,7 @@
         </main>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
                     function contactProvider() {

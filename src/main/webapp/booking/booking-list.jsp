@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách đặt phòng</title>
+    <title data-i18n="booking.booking_list"></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -58,34 +58,34 @@
                 <i class="fas fa-list"></i> 
                 <c:choose>
                     <c:when test="${userType == 'host'}">
-                        Đặt phòng của khách
+                        <span data-i18n="booking.guest_bookings"></span>
                     </c:when>
                     <c:otherwise>
-                        Đặt phòng của tôi
+                        <span data-i18n="booking.my_bookings"></span>
                     </c:otherwise>
                 </c:choose>
             </h2>
             <a href="${pageContext.request.contextPath}/home" class="btn btn-outline-primary">
-                <i class="fas fa-home"></i> Về trang chủ
+                <i class="fas fa-home"></i> <span data-i18n="booking.home_page"></span>
             </a>
         </div>
         
         <c:if test="${empty bookings}">
             <div class="text-center py-5">
                 <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                <h4 class="text-muted">Chưa có đặt phòng nào</h4>
+                <h4 class="text-muted" data-i18n="booking.no_bookings"></h4>
                 <p class="text-muted">
                     <c:choose>
                         <c:when test="${userType == 'host'}">
-                            Chưa có khách nào đặt phòng của bạn
+                            <span data-i18n="booking.no_guest_bookings"></span>
                         </c:when>
                         <c:otherwise>
-                            Bạn chưa đặt phòng nào
+                            <span data-i18n="booking.no_my_bookings"></span>
                         </c:otherwise>
                     </c:choose>
                 </p>
                 <a href="${pageContext.request.contextPath}/home" class="btn btn-primary">
-                    <i class="fas fa-search"></i> Tìm phòng ngay
+                    <i class="fas fa-search"></i> <span data-i18n="booking.find_rooms"></span>
                 </a>
             </div>
         </c:if>
@@ -113,7 +113,7 @@
                                     ${booking.listingTitle}
                                 </c:when>
                                 <c:otherwise>
-                                    Phòng đã bị xóa
+                                    <span class="text-muted" data-i18n="booking.room_deleted"></span>
                                 </c:otherwise>
                             </c:choose>
                         </h5>
@@ -125,39 +125,39 @@
                                     ${booking.listingAddress}
                                 </c:when>
                                 <c:otherwise>
-                                    Địa chỉ không khả dụng
+                                    <span class="text-muted" data-i18n="booking.address_unavailable"></span>
                                 </c:otherwise>
                             </c:choose>
                         </p>
                         
                         <div class="row">
                             <div class="col-6">
-                                <small class="text-muted">Ngày nhận phòng</small>
+                                <small class="text-muted" data-i18n="booking.check_in_date"></small>
                                 <div>${booking.formattedCheckInDate}</div>
                             </div>
                             <div class="col-6">
-                                <small class="text-muted">Ngày trả phòng</small>
+                                <small class="text-muted" data-i18n="booking.check_out_date"></small>
                                 <div>${booking.formattedCheckOutDate}</div>
                             </div>
                         </div>
                         
                         <c:if test="${userType == 'host'}">
                             <p class="text-muted mb-0 mt-2">
-                                <i class="fas fa-user"></i> Khách: ${booking.guestName}
+                                <i class="fas fa-user"></i> <span data-i18n="booking.guest_name"></span> ${booking.guestName}
                             </p>
                         </c:if>
                     </div>
                     
                     <div class="col-md-2">
                         <div class="text-center">
-                            <small class="text-muted">Số đêm</small>
+                            <small class="text-muted" data-i18n="booking.nights"></small>
                             <div class="h5">${booking.numberOfNights}</div>
                         </div>
                     </div>
                     
                     <div class="col-md-2">
                         <div class="text-center">
-                            <small class="text-muted">Tổng tiền</small>
+                            <small class="text-muted" data-i18n="booking.total_amount"></small>
                             <div class="h5 text-success">
                                 <fmt:formatNumber value="${booking.totalPrice}" type="currency" currencyCode="VND"/>
                             </div>
@@ -170,13 +170,13 @@
                         <span class="status-badge status-${booking.status.toLowerCase()}">
                             <c:choose>
                                 <c:when test="${booking.status == 'Processing'}">
-                                    <i class="fas fa-clock"></i> Đang xử lý
+                                    <i class="fas fa-clock"></i> <span data-i18n="booking.status_processing"></span>
                                 </c:when>
                                 <c:when test="${booking.status == 'Completed'}">
-                                    <i class="fas fa-check-circle"></i> Hoàn thành
+                                    <i class="fas fa-check-circle"></i> <span data-i18n="booking.status_completed"></span>
                                 </c:when>
                                 <c:when test="${booking.status == 'Failed'}">
-                                    <i class="fas fa-times"></i> Thất bại
+                                    <i class="fas fa-times"></i> <span data-i18n="booking.status_failed"></span>
                                 </c:when>
                             </c:choose>
                         </span>
@@ -189,14 +189,14 @@
                     
                     <div class="col-md-4 text-end">
                         <a href="booking?action=detail&bookingId=${booking.bookingID}" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-eye"></i> Chi tiết
+                            <i class="fas fa-eye"></i> <span data-i18n="booking.details"></span>
                         </a>
                         
                         <c:if test="${userType == 'guest' && booking.status == 'Processing'}">
                             <a href="booking?action=cancel&bookingId=${booking.bookingID}" 
                                class="btn btn-outline-danger btn-sm ms-1"
-                               onclick="return confirm('Bạn có chắc muốn hủy đặt phòng này?')">
-                                <i class="fas fa-times"></i> Hủy
+                               onclick="return confirm(I18N.t('booking.confirm_cancel'))">
+                                <i class="fas fa-times"></i> <span data-i18n="booking.cancel"></span>
                             </a>
                         </c:if>
                     </div>
@@ -206,5 +206,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
 </body>
 </html>

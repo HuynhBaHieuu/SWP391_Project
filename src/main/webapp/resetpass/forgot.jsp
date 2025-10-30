@@ -3,8 +3,9 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Quên mật khẩu</title>
+  <title data-i18n="resetpass.forgot_title">Forgot Password</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
 
   <style>
     :root{

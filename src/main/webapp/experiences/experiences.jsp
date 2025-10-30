@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html lang="vi">
     <head>
-        <title> Trải nghiệm </title>
+        <title data-i18n="experiences.title">Experiences</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="icon" type="image/jpg" href="${pageContext.request.contextPath}/image/logo.jpg">
         <!-- Styles giống trang chủ -->
@@ -17,6 +17,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+        <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     </head>
     <body>
 
@@ -28,9 +29,11 @@
                 <div class="search-result-header" style="text-align: center; margin: 30px auto; padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 16px; max-width: 800px;">
                     <h2 style="font-size: 28px; font-weight: 700; color: #222; margin-bottom: 15px;">
                         <i class="bi bi-search text-danger"></i>
-                        Kết quả tìm kiếm: "<span class="text-danger">${keyword}</span>"
+                        <span data-i18n="experiences.search_result">Kết quả tìm kiếm</span>: "<span class="text-danger">${keyword}</span>"
                     </h2>
-                    <p style="font-size: 16px; color: #666;">Tìm thấy ${totalResults} trải nghiệm</p>
+                    <p style="font-size: 16px; color: #666;">
+                        <span data-i18n="experiences.found_experiences">Tìm thấy</span> ${totalResults} <span data-i18n="experiences.experiences_count">trải nghiệm</span>
+                    </p>
                 </div>
             </c:if>
             
@@ -38,7 +41,7 @@
             <c:if test="${not empty originalExperiences}">
                 <section class="xp-row">
                     <div class="xp-row-header">
-                        <h2>GO2BNB Original</h2>
+                        <h2 data-i18n="experiences.go2bnb_original">GO2BNB Original</h2>
                         <div class="nav-arrows">
                             <button class="nav-arrow left" onclick="scrollRow('original-row', -1)">‹</button>
                             <button class="nav-arrow right" onclick="scrollRow('original-row', 1)">›</button>
@@ -54,13 +57,13 @@
                                         <c:if test="${not empty exp.badge}">
                                             <span class="xp-badge">${exp.badge}</span>
                                         </c:if>
-                                        <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation(); alert('Chức năng yêu thích đang phát triển!');"><i class="bi bi-heart"></i></button>
+                                        <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation(); alert(I18N.t('experiences.wishlist_feature'));"><i class="bi bi-heart"></i></button>
                                     </div>
                                     <div class="xp-info">
                                         <h3>${exp.title}</h3>
                                         <div class="xp-meta">
                                             <span class="xp-loc">${exp.location}</span>
-                                            <span class="xp-price">Từ ₫<fmt:formatNumber value="${exp.price}" type="number" groupingUsed="true"/>/khách</span>
+                                            <span class="xp-price"><span data-i18n="experiences.from_price">Từ</span> ₫<fmt:formatNumber value="${exp.price}" type="number" groupingUsed="true"/><span data-i18n="experiences.per_guest">/khách</span></span>
                                             <span class="xp-rate">${exp.rating}</span>
                                         </div>
                                     </div>
@@ -75,7 +78,7 @@
             <c:if test="${not empty tomorrowExperiences}">
                 <section class="xp-row">
                     <div class="xp-row-header">
-                        <h2>Ngày mai, tại Đà Nẵng</h2>
+                        <h2 data-i18n="experiences.tomorrow_danang">Ngày mai, tại Đà Nẵng</h2>
                         <div class="nav-arrows">
                             <button class="nav-arrow left" onclick="scrollRow('tomorrow-row', -1)">‹</button>
                             <button class="nav-arrow right" onclick="scrollRow('tomorrow-row', 1)">›</button>
@@ -91,13 +94,13 @@
                                         <c:if test="${not empty exp.timeSlot}">
                                             <div class="xp-time">${exp.timeSlot}</div>
                                         </c:if>
-                                        <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation(); alert('Chức năng yêu thích đang phát triển!');"><i class="bi bi-heart"></i></button>
+                                        <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation(); alert(I18N.t('experiences.wishlist_feature'));"><i class="bi bi-heart"></i></button>
                                     </div>
                                     <div class="xp-info">
                                         <h3>${exp.title}</h3>
                                         <div class="xp-meta">
                                             <span class="xp-loc">${exp.location}</span>
-                                            <span class="xp-price">Từ ₫<fmt:formatNumber value="${exp.price}" type="number" groupingUsed="true"/>/khách</span>
+                                            <span class="xp-price"><span data-i18n="experiences.from_price">Từ</span> ₫<fmt:formatNumber value="${exp.price}" type="number" groupingUsed="true"/><span data-i18n="experiences.per_guest">/khách</span></span>
                                             <span class="xp-rate">${exp.rating}</span>
                                         </div>
                                     </div>
@@ -112,7 +115,7 @@
             <c:if test="${not empty foodExperiences}">
                 <section class="xp-row">
                     <div class="xp-row-header">
-                        <h2>Ẩm thực địa phương</h2>
+                        <h2 data-i18n="experiences.local_food">Ẩm thực địa phương</h2>
                         <div class="nav-arrows">
                             <button class="nav-arrow left" onclick="scrollRow('food-row', -1)">‹</button>
                             <button class="nav-arrow right" onclick="scrollRow('food-row', 1)">›</button>
@@ -125,13 +128,13 @@
                                 <article class="xp-card">
                                     <div class="xp-image">
                                         <img src="${exp.imageUrl}" alt="${exp.title}">
-                                        <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation(); alert('Chức năng yêu thích đang phát triển!');"><i class="bi bi-heart"></i></button>
+                                        <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation(); alert(I18N.t('experiences.wishlist_feature'));"><i class="bi bi-heart"></i></button>
                                     </div>
                                     <div class="xp-info">
                                         <h3>${exp.title}</h3>
                                         <div class="xp-meta">
                                             <span class="xp-loc">${exp.location}</span>
-                                            <span class="xp-price">Từ ₫<fmt:formatNumber value="${exp.price}" type="number" groupingUsed="true"/>/khách</span>
+                                            <span class="xp-price"><span data-i18n="experiences.from_price">Từ</span> ₫<fmt:formatNumber value="${exp.price}" type="number" groupingUsed="true"/><span data-i18n="experiences.per_guest">/khách</span></span>
                                             <span class="xp-rate">${exp.rating}</span>
                                         </div>
                                     </div>
@@ -146,7 +149,7 @@
             <c:if test="${not empty workshopExperiences}">
                 <section class="xp-row">
                     <div class="xp-row-header">
-                        <h2>Workshop và lớp học</h2>
+                        <h2 data-i18n="experiences.workshops_classes">Workshop và lớp học</h2>
                         <div class="nav-arrows">
                             <button class="nav-arrow left" onclick="scrollRow('workshop-row', -1)">‹</button>
                             <button class="nav-arrow right" onclick="scrollRow('workshop-row', 1)">›</button>
@@ -159,13 +162,13 @@
                                 <article class="xp-card">
                                     <div class="xp-image">
                                         <img src="${exp.imageUrl}" alt="${exp.title}">
-                                        <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation(); alert('Chức năng yêu thích đang phát triển!');"><i class="bi bi-heart"></i></button>
+                                        <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation(); alert(I18N.t('experiences.wishlist_feature'));"><i class="bi bi-heart"></i></button>
                                     </div>
                                     <div class="xp-info">
                                         <h3>${exp.title}</h3>
                                         <div class="xp-meta">
                                             <span class="xp-loc">${exp.location}</span>
-                                            <span class="xp-price">Từ ₫<fmt:formatNumber value="${exp.price}" type="number" groupingUsed="true"/>/khách</span>
+                                            <span class="xp-price"><span data-i18n="experiences.from_price">Từ</span> ₫<fmt:formatNumber value="${exp.price}" type="number" groupingUsed="true"/><span data-i18n="experiences.per_guest">/khách</span></span>
                                             <span class="xp-rate">${exp.rating}</span>
                                         </div>
                                     </div>
@@ -178,7 +181,6 @@
         </main>
 
         <%@ include file="/design/footer.jsp" %>
-        <jsp:include page="/chatbot/chatbot.jsp" />
 
         <!-- Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>

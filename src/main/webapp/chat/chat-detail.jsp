@@ -10,7 +10,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GO2BNB - Chat với 
+    <title>GO2BNB - Chat with 
         <c:choose>
             <c:when test="${currentUser.userID == conversation.guestID}">
                 ${conversation.hostName}
@@ -270,10 +270,10 @@
                     <h5>
                         <c:choose>
                             <c:when test="${currentUser.userID == conversation.guestID}">
-                                ${conversation.hostName} (Host)
+                                ${conversation.hostName} (<span data-i18n="chat.host"></span>)
                             </c:when>
                             <c:otherwise>
-                                ${conversation.guestName} (Guest)
+                                ${conversation.guestName} (<span data-i18n="chat.guest"></span>)
                             </c:otherwise>
                         </c:choose>
                     </h5>
@@ -299,22 +299,22 @@
                 <c:otherwise>
                     <div class="no-messages">
                         <i class="bi bi-chat-square-text"></i>
-                        <h5>Chưa có tin nhắn nào</h5>
-                        <p>Hãy gửi tin nhắn đầu tiên để bắt đầu cuộc hội thoại!</p>
+                        <h5 data-i18n="chat.no_messages_yet"></h5>
+                        <p data-i18n="chat.first_message"></p>
                     </div>
                 </c:otherwise>
             </c:choose>
         </div>
 
         <div class="typing-indicator" id="typingIndicator">
-            <i class="bi bi-three-dots"></i> Đang nhập...
+            <i class="bi bi-three-dots"></i> <span data-i18n="chat.typing"></span>
         </div>
 
         <!-- Message Input -->
         <div class="message-input-container">
             <textarea class="message-input" 
                       id="messageInput" 
-                      placeholder="Nhập tin nhắn..." 
+                      placeholder="Type a message..." 
                       rows="1"></textarea>
             <button class="send-btn" id="sendBtn" onclick="sendMessage()">
                 <i class="bi bi-send"></i>
@@ -323,6 +323,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     <script>
         const conversationId = ${conversation.conversationID};
         const currentUserId = ${currentUser.userID};

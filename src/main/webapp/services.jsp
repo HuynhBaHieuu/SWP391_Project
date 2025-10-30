@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title data-i18n="services.page_title">GO2BNB - Dịch vụ</title>
+        <title>GO2BNB - <span data-i18n="services.page_title">Services</span></title>
         <link rel="icon" type="image/jpg" href="image/logo.jpg">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" href="css/services.css"/>
@@ -16,6 +16,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+        <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     </head>
     <body>
         <%
@@ -211,8 +212,8 @@
                             <p class="service-description"><%= description.length() > 100 ? description.substring(0, 100) + "..." : description%></p>
                             <% }%>
                             <div class="price-info">
-                                <span class="price-from">Từ <%= formattedPrice%>/khách</span>
-                                <span class="price-min">Tối thiểu <%= formattedPrice%></span>
+                                <span class="price-from"><span data-i18n="experiences.from_price">Từ</span> <%= formattedPrice%><span data-i18n="experiences.per_guest">/khách</span></span>
+                                <span class="price-min"><span data-i18n="services.minimum">Tối thiểu</span> <%= formattedPrice%></span>
                                 <span class="rating">★ 4,5</span>
                             </div>
                         </div>
@@ -231,7 +232,7 @@
             %>
             <section class="service-row">
                 <div class="service-row-header">
-                    <h2>Dịch vụ</h2>
+                    <h2 data-i18n="services.page_title">Dịch vụ</h2>
                 </div>
                 <div class="service-cards-container">
                     <div class="no-services">

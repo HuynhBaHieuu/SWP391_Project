@@ -24,7 +24,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/image/logo.jpg">
-    <title>Hồ sơ người dùng</title>
+    <title data-i18n="profile.user_profile">Hồ sơ người dùng</title>
     <link rel="stylesheet" href="<%= request.getContextPath() %>/css/home.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -136,19 +136,19 @@
                     </form>
                              
                     <% if (user.getProfileImage() != null) { %>
-                    <button type="button" class="btn btn-danger mt-2 avatar-remove" onclick="removeAvatar()">Xóa ảnh</button>
+                    <button type="button" class="btn btn-danger mt-2 avatar-remove" onclick="removeAvatar()" data-i18n="profile.remove_avatar"></button>
                     <% }%>
                 </div>
                 <div class="col-md-6">
                     <h2 class="mb-2"><%= user.getFullName() %></h2>
                     <div class="mb-3">
-                        <span>Vai trò: </span>
+                        <span data-i18n="profile.role">Vai trò:</span>
                         <span class="role-badge role-<%= user.getRole().toLowerCase() %>"><%= user.getRole() %></span>
                     </div>
                 </div>
                 <div class="col-md-3 text-end">
                     <a href="<%= request.getContextPath() %>/profile/editProfile.jsp" class="btn btn-light btn-lg">
-                        <i class="fas fa-edit"></i> Chỉnh sửa hồ sơ
+                        <i class="fas fa-edit"></i> <span data-i18n="profile.edit_profile">Chỉnh sửa hồ sơ</span>
                     </a>
                 </div>
             </div>
@@ -159,7 +159,7 @@
             <div class="col-md-6">
                 <div class="info-card">
                     <h4 class="mb-3">
-                        <i class="fas fa-address-book text-primary"></i> Thông tin liên lạc
+                        <i class="fas fa-address-book text-primary"></i> <span data-i18n="profile.contact_info">Thông tin liên lạc</span>
                     </h4>
                     
                     <div class="info-item">
@@ -167,7 +167,7 @@
                             <i class="fas fa-envelope"></i>
                         </div>
                         <div>
-                            <strong>Email</strong><br>
+                            <strong data-i18n="profile.email">Email</strong><br>
                             <span class="text-muted"><%= user.getEmail() %></span>
                         </div>
                     </div>
@@ -177,8 +177,8 @@
                             <i class="fas fa-phone"></i>
                         </div>
                         <div>
-                            <strong>Số điện thoại</strong><br>
-                            <span class="text-muted"><%= user.getPhoneNumber() != null ? user.getPhoneNumber() : "Not provided" %></span>
+                            <strong data-i18n="profile.phone_number">Số điện thoại</strong><br>
+                            <span class="text-muted"><%= user.getPhoneNumber() != null ? user.getPhoneNumber() : I18N.t('profile.not_provided') %></span>
                         </div>
                     </div>
                 </div>
@@ -188,7 +188,7 @@
             <div class="col-md-6">
                 <div class="info-card">
                     <h4 class="mb-3">
-                        <i class="fas fa-user-cog text-primary"></i> Thông tin chi tiết
+                        <i class="fas fa-user-cog text-primary"></i> <span data-i18n="profile.detailed_info">Thông tin chi tiết</span>
                     </h4>
                     
                     <div class="info-item">
@@ -196,7 +196,7 @@
                             <i class="fas fa-calendar-alt"></i>
                         </div>
                         <div>
-                            <strong>Tham gia từ</strong><br>
+                            <strong data-i18n="profile.joined_since">Tham gia từ</strong><br>
                             <span class="text-muted"><%= user.getCreatedAt() %></span>
                         </div>
                     </div>
@@ -206,9 +206,9 @@
                             <i class="fas fa-shield-alt"></i>
                         </div>
                         <div>
-                            <strong>Trạng thái tài khoản</strong><br>
+                            <strong data-i18n="profile.account_status">Trạng thái tài khoản</strong><br>
                             <span class="<%= user.isActive() ? "status-active" : "status-inactive" %>">
-                                <%= user.isActive() ? "Active" : "Inactive" %>
+                                <%= user.isActive() ? I18N.t('profile.active') : I18N.t('profile.inactive') %>
                             </span>
                         </div>
                     </div>
@@ -218,8 +218,8 @@
 
         <!-- Quyền & Vai trò -->
         <div class="info-card">
-            <h4 class="mb-3"><i class="fas fa-users-cog text-primary"></i> Quyền & Vai trò </h4>
-            <p class="text-muted">Thông tin vai trò được hiển thị ở tiêu đề hồ sơ phía trên.</p>
+            <h4 class="mb-3"><i class="fas fa-users-cog text-primary"></i> <span data-i18n="profile.permissions_roles">Quyền & Vai trò</span> </h4>
+            <p class="text-muted" data-i18n="profile.role_info">Thông tin vai trò được hiển thị ở tiêu đề hồ sơ phía trên.</p>
         </div>
     </div>
 
@@ -227,17 +227,18 @@
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div id="avatarToast" class="toast" role="alert">
             <div class="toast-header">
-                <strong class="me-auto">Cập nhật thành công</strong>
+                <strong class="me-auto" data-i18n="profile.update_success">Cập nhật thành công</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
             </div>
             <div class="toast-body">
-                Đã cập nhật ảnh đại diện thành công!
+                <span data-i18n="profile.avatar_updated">Đã cập nhật ảnh đại diện thành công!</span>
             </div>
         </div>
     </div>
     </main>
                             
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     <script>
         function uploadAvatar() {
             const fileInput = document.getElementById('avatarInput');
@@ -275,17 +276,17 @@
                             location.reload();
                         }, 2000);
                     } else {
-                        alert('Lỗi: ' + (data.message || 'Không thể upload ảnh'));
+                        alert(I18N.t('profile.upload_error') + ': ' + (data.message || I18N.t('profile.upload_error')));
                     }
                 })
                 .catch(error => {
                     console.error('Lỗi tải ảnh đại diện:', error);
-                    alert('Có lỗi khi tải ảnh đại diện. Vui lòng thử lại.');
+                    alert(I18N.t('profile.upload_error_msg'));
                 });
             }
         }
         function removeAvatar() {
-        if (confirm("Bạn có chắc muốn xóa ảnh đại diện?")) {
+        if (confirm(I18N.t('profile.confirm_remove_avatar'))) {
             fetch('removeAvatar', { method: 'POST' })
                 .then(res => res.json())
                 .then(result => {
@@ -293,7 +294,7 @@
                         document.getElementById("profileImage").src = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
                         location.reload(); // reload lại để ẩn nút Remove
                     } else {
-                        alert(result.message || "Xóa ảnh thất bại!");
+                        alert(result.message || I18N.t('profile.remove_error'));
                     }
                 })
                 .catch(err => alert("Lỗi: " + err));
