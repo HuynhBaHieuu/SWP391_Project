@@ -324,6 +324,7 @@
                                          alt="${item.title}" 
                                          class="card-img-top"
                                          onerror="this.src='https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1000'">
+                                    <button class="wishlist-btn" data-listing-id="${item.listingID}"><i class="bi bi-heart"></i></button>
                                     <div class="card-body">
                                         <h5 class="card-title">${item.title}</h5>
                                         <p class="card-text"><i class="bi bi-geo-alt"></i> ${item.city}</p>
@@ -363,6 +364,7 @@
                                          alt="${item.title}" 
                                          class="card-img-top"
                                          onerror="this.src='https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1000'">
+                                    <button class="wishlist-btn" data-listing-id="${item.listingID}"><i class="bi bi-heart"></i></button>
                                     <div class="card-body">
                                         <h5 class="card-title">${item.title}</h5>
                                         <p class="card-text">${item.city}</p>
@@ -524,6 +526,16 @@
                 const isActive = btn.classList.contains('active');
                 const action = isActive ? 'remove' : 'add';
 
+                // Cập nhật UI ngay lập tức (optimistic update)
+                btn.classList.toggle('active');
+                if (isActive) {
+                    icon.classList.remove('bi-heart-fill');
+                    icon.classList.add('bi-heart');
+                } else {
+                    icon.classList.remove('bi-heart');
+                    icon.classList.add('bi-heart-fill');
+                }
+
                 fetch('${pageContext.request.contextPath}/WishlistServlet', {
                     method: 'POST',
                     headers: {
@@ -531,17 +543,32 @@
                     },
                     body: 'listingId=' + listingId + '&action=' + action
                 })
-                        .then(response => {
-                            if (response.ok) {
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
+                                // Nếu có lỗi, hoàn tác thay đổi UI
                                 btn.classList.toggle('active');
-                                icon.classList.toggle('bi-heart');
-                                icon.classList.toggle('bi-heart-fill');
-                            } else {
+                                if (isActive) {
+                                    icon.classList.remove('bi-heart');
+                                    icon.classList.add('bi-heart-fill');
+                                } else {
+                                    icon.classList.remove('bi-heart-fill');
+                                    icon.classList.add('bi-heart');
+                                }
                                 alert('Có lỗi xảy ra, vui lòng thử lại!');
                             }
                         })
                         .catch(err => {
                             console.error('Error:', err);
+                            // Hoàn tác thay đổi UI khi có lỗi
+                            btn.classList.toggle('active');
+                            if (isActive) {
+                                icon.classList.remove('bi-heart');
+                                icon.classList.add('bi-heart-fill');
+                            } else {
+                                icon.classList.remove('bi-heart-fill');
+                                icon.classList.add('bi-heart');
+                            }
                             alert('Có lỗi xảy ra, vui lòng thử lại!');
                         });
             <% }%>

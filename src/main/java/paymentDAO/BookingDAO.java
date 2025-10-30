@@ -310,11 +310,12 @@ public class BookingDAO {
     public List<Booking> getAllBookingsByUserId(int userId) {
         List<Booking> list = new ArrayList<>();
         String sql = "SELECT b.BookingID, b.Status, "
-                + "l.ListingID, l.Title, l.Address, i.ImageUrl "
+                + "l.ListingID, l.Title, l.Address, "
+                + "(SELECT TOP 1 ImageUrl FROM ListingImages WHERE ListingID = l.ListingID) AS FirstImage "
                 + "FROM Bookings b "
                 + "JOIN Listings l ON b.ListingID = l.ListingID "
-                + "LEFT JOIN ListingImages i ON l.ListingID = i.ListingID "
-                + "WHERE b.GuestID = ?";
+                + "WHERE b.GuestID = ? "
+                + "ORDER BY b.CreatedAt DESC";
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -325,7 +326,7 @@ public class BookingDAO {
                 listing.setListingID(rs.getInt("ListingID"));
                 listing.setTitle(rs.getString("Title"));
                 listing.setAddress(rs.getString("Address"));
-                listing.setFirstImage(rs.getString("ImageUrl")); 
+                listing.setFirstImage(rs.getString("FirstImage")); 
 
                 Booking booking = new Booking();
                 booking.setBookingID(rs.getInt("BookingID"));

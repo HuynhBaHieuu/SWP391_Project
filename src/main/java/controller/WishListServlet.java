@@ -25,20 +25,31 @@ public class WishListServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User currentUser = (User) session.getAttribute("user");
 
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
         if (currentUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"success\":false,\"message\":\"Unauthorized\"}");
             return;
         }
 
-        int listingId = Integer.parseInt(request.getParameter("listingId"));
-        String action = request.getParameter("action");
+        try {
+            int listingId = Integer.parseInt(request.getParameter("listingId"));
+            String action = request.getParameter("action");
 
-        if ("add".equals(action)) {
-            userService.addToWishlist(currentUser.getUserID(), listingId);
-        } else if ("remove".equals(action)) {
-            userService.removeFromWishlist(currentUser.getUserID(), listingId);
+            if ("add".equals(action)) {
+                userService.addToWishlist(currentUser.getUserID(), listingId);
+            } else if ("remove".equals(action)) {
+                userService.removeFromWishlist(currentUser.getUserID(), listingId);
+            }
+            
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write("{\"success\":true}");
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"success\":false,\"message\":\"" + e.getMessage() + "\"}");
         }
-        response.setStatus(HttpServletResponse.SC_OK);
     }
 
     @Override
