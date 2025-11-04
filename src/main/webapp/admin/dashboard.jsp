@@ -50,6 +50,122 @@
     }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Chart.js for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* Analytics Section Styles */
+    .analytics-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+    
+    .chart-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .chart-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+    
+    .chart-card.full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .chart-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .chart-title i {
+      color: #6366f1;
+    }
+    
+    .chart-wrapper {
+      position: relative;
+      height: 300px;
+      margin-top: 16px;
+    }
+    
+    .chart-wrapper.large {
+      height: 400px;
+    }
+    
+    .stats-mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    
+    .mini-stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      padding: 20px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .mini-stat-card.success {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    
+    .mini-stat-card.warning {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .mini-stat-card.info {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .mini-stat-label {
+      font-size: 13px;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+    
+    .mini-stat-value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+    
+    .progress-ring {
+      width: 120px;
+      height: 120px;
+      margin: 20px auto;
+    }
+    
+    .progress-ring circle {
+      fill: none;
+      stroke-width: 8;
+      transition: stroke-dashoffset 0.35s;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+    
+    .progress-ring .bg-circle {
+      stroke: #e5e7eb;
+    }
+    
+    .progress-ring .progress-circle {
+      stroke: #6366f1;
+      stroke-dasharray: 283;
+      stroke-linecap: round;
+    }
+  </style>
 </head>
 <body>
   <%
@@ -57,11 +173,30 @@
     Statement stmt = null;
     ResultSet rs = null;
     
+    // Helper function to format currency in VND
+    java.text.DecimalFormat currencyFormat = new java.text.DecimalFormat("#,###");
+    
     // Stats variables
     int totalUsers = 0;
     int totalListings = 0;
     int totalBookings = 0;
     double totalRevenue = 0.0;
+    
+    // Analytics variables
+    double usageRate = 0.0; // Tỷ lệ sử dụng (%)
+    int newUsers = 0; // Người dùng mới (30 ngày)
+    double conversionRate = 0.0; // Tỷ lệ chuyển đổi (%)
+    double averageRating = 0.0; // Đánh giá trung bình
+    
+    // Chart data variables
+    java.util.List<String> monthlyLabels = new java.util.ArrayList<>();
+    java.util.List<Double> monthlyRevenue = new java.util.ArrayList<>();
+    int completedBookings = 0;
+    int processingBookings = 0;
+    int failedBookings = 0;
+    
+    // Payment variables
+    double totalRefund = 0.0; // Tổng hoàn tiền
     
     try {
       // Get database connection using DBConnection class
@@ -91,26 +226,113 @@
         }
         rs.close();
         
-        // Fetch total revenue (adjust column names if different in your schema)
+        // Fetch total revenue from completed bookings
         try {
-          rs = stmt.executeQuery("SELECT SUM(TotalAmount) as revenue FROM Bookings WHERE Status = 'completed'");
+          rs = stmt.executeQuery("SELECT ISNULL(SUM(TotalPrice), 0) as revenue FROM Bookings WHERE Status = 'Completed'");
           if (rs.next()) {
             totalRevenue = rs.getDouble("revenue");
           }
           rs.close();
         } catch (SQLException e) {
-          // Column name might be different, try alternative names
-          try {
-            rs = stmt.executeQuery("SELECT SUM(Total_Amount) as revenue FROM Bookings WHERE Status = 'completed'");
+          // If fails, set to 0
+          totalRevenue = 0.0;
+          System.out.println("Warning: Could not fetch revenue - " + e.getMessage());
+        }
+        
+        // Fetch Analytics metrics
+        try {
+          // 1. Tỷ lệ sử dụng: (số listings đã được đặt / tổng số listings) * 100
+          rs = stmt.executeQuery(
+            "SELECT CASE " +
+            "  WHEN COUNT(DISTINCT l.ListingID) > 0 " +
+            "  THEN CAST(COUNT(DISTINCT b.ListingID) * 100.0 / COUNT(DISTINCT l.ListingID) AS DECIMAL(10,2)) " +
+            "  ELSE 0 " +
+            "END AS usage_rate " +
+            "FROM Listings l " +
+            "LEFT JOIN Bookings b ON l.ListingID = b.ListingID AND b.Status = 'Completed'"
+          );
             if (rs.next()) {
-              totalRevenue = rs.getDouble("revenue");
+            usageRate = rs.getDouble("usage_rate");
             }
             rs.close();
-          } catch (SQLException e2) {
-            // If still fails, just set to 0
-            totalRevenue = 0.0;
-            System.out.println("Warning: Could not fetch revenue - " + e2.getMessage());
+          
+          // 2. Người dùng mới (30 ngày gần đây)
+          rs = stmt.executeQuery(
+            "SELECT COUNT(*) AS new_users " +
+            "FROM Users " +
+            "WHERE CreatedAt >= DATEADD(day, -30, GETDATE())"
+          );
+          if (rs.next()) {
+            newUsers = rs.getInt("new_users");
           }
+          rs.close();
+          
+          // 3. Tỷ lệ chuyển đổi: (số bookings completed / tổng số bookings) * 100
+          rs = stmt.executeQuery(
+            "SELECT CASE " +
+            "  WHEN COUNT(*) > 0 " +
+            "  THEN CAST(SUM(CASE WHEN Status = 'Completed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS DECIMAL(10,2)) " +
+            "  ELSE 0 " +
+            "END AS conversion_rate " +
+            "FROM Bookings"
+          );
+          if (rs.next()) {
+            conversionRate = rs.getDouble("conversion_rate");
+          }
+          rs.close();
+          
+          // 4. Đánh giá trung bình
+          rs = stmt.executeQuery("SELECT ISNULL(AVG(CAST(Rating AS FLOAT)), 0) AS avg_rating FROM Reviews");
+          if (rs.next()) {
+            averageRating = rs.getDouble("avg_rating");
+          }
+          rs.close();
+          
+          // 5. Doanh thu theo tháng (6 tháng gần đây)
+          rs = stmt.executeQuery(
+            "SELECT TOP 6 " +
+            "  FORMAT(DATEFROMPARTS(YEAR(CreatedAt), MONTH(CreatedAt), 1), 'MM/yyyy') AS month_label, " +
+            "  ISNULL(SUM(TotalPrice), 0) AS revenue " +
+            "FROM Bookings " +
+            "WHERE Status = 'Completed' AND CreatedAt >= DATEADD(month, -6, GETDATE()) " +
+            "GROUP BY YEAR(CreatedAt), MONTH(CreatedAt) " +
+            "ORDER BY YEAR(CreatedAt), MONTH(CreatedAt)"
+          );
+          while (rs.next()) {
+            monthlyLabels.add(rs.getString("month_label"));
+            monthlyRevenue.add(rs.getDouble("revenue"));
+          }
+          rs.close();
+          
+          // 6. Bookings theo trạng thái
+          rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM Bookings WHERE Status = 'Completed'");
+          if (rs.next()) completedBookings = rs.getInt("count");
+          rs.close();
+          
+          rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM Bookings WHERE Status = 'Processing'");
+          if (rs.next()) processingBookings = rs.getInt("count");
+          rs.close();
+          
+          rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM Bookings WHERE Status = 'Failed'");
+          if (rs.next()) failedBookings = rs.getInt("count");
+          rs.close();
+          
+          // 7. Tổng hoàn tiền (từ bookings failed hoặc payments failed)
+          try {
+            rs = stmt.executeQuery(
+              "SELECT ISNULL(SUM(TotalPrice), 0) AS refund_total " +
+              "FROM Bookings " +
+              "WHERE Status = 'Failed'"
+            );
+            if (rs.next()) {
+              totalRefund = rs.getDouble("refund_total");
+            }
+            rs.close();
+          } catch (SQLException e) {
+            totalRefund = 0.0;
+          }
+        } catch (SQLException e) {
+          System.out.println("Warning: Could not fetch analytics - " + e.getMessage());
         }
       }
       
@@ -236,13 +458,13 @@
               <span class="stat-title">Doanh thu</span>
               <div class="stat-icon orange">💵</div>
             </div>
-            <div class="stat-value">$<%= totalRevenue > 0 ? String.format("%.2f", totalRevenue) : "0.00" %></div>
+            <div class="stat-value"><%= totalRevenue > 0 ? currencyFormat.format(totalRevenue) : "0" %> VNĐ</div>
             <div class="stat-change">Tổng hợp mới nhất</div>
           </div>
         </div>
         
         <!-- Recent Activity now fetches from database -->
-        <div class="content-section active">
+        <div class="activity-section">
           <div class="section-header">
             <h2 class="section-title">Hoạt động gần đây</h2>
           </div>
@@ -259,36 +481,114 @@
             <tbody>
               <%
                 try {
-                  rs = stmt.executeQuery(
-                    "SELECT u.FullName AS full_name, u.Email AS email, u.ProfileImage AS avatar_url, " +
-                    "       a.ActivityType AS activity_type, a.CreatedAt AS created_at, a.Status AS status " +
-                    "FROM Activities a " +
-                    "JOIN Users u ON a.UserID = u.UserID " +
-                    "ORDER BY a.CreatedAt DESC"
-                  );
+                  // Combined query for recent activities from multiple sources
+                  String activitiesQuery = 
+                    "SELECT TOP 10 full_name, email, avatar_url, activity_type, created_at, status " +
+                    "FROM ( " +
+                    "  SELECT u.FullName AS full_name, u.Email AS email, u.ProfileImage AS avatar_url, " +
+                    "         N'Đăng ký tài khoản mới' AS activity_type, " +
+                    "         u.CreatedAt AS created_at, " +
+                    "         'success' AS status " +
+                    "  FROM Users u " +
+                    "  WHERE u.CreatedAt >= DATEADD(day, -30, GETDATE()) " +
+                    "  UNION ALL " +
+                    "  SELECT u.FullName AS full_name, u.Email AS email, u.ProfileImage AS avatar_url, " +
+                    "         N'Đặt phòng mới #' + CAST(b.BookingID AS NVARCHAR) + N' - ' + ISNULL(l.Title, N'N/A') AS activity_type, " +
+                    "         b.CreatedAt AS created_at, " +
+                    "         CASE WHEN b.Status = 'Completed' THEN 'success' WHEN b.Status = 'Failed' THEN 'danger' ELSE 'warning' END AS status " +
+                    "  FROM Bookings b " +
+                    "  LEFT JOIN Users u ON b.GuestID = u.UserID " +
+                    "  LEFT JOIN Listings l ON b.ListingID = l.ListingID " +
+                    "  WHERE b.CreatedAt >= DATEADD(day, -30, GETDATE()) " +
+                    "  UNION ALL " +
+                    "  SELECT u.FullName AS full_name, u.Email AS email, u.ProfileImage AS avatar_url, " +
+                    "         N'Hoàn thành đặt phòng #' + CAST(b.BookingID AS NVARCHAR) + N' - ' + CAST(b.TotalPrice AS NVARCHAR) + N' VNĐ' AS activity_type, " +
+                    "         b.CreatedAt AS created_at, " +
+                    "         'success' AS status " +
+                    "  FROM Bookings b " +
+                    "  LEFT JOIN Users u ON b.GuestID = u.UserID " +
+                    "  WHERE b.Status = 'Completed' AND b.CreatedAt >= DATEADD(day, -30, GETDATE()) " +
+                    "  UNION ALL " +
+                    "  SELECT u.FullName AS full_name, u.Email AS email, u.ProfileImage AS avatar_url, " +
+                    "         N'Tạo chỗ ở mới: ' + ISNULL(l.Title, N'N/A') AS activity_type, " +
+                    "         l.CreatedAt AS created_at, " +
+                    "         CASE WHEN l.Status = 'active' THEN 'success' ELSE 'warning' END AS status " +
+                    "  FROM Listings l " +
+                    "  LEFT JOIN Users u ON l.HostID = u.UserID " +
+                    "  WHERE l.CreatedAt >= DATEADD(day, -30, GETDATE()) " +
+                    "  UNION ALL " +
+                    "  SELECT u.FullName AS full_name, u.Email AS email, u.ProfileImage AS avatar_url, " +
+                    "         N'Yêu cầu trở thành Host ' + ISNULL(hr.ServiceType, N'N/A') AS activity_type, " +
+                    "         hr.RequestedAt AS created_at, " +
+                    "         CASE WHEN hr.Status = 'APPROVED' THEN 'success' WHEN hr.Status = 'REJECTED' THEN 'danger' ELSE 'warning' END AS status " +
+                    "  FROM HostRequests hr " +
+                    "  LEFT JOIN Users u ON hr.UserID = u.UserID " +
+                    "  WHERE hr.RequestedAt >= DATEADD(day, -30, GETDATE()) " +
+                    "  UNION ALL " +
+                    "  SELECT u.FullName AS full_name, u.Email AS email, u.ProfileImage AS avatar_url, " +
+                    "         N'Yêu cầu duyệt bài đăng: ' + ISNULL(l.Title, N'N/A') AS activity_type, " +
+                    "         lr.RequestedAt AS created_at, " +
+                    "         CASE WHEN lr.Status = 'Approved' THEN 'success' WHEN lr.Status = 'Rejected' THEN 'danger' ELSE 'warning' END AS status " +
+                    "  FROM ListingRequests lr " +
+                    "  LEFT JOIN Listings l ON lr.ListingID = l.ListingID " +
+                    "  LEFT JOIN Users u ON lr.HostID = u.UserID " +
+                    "  WHERE lr.RequestedAt >= DATEADD(day, -30, GETDATE()) " +
+                    ") AS activities " +
+                    "ORDER BY created_at DESC";
+                  
+                  rs = stmt.executeQuery(activitiesQuery);
                   
                   if (!rs.isBeforeFirst()) {
                     out.println("<tr><td colspan='4' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có hoạt động nào</td></tr>");
                   } else {
                     int count = 0;
+                    java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm");
                     while (rs.next() && count < 10) {
                       count++;
+                      String status = rs.getString("status");
+                      String statusClass = "warning";
+                      String statusText = "Đang xử lý";
+                      if ("success".equals(status)) {
+                        statusClass = "success";
+                        statusText = "Thành công";
+                      } else if ("danger".equals(status)) {
+                        statusClass = "danger";
+                        statusText = "Thất bại";
+                      }
+                      String timeStr = "";
+                      java.sql.Timestamp timestamp = rs.getTimestamp("created_at");
+                      if (timestamp != null) {
+                        timeStr = dateFormat.format(new java.util.Date(timestamp.getTime()));
+                      }
+                      
+                      // Process avatar path for recent activities
+                      String activityAvatarUrl = "https://i.pravatar.cc/150"; // Default
+                      String profileImage = rs.getString("avatar_url");
+                      if (profileImage != null && !profileImage.isEmpty()) {
+                        if (profileImage.startsWith("http")) {
+                          // External URL (Google avatar)
+                          activityAvatarUrl = profileImage;
+                        } else {
+                          // Local path - add context path
+                          activityAvatarUrl = request.getContextPath() + "/" + profileImage;
+                        }
+                      }
               %>
               <tr>
                 <td>
                   <div class="user-info">
-                    <img src="<%= rs.getString("avatar_url") != null ? rs.getString("avatar_url") : "https://i.pravatar.cc/150" %>" alt="User" class="user-avatar">
+                    <img src="<%= activityAvatarUrl %>" alt="User" class="user-avatar" onerror="this.src='https://i.pravatar.cc/150'">
                     <div class="user-details">
-                      <span class="user-name"><%= rs.getString("full_name") %></span>
-                      <span class="user-email"><%= rs.getString("email") %></span>
+                      <span class="user-name"><%= rs.getString("full_name") != null ? rs.getString("full_name") : "Người dùng" %></span>
+                      <span class="user-email"><%= rs.getString("email") != null ? rs.getString("email") : "" %></span>
                     </div>
                   </div>
                 </td>
-                <td><%= rs.getString("activity_type") %></td>
-                <td><%= rs.getTimestamp("created_at") %></td>
+                <td><%= rs.getString("activity_type") != null ? rs.getString("activity_type") : "Hoạt động" %></td>
+                <td><%= timeStr %></td>
                 <td>
-                  <span class="badge badge-<%= rs.getString("status").equals("success") ? "success" : "warning" %>">
-                    <%= rs.getString("status") %>
+                  <span class="badge badge-<%= statusClass %>">
+                    <%= statusText %>
                   </span>
                 </td>
               </tr>
@@ -297,6 +597,7 @@
                   }
                 } catch (Exception e) {
                   out.println("<tr><td colspan='4' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                  e.printStackTrace();
                 }
               %>
             </tbody>
@@ -341,11 +642,21 @@
                   out.println("<tr><td colspan='5' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có người dùng nào</td></tr>");
                 } else {
                   while (rs.next()) {
+                    // Process user avatar path
+                    String userAvatarUrl = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg"; // Default
+                    String userProfileImage = rs.getString("avatar_url");
+                    if (userProfileImage != null && !userProfileImage.isEmpty()) {
+                      if (userProfileImage.startsWith("http")) {
+                        userAvatarUrl = userProfileImage;
+                      } else {
+                        userAvatarUrl = request.getContextPath() + "/" + userProfileImage;
+                      }
+                    }
             %>
             <tr>
               <td>
                 <div class="user-info">
-                  <img src="<%= rs.getString("avatar_url") != null ? request.getContextPath() + "/" + rs.getString("avatar_url") : "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg" %>" alt="User" class="user-avatar">
+                  <img src="<%= userAvatarUrl %>" alt="User" class="user-avatar" onerror="this.src='https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg'">
                   <div class="user-details">
                     <span class="user-name"><%= rs.getString("full_name") %></span>
                     <span class="user-email"><%= rs.getString("email") %></span>
@@ -420,9 +731,9 @@
               try {
                 rs = stmt.executeQuery(
                   "SELECT l.ListingID AS id, l.Title AS title, l.Description AS description, " +
-                  "       (SELECT TOP 1 ImageUrl FROM ListingImages li WHERE li.ListingID = l.ListingID) AS image_url, " +
                   "       l.PricePerNight AS price_per_night, l.Status AS status, l.CreatedAt AS created_at, " +
-                  "       u.FullName AS host_name " +
+                  "       u.FullName AS host_name, " +
+                  "       (SELECT TOP 1 ImageUrl FROM ListingImages WHERE ListingID = l.ListingID) AS image_url " +
                   "FROM Listings l " +
                   "JOIN Users u ON l.HostID = u.UserID " +
                   "ORDER BY l.CreatedAt DESC"
@@ -432,19 +743,34 @@
                   out.println("<tr><td colspan='6' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có chỗ ở nào</td></tr>");
                 } else {
                   while (rs.next()) {
+                    // Process listing image path - same logic as avatar
+                    String listingImageUrl = "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop"; // Default placeholder
+                    String imageUrl = rs.getString("image_url");
+                    if (imageUrl != null && !imageUrl.isEmpty()) {
+                      if (imageUrl.startsWith("http")) {
+                        // External URL (Google, Unsplash, etc.)
+                        listingImageUrl = imageUrl;
+                      } else if (imageUrl.startsWith("/") || imageUrl.startsWith(request.getContextPath())) {
+                        // URL đã có context path hoặc bắt đầu bằng /
+                        listingImageUrl = imageUrl;
+                      } else {
+                        // Local path - add context path
+                        listingImageUrl = request.getContextPath() + "/" + imageUrl;
+                      }
+                    }
             %>
             <tr>
               <td>
                 <div class="user-info">
-                  <img src="<%= rs.getString("image_url") != null ? request.getContextPath() + "/" + rs.getString("image_url") : request.getContextPath() + "/images/placeholder.jpg" %>" alt="Listing" class="user-avatar">
+                  <img src="<%= listingImageUrl %>" alt="Listing" class="user-avatar" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop'">
                   <div class="user-details">
                     <span class="user-name"><%= rs.getString("title") %></span>
-                    <span class="user-email"><%= rs.getString("description") %></span>
+                    <span class="user-email"><%= rs.getString("description") != null && rs.getString("description").length() > 50 ? rs.getString("description").substring(0, 50) + "..." : rs.getString("description") %></span>
                   </div>
                 </div>
               </td>
               <td><%= rs.getString("host_name") %></td>
-              <td>$<%= rs.getDouble("price_per_night") %></td>
+              <td><%= currencyFormat.format(rs.getDouble("price_per_night")) %> VNĐ</td>
               <td>
                 <span class="badge badge-<%= rs.getString("status").equals("approved") ? "success" : "warning" %>">
                   <%= rs.getString("status") %>
@@ -618,8 +944,7 @@
                                 "SELECT lr.RequestID, l.ListingID, l.Title, l.Description, "
                                         + "u.FullName AS HostName, lr.RequestedAt AS RequestDate, "
                                         + "lr.Status AS RequestStatus, "
-                                        + "(SELECT TOP 1 li.ImageUrl FROM ListingImages li "
-                                        + "WHERE li.ListingID = l.ListingID ORDER BY li.ImageID ASC) AS ImageUrl "
+                                        + "(SELECT TOP 1 ImageUrl FROM ListingImages WHERE ListingID = l.ListingID) AS image_url "
                                         + "FROM ListingRequests lr "
                                         + "JOIN Listings l ON lr.ListingID = l.ListingID "
                                         + "JOIN Users u ON lr.HostID = u.UserID "
@@ -630,14 +955,29 @@
                             out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#6b7280;'>Không bài đăng chỗ ở nào cần duyệt</td></tr>");
                         } else {
                             while (rs.next()) {
+                                // Process listing image path - same logic as avatar
+                                String listingImageUrl = "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop"; // Default placeholder
+                                String imageUrl = rs.getString("image_url");
+                                if (imageUrl != null && !imageUrl.isEmpty()) {
+                                  if (imageUrl.startsWith("http")) {
+                                    // External URL (Google, Unsplash, etc.)
+                                    listingImageUrl = imageUrl;
+                                  } else if (imageUrl.startsWith("/") || imageUrl.startsWith(request.getContextPath())) {
+                                    // URL đã có context path hoặc bắt đầu bằng /
+                                    listingImageUrl = imageUrl;
+                                  } else {
+                                    // Local path - add context path
+                                    listingImageUrl = request.getContextPath() + "/" + imageUrl;
+                                  }
+                                }
                 %>
                 <tr>
                     <td>
                         <div class="user-info">
-                            <img src="<%= rs.getString("ImageUrl") != null ? request.getContextPath() + "/" + rs.getString("ImageUrl") : request.getContextPath() + "/images/placeholder.jpg"%>" alt="Listing" class="user-avatar">
+                            <img src="<%= listingImageUrl %>" alt="Listing" class="user-avatar" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop'">
                             <div class="user-details">
-                                <span class="user-name"><%= rs.getString("Title")%></span>
-                                <span class="user-email"><%= rs.getString("Description")%></span>
+                                <span class="user-name"><%= rs.getString("Title") != null ? rs.getString("Title") : "N/A" %></span>
+                                <span class="user-email"><%= rs.getString("Description") != null && rs.getString("Description").length() > 50 ? rs.getString("Description").substring(0, 50) + "..." : rs.getString("Description") %></span>
                             </div>
                         </div>
                     </td>
@@ -886,7 +1226,7 @@
               <span class="stat-title">Tổng doanh thu</span>
               <div class="stat-icon green">💰</div>
             </div>
-            <div class="stat-value">$<%= totalRevenue > 0 ? String.format("%.2f", totalRevenue) : "0.00" %></div>
+            <div class="stat-value"><%= totalRevenue > 0 ? currencyFormat.format(totalRevenue) : "0" %> VNĐ</div>
             <div class="stat-change">Dữ liệu từ database</div>
           </div>
           
@@ -895,7 +1235,7 @@
               <span class="stat-title">Hoa hồng</span>
               <div class="stat-icon blue">💵</div>
             </div>
-            <div class="stat-value">$<%= totalRevenue > 0 ? String.format("%.2f", totalRevenue * 0.15) : "0.00" %></div>
+            <div class="stat-value"><%= totalRevenue > 0 ? currencyFormat.format(totalRevenue * 0.15) : "0" %> VNĐ</div>
             <div class="stat-change">15% doanh thu</div>
           </div>
           
@@ -904,8 +1244,8 @@
               <span class="stat-title">Hoàn tiền</span>
               <div class="stat-icon orange">🔄</div>
             </div>
-            <div class="stat-value">$0.00</div>
-            <div class="stat-change">Dữ liệu từ database</div>
+            <div class="stat-value"><%= totalRefund > 0 ? currencyFormat.format(totalRefund) : "0" %> VNĐ</div>
+            <div class="stat-change">Từ các đặt phòng thất bại</div>
           </div>
         </div>
         
@@ -927,11 +1267,125 @@
             </tr>
           </thead>
           <tbody>
+            <%
+              try {
+                // Fetch payments/transactions from Bookings with payment info
+                rs = stmt.executeQuery(
+                  "SELECT TOP 50 " +
+                  "  'BK-' + CAST(b.BookingID AS VARCHAR) AS transaction_id, " +
+                  "  u.FullName AS user_name, " +
+                  "  u.Email AS user_email, " +
+                  "  u.ProfileImage AS user_avatar, " +
+                  "  CASE " +
+                  "    WHEN b.Status = 'Completed' THEN N'Thanh toán' " +
+                  "    WHEN b.Status = 'Failed' THEN N'Hoàn tiền' " +
+                  "    ELSE N'Đang xử lý' " +
+                  "  END AS transaction_type, " +
+                  "  b.TotalPrice AS amount, " +
+                  "  b.CreatedAt AS transaction_date, " +
+                  "  b.Status AS status, " +
+                  "  b.BookingID AS booking_id, " +
+                  "  l.Title AS listing_title " +
+                  "FROM Bookings b " +
+                  "LEFT JOIN Users u ON b.GuestID = u.UserID " +
+                  "LEFT JOIN Listings l ON b.ListingID = l.ListingID " +
+                  "WHERE b.TotalPrice IS NOT NULL " +
+                  "ORDER BY b.CreatedAt DESC"
+                );
+                
+                if (!rs.isBeforeFirst()) {
+                  out.println("<tr><td colspan='7' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có giao dịch nào</td></tr>");
+                } else {
+                  java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm");
+                  while (rs.next()) {
+                    String status = rs.getString("status");
+                    String statusText = "Đang xử lý";
+                    String statusClass = "warning";
+                    if ("Completed".equals(status)) {
+                      statusText = "Hoàn thành";
+                      statusClass = "success";
+                    } else if ("Failed".equals(status)) {
+                      statusText = "Thất bại";
+                      statusClass = "danger";
+                    }
+                    
+                    String dateStr = "";
+                    java.sql.Timestamp timestamp = rs.getTimestamp("transaction_date");
+                    if (timestamp != null) {
+                      dateStr = dateFormat.format(new java.util.Date(timestamp.getTime()));
+                    }
+                    
+                    // Process avatar path
+                    String avatarUrl = "https://i.pravatar.cc/150"; // Default
+                    String profileImage = rs.getString("user_avatar");
+                    if (profileImage != null && !profileImage.isEmpty()) {
+                      if (profileImage.startsWith("http")) {
+                        // External URL (Google avatar)
+                        avatarUrl = profileImage;
+                      } else {
+                        // Local path - add context path
+                        avatarUrl = request.getContextPath() + "/" + profileImage;
+                      }
+                    }
+            %>
             <tr>
-              <td colspan="7" style="text-align: center; padding: 40px; color: #6b7280;">
-                Chưa có giao dịch nào
+              <td>
+                <span style="font-weight: 600; color: #6366f1;">
+                  <%= rs.getString("transaction_id") != null ? rs.getString("transaction_id") : "N/A" %>
+                </span>
+              </td>
+              <td>
+                <div class="user-info">
+                  <img src="<%= avatarUrl %>" alt="User" class="user-avatar" onerror="this.src='https://i.pravatar.cc/150'">
+                  <div class="user-details">
+                    <span class="user-name"><%= rs.getString("user_name") != null ? rs.getString("user_name") : "N/A" %></span>
+                    <span class="user-email"><%= rs.getString("user_email") != null ? rs.getString("user_email") : "" %></span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span style="font-weight: 500;">
+                  <%= rs.getString("transaction_type") != null ? rs.getString("transaction_type") : "N/A" %>
+                </span>
+                <% if (rs.getString("listing_title") != null) { %>
+                  <br><small style="color: #6b7280; font-size: 12px;"><%= rs.getString("listing_title") %></small>
+                <% } %>
+              </td>
+              <td>
+                <span style="font-weight: 600; color: <%= "Failed".equals(status) ? "#ef4444" : "#10b981" %>;">
+                  <%= "Failed".equals(status) ? "-" : "" %><%= currencyFormat.format(rs.getDouble("amount")) %> VNĐ
+                </span>
+              </td>
+              <td><%= dateStr %></td>
+              <td>
+                <span class="badge badge-<%= statusClass %>">
+                  <%= statusText %>
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn action-btn-view" onclick="viewTransactionDetail(<%= rs.getInt("booking_id") %>)" title="Xem chi tiết">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <% if ("Processing".equals(status)) { %>
+                    <button class="action-btn action-btn-success" onclick="confirmTransaction(<%= rs.getInt("booking_id") %>)" title="Xác nhận">
+                      <i class="fas fa-check"></i>
+                    </button>
+                    <button class="action-btn action-btn-danger" onclick="refundTransaction(<%= rs.getInt("booking_id") %>)" title="Hoàn tiền">
+                      <i class="fas fa-undo"></i>
+                    </button>
+                  <% } %>
+                </div>
               </td>
             </tr>
+            <%
+                  }
+                }
+              } catch (Exception e) {
+                out.println("<tr><td colspan='7' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                e.printStackTrace();
+              }
+            %>
           </tbody>
         </table>
       </div>
@@ -949,8 +1403,8 @@
               <span class="stat-title">Tỷ lệ sử dụng</span>
               <div class="stat-icon purple">📊</div>
             </div>
-            <div class="stat-value">0%</div>
-            <div class="stat-change">Dữ liệu từ database</div>
+            <div class="stat-value"><%= String.format("%.1f", usageRate) %>%</div>
+            <div class="stat-change">Tỷ lệ chỗ ở đã được đặt</div>
           </div>
           
           <div class="stat-card">
@@ -958,8 +1412,8 @@
               <span class="stat-title">Người dùng mới</span>
               <div class="stat-icon blue">👤</div>
             </div>
-            <div class="stat-value">0</div>
-            <div class="stat-change">Dữ liệu từ database</div>
+            <div class="stat-value"><%= newUsers %></div>
+            <div class="stat-change">Trong 30 ngày gần đây</div>
           </div>
           
           <div class="stat-card">
@@ -967,8 +1421,8 @@
               <span class="stat-title">Tỷ lệ chuyển đổi</span>
               <div class="stat-icon green">💹</div>
             </div>
-            <div class="stat-value">0%</div>
-            <div class="stat-change">Dữ liệu từ database</div>
+            <div class="stat-value"><%= String.format("%.1f", conversionRate) %>%</div>
+            <div class="stat-change">Tỷ lệ đặt phòng hoàn thành</div>
           </div>
           
           <div class="stat-card">
@@ -976,17 +1430,100 @@
               <span class="stat-title">Đánh giá trung bình</span>
               <div class="stat-icon orange">⭐</div>
             </div>
-            <div class="stat-value">0.0</div>
-            <div class="stat-change">Dữ liệu từ database</div>
+            <div class="stat-value"><%= String.format("%.1f", averageRating) %></div>
+            <div class="stat-change">Từ tất cả đánh giá</div>
           </div>
         </div>
         
-        <div class="content-section active">
-          <div class="section-header">
-            <h2 class="section-title">Biểu đồ doanh thu theo tháng</h2>
+        <!-- Analytics Charts Grid -->
+        <div class="analytics-container">
+          <!-- Revenue Chart -->
+          <div class="chart-card full-width">
+            <div class="chart-title">
+              <i class="fas fa-chart-line"></i>
+              Doanh thu theo tháng (6 tháng gần đây)
           </div>
-          <div class="chart-container">
-            📈 Biểu đồ sẽ được hiển thị khi có dữ liệu (tích hợp Chart.js)
+            <div class="chart-wrapper large">
+              <canvas id="revenueChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Bookings Status Chart -->
+          <div class="chart-card">
+            <div class="chart-title">
+              <i class="fas fa-chart-pie"></i>
+              Trạng thái đặt phòng
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="bookingsStatusChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- User Growth Chart -->
+          <div class="chart-card">
+            <div class="chart-title">
+              <i class="fas fa-users"></i>
+              Tăng trưởng người dùng
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="userGrowthChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Conversion Rate Progress -->
+          <div class="chart-card">
+            <div class="chart-title">
+              <i class="fas fa-percentage"></i>
+              Tỷ lệ chuyển đổi
+            </div>
+            <div style="text-align: center; padding: 20px;">
+              <div style="font-size: 48px; font-weight: 700; color: #6366f1; margin-bottom: 8px;">
+                <%= String.format("%.1f", conversionRate) %>%%
+              </div>
+              <div style="color: #6b7280; font-size: 14px;">Tỷ lệ đặt phòng hoàn thành</div>
+              <div style="margin-top: 24px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                <% double convWidth = Math.min(conversionRate, 100); %>
+                <div style="height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); width: <%= convWidth %>%; transition: width 0.5s;"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Usage Rate Progress -->
+          <div class="chart-card">
+            <div class="chart-title">
+              <i class="fas fa-chart-bar"></i>
+              Tỷ lệ sử dụng
+            </div>
+            <div style="text-align: center; padding: 20px;">
+              <div style="font-size: 48px; font-weight: 700; color: #10b981; margin-bottom: 8px;">
+                <%= String.format("%.1f", usageRate) %>%%
+              </div>
+              <div style="color: #6b7280; font-size: 14px;">Chỗ ở đã được đặt</div>
+              <div style="margin-top: 24px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                <% double usageWidth = Math.min(usageRate, 100); %>
+                <div style="height: 100%; background: linear-gradient(90deg, #10b981, #059669); width: <%= usageWidth %>%; transition: width 0.5s;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Mini Stats Grid -->
+        <div class="stats-mini-grid">
+          <div class="mini-stat-card">
+            <div class="mini-stat-label">Đặt phòng hoàn thành</div>
+            <div class="mini-stat-value"><%= completedBookings %></div>
+          </div>
+          <div class="mini-stat-card success">
+            <div class="mini-stat-label">Đang xử lý</div>
+            <div class="mini-stat-value"><%= processingBookings %></div>
+          </div>
+          <div class="mini-stat-card warning">
+            <div class="mini-stat-label">Thất bại</div>
+            <div class="mini-stat-value"><%= failedBookings %></div>
+          </div>
+          <div class="mini-stat-card info">
+            <div class="mini-stat-label">Đánh giá trung bình</div>
+            <div class="mini-stat-value"><%= String.format("%.1f", averageRating) %> ⭐</div>
           </div>
         </div>
       </div>
@@ -1336,6 +1873,14 @@
         if (section) {
           section.classList.add('active');
           section.style.display = 'block';
+          
+          // Ensure activity-section is visible when dashboard is shown
+          if (sectionId === 'dashboard') {
+            const activitySection = section.querySelector('.activity-section');
+            if (activitySection) {
+              activitySection.style.display = 'block';
+            }
+          }
         }
       });
     });
@@ -1584,6 +2129,24 @@
       const contextPath = '<%=request.getContextPath()%>';
       const url = contextPath + '/booking?action=detail&bookingId=' + id;
       window.open(url, '_blank');
+    }
+    
+    // Payment transaction functions
+    function viewTransactionDetail(bookingId) {
+      console.log('Viewing transaction detail for booking:', bookingId);
+      viewBookingDetail(bookingId);
+    }
+    
+    function confirmTransaction(bookingId) {
+      if (confirm('Bạn có chắc muốn xác nhận giao dịch này?')) {
+        updateBookingStatus(bookingId, 'Completed');
+      }
+    }
+    
+    function refundTransaction(bookingId) {
+      if (confirm('Bạn có chắc muốn hoàn tiền cho giao dịch này? Hành động này sẽ không thể hoàn tác.')) {
+        updateBookingStatus(bookingId, 'Failed');
+      }
     }
     
     function updateBookingStatus(bookingId, newStatus) {
@@ -1878,7 +2441,7 @@
           '<td><strong>' + exp.experienceId + '</strong></td>' +
           '<td>' +
             '<img src="' + exp.imageUrl + '" alt="' + exp.title + '" ' +
-                 'onerror="this.src=\'https://via.placeholder.com/80x60?text=No+Image\'" ' +
+                 'onerror="this.src=\'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=80&h=60&fit=crop\'" ' +
                  'style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;">' +
           '</td>' +
           '<td>' +
@@ -3021,7 +3584,142 @@
         }, 3000); // 3000ms = 3 giây
     }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">  </script>
+  
+  <!-- Analytics Charts JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Revenue Chart Data
+      <% if (monthlyLabels.isEmpty()) { %>
+      const revenueLabels = [];
+      const revenueData = [];
+      <% } else { %>
+      const revenueLabels = [<% for (int i = 0; i < monthlyLabels.size(); i++) { %>'<%= monthlyLabels.get(i) %>'<%= i < monthlyLabels.size() - 1 ? "," : "" %><% } %>];
+      const revenueData = [<% for (int i = 0; i < monthlyRevenue.size(); i++) { %><%= monthlyRevenue.get(i) %><%= i < monthlyRevenue.size() - 1 ? "," : "" %><% } %>];
+      <% } %>
+      
+      // Format revenue data with thousands separator
+      const formattedRevenue = revenueData.map(val => {
+        return Math.round(val).toLocaleString('vi-VN');
+      });
+      
+      // Revenue Line Chart
+      const revenueCtx = document.getElementById('revenueChart');
+      if (revenueCtx) {
+        new Chart(revenueCtx, {
+          type: 'line',
+          data: {
+            labels: revenueLabels,
+            datasets: [{
+              label: 'Doanh thu (VNĐ)',
+              data: revenueData,
+              borderColor: 'rgb(99, 102, 241)',
+              backgroundColor: 'rgba(99, 102, 241, 0.1)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 5,
+              pointBackgroundColor: 'rgb(99, 102, 241)',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top'
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return 'Doanh thu: ' + Math.round(context.parsed.y).toLocaleString('vi-VN') + ' VNĐ';
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return Math.round(value).toLocaleString('vi-VN') + ' VNĐ';
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+      
+      // Bookings Status Pie Chart
+      const bookingsStatusCtx = document.getElementById('bookingsStatusChart');
+      if (bookingsStatusCtx) {
+        new Chart(bookingsStatusCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Hoàn thành', 'Đang xử lý', 'Thất bại'],
+            datasets: [{
+              data: [<%= completedBookings %>, <%= processingBookings %>, <%= failedBookings %>],
+              backgroundColor: [
+                'rgb(16, 185, 129)',
+                'rgb(59, 130, 246)',
+                'rgb(239, 68, 68)'
+              ],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            }
+          }
+        });
+      }
+      
+      // User Growth Chart (simplified - showing new users trend)
+      const userGrowthCtx = document.getElementById('userGrowthChart');
+      if (userGrowthCtx) {
+        // Simple bar chart showing new users
+        new Chart(userGrowthCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Người dùng mới'],
+            datasets: [{
+              label: 'Số lượng',
+              data: [<%= newUsers %>],
+              backgroundColor: 'rgba(59, 130, 246, 0.8)',
+              borderColor: 'rgb(59, 130, 246)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1
+                }
+              }
+            }
+          }
+        });
+      }
+    });
+  </script>
 </body>
 </html>
     

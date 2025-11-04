@@ -83,7 +83,7 @@ public class GoogleOAuthCallbackServlet extends HttpServlet {
             if ("Admin".equalsIgnoreCase(role)) {
                 resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
             } else {
-                resp.sendRedirect(req.getContextPath() + "/home.jsp");
+                resp.sendRedirect(req.getContextPath() + "/home");
             }
 
         } catch (Exception ex) {

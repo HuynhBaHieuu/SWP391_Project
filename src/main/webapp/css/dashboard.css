@@ -213,6 +213,16 @@ body {
   display: block;
 }
 
+/* Activity Section - nested inside dashboard, always visible when dashboard is active */
+.activity-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  display: block;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
