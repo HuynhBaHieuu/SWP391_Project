@@ -46,6 +46,34 @@ public class HostCalendarController extends HttpServlet {
         }
         
         try {
+            // Lấy tháng và năm từ request (nếu có)
+            Integer selectedMonth = null;
+            Integer selectedYear = null;
+            
+            String monthParam = request.getParameter("month");
+            String yearParam = request.getParameter("year");
+            
+            if (monthParam != null && !monthParam.isEmpty()) {
+                try {
+                    selectedMonth = Integer.parseInt(monthParam);
+                } catch (NumberFormatException e) {
+                    // Invalid month, use current month
+                }
+            }
+            
+            if (yearParam != null && !yearParam.isEmpty()) {
+                try {
+                    selectedYear = Integer.parseInt(yearParam);
+                } catch (NumberFormatException e) {
+                    // Invalid year, use current year
+                }
+            }
+            
+            // Nếu không có filter, dùng tháng/năm hiện tại
+            LocalDate now = LocalDate.now();
+            int displayMonth = (selectedMonth != null) ? selectedMonth : now.getMonthValue();
+            int displayYear = (selectedYear != null) ? selectedYear : now.getYear();
+            
             // Lấy danh sách tất cả listings của host
             List<Listing> hostListings = listingDAO.getActiveListingsByHostId(currentUser.getUserID());
             
@@ -61,8 +89,10 @@ public class HostCalendarController extends HttpServlet {
             request.setAttribute("hostListings", hostListings);
             request.setAttribute("listingsBookings", listingsBookings);
             request.setAttribute("currentDate", LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-            request.setAttribute("currentMonth", LocalDate.now().getMonthValue());
-            request.setAttribute("currentYear", LocalDate.now().getYear());
+            request.setAttribute("currentMonth", displayMonth);
+            request.setAttribute("currentYear", displayYear);
+            request.setAttribute("selectedMonth", selectedMonth);
+            request.setAttribute("selectedYear", selectedYear);
             
         } catch (Exception e) {
             e.printStackTrace();

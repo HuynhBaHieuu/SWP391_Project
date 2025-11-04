@@ -8,9 +8,16 @@
     String currentDate = (String) request.getAttribute("currentDate");
     Integer currentMonth = (Integer) request.getAttribute("currentMonth");
     Integer currentYear = (Integer) request.getAttribute("currentYear");
+    Integer selectedMonth = (Integer) request.getAttribute("selectedMonth");
+    Integer selectedYear = (Integer) request.getAttribute("selectedYear");
     
     if (hostListings == null) hostListings = new java.util.ArrayList<>();
     if (listingsBookings == null) listingsBookings = new java.util.HashMap<>();
+    
+    // Lấy tháng/năm hiện tại nếu chưa có filter
+    java.time.LocalDate now = java.time.LocalDate.now();
+    int defaultMonth = (currentMonth != null) ? currentMonth : now.getMonthValue();
+    int defaultYear = (currentYear != null) ? currentYear : now.getYear();
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -35,6 +42,45 @@
             <div class="calendar-header">
                 <h1><i class="bi bi-calendar3"></i> Lịch đặt phòng</h1>
                 <p class="subtitle">Quản lý lịch đặt của tất cả nơi lưu trú</p>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="monthFilter" class="form-label"><i class="bi bi-calendar-month"></i> Chọn tháng:</label>
+                        <select id="monthFilter" class="form-select">
+                            <% for (int m = 1; m <= 12; m++) { %>
+                                <option value="<%= m %>" <%= (selectedMonth != null && selectedMonth == m) || (selectedMonth == null && defaultMonth == m) ? "selected" : "" %>>
+                                    Tháng <%= m %>
+                                </option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="yearFilter" class="form-label"><i class="bi bi-calendar-year"></i> Chọn năm:</label>
+                        <select id="yearFilter" class="form-select">
+                            <% 
+                            int currentYearNow = java.time.LocalDate.now().getYear();
+                            for (int y = currentYearNow - 1; y <= currentYearNow + 2; y++) { 
+                            %>
+                                <option value="<%= y %>" <%= (selectedYear != null && selectedYear == y) || (selectedYear == null && defaultYear == y) ? "selected" : "" %>>
+                                    Năm <%= y %>
+                                </option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-red w-100" onclick="applyFilter()">
+                            <i class="bi bi-search"></i> Áp dụng
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-outline-secondary w-100" onclick="resetFilter()">
+                            <i class="bi bi-arrow-clockwise"></i> Về tháng hiện tại
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Listing Selector -->
@@ -119,8 +165,8 @@
             if (!calendarDiv) return;
 
             const today = new Date('<%= currentDate %>');
-            const currentMonth = <%= currentMonth %>;
-            const currentYear = <%= currentYear %>;
+            const currentMonth = <%= defaultMonth %>;
+            const currentYear = <%= defaultYear %>;
             
             const firstDay = new Date(currentYear, currentMonth - 1, 1);
             const lastDay = new Date(currentYear, currentMonth, 0);
@@ -225,6 +271,23 @@
                 });
             }
         });
+
+        // Filter functions
+        function applyFilter() {
+            const month = document.getElementById('monthFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('month', month);
+            url.searchParams.set('year', year);
+            window.location.href = url.toString();
+        }
+
+        function resetFilter() {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('month');
+            url.searchParams.delete('year');
+            window.location.href = url.toString();
+        }
     </script>
 </body>
 </html>

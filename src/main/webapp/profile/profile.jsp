@@ -136,7 +136,7 @@
                     </form>
                              
                     <% if (user.getProfileImage() != null) { %>
-                    <button type="button" class="btn btn-danger mt-2 avatar-remove" onclick="removeAvatar()">Xóa ảnh</button>
+                    <button type="button" class="btn btn-danger mt-2 avatar-remove" style="white-space: nowrap; padding: 6px 12px; line-height: 1.2;" onclick="removeAvatar()">Xóa ảnh</button>
                     <% }%>
                 </div>
                 <div class="col-md-6">

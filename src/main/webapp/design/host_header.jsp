@@ -18,6 +18,7 @@
         // Ảnh mặc định
         hostImagePath = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
     }
+    
 %>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/host-header.css">
 
@@ -33,6 +34,9 @@
         <a href="${pageContext.request.contextPath}/host/listings" class="nav-link ${param.active eq 'listings' ? 'active' : ''}" data-i18n="header.host.nav.listings">Bài đăng</a>
         <a href="${pageContext.request.contextPath}/chat" class="nav-link ${param.active eq 'inbox' ? 'active' : ''}" data-i18n="header.host.nav.inbox">Tin nhắn</a>
         <a href="${pageContext.request.contextPath}/booking?action=list" class="nav-link ${param.active eq 'bookings' ? 'active' : ''}" data-i18n="header.host.nav.bookings">Phòng đặt</a>
+        <a href="${pageContext.request.contextPath}/host/revenue" class="nav-link nav-link-revenue ${param.active eq 'revenue' ? 'active' : ''}" title="Tổng doanh thu">
+            Doanh thu
+        </a>
     </nav>
     <div class="host-header-right">
         <a href="${pageContext.request.contextPath}/host/switch-to-guest" class="switch-mode" data-i18n="header.host.switch_to_guest">Chuyển sang chế độ du lịch</a>

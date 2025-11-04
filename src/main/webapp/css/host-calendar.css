@@ -42,6 +42,72 @@ body {
     margin-top: 10px;
 }
 
+/* Filter Section */
+.filter-section {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+    transition: all 0.3s ease;
+}
+
+.filter-section:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.filter-section .form-label {
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: block;
+    color: #374151;
+    font-size: 1rem;
+}
+
+.filter-section .form-select {
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.filter-section .form-select:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+    outline: none;
+}
+
+.filter-section .btn {
+    padding: 12px 20px;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.filter-section .btn-primary {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    border: none;
+}
+
+.filter-section .btn-primary:hover {
+    background: linear-gradient(135deg, #ee5a6f 0%, #ff6b6b 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.filter-section .btn-outline-secondary {
+    border: 2px solid #e5e7eb;
+    color: #6b7280;
+}
+
+.filter-section .btn-outline-secondary:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    transform: translateY(-2px);
+}
+
 /* Listing Selector */
 .listing-selector {
     background: white;
