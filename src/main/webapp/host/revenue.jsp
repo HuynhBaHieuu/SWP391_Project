@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ page import="model.Booking, java.util.List, java.util.Map" %>
+<%@ page import="model.Booking, model.HostBalance, java.util.List, java.util.Map" %>
 
 <%
     Double totalRevenue = (Double) request.getAttribute("totalRevenue");
@@ -16,6 +16,7 @@
     Integer selectedYear = (Integer) request.getAttribute("selectedYear");
     Double selectedMonthRevenue = (Double) request.getAttribute("selectedMonthRevenue");
     Integer selectedMonthBookings = (Integer) request.getAttribute("selectedMonthBookings");
+    HostBalance balance = (HostBalance) request.getAttribute("balance");
     
     if (totalRevenue == null) totalRevenue = 0.0;
     if (thisMonthRevenue == null) thisMonthRevenue = 0.0;
@@ -337,6 +338,31 @@
     </div>
     
     <div class="container-main">
+        <!-- Balance Cards (if balance exists) -->
+        <% if (balance != null) { %>
+            <div class="stats-container" style="margin-bottom: 30px;">
+                <div class="stat-card" style="border-left-color: #10b981;">
+                    <div class="icon">💰</div>
+                    <div class="stat-label">Số dư có thể rút</div>
+                    <div class="stat-value" style="color: #10b981;">
+                        <fmt:formatNumber value="<%= balance.getAvailableBalance().doubleValue() %>" type="number" maxFractionDigits="0" /> VNĐ
+                    </div>
+                    <a href="${pageContext.request.contextPath}/host/withdrawal" style="margin-top: 10px; display: inline-block; color: #10b981; text-decoration: none; font-weight: 600;">
+                        <i class="fas fa-arrow-right me-1"></i>Rút tiền ngay
+                    </a>
+                </div>
+                
+                <div class="stat-card" style="border-left-color: #f59e0b;">
+                    <div class="icon">⏳</div>
+                    <div class="stat-label">Số dư đang chờ</div>
+                    <div class="stat-value" style="color: #f59e0b;">
+                        <fmt:formatNumber value="<%= balance.getPendingBalance().doubleValue() %>" type="number" maxFractionDigits="0" /> VNĐ
+                    </div>
+                    <small style="color: #6b7280; margin-top: 5px; display: block;">Sẽ có thể rút sau 24h từ check-out</small>
+                </div>
+            </div>
+        <% } %>
+        
         <!-- Stats Cards -->
         <div class="stats-container">
             <div class="stat-card total">

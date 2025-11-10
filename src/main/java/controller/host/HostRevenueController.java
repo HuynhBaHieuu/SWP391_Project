@@ -2,7 +2,10 @@ package controller.host;
 
 import model.User;
 import model.Booking;
+import model.HostBalance;
 import paymentDAO.BookingDAO;
+import paymentDAO.HostBalanceDAO;
+import paymentDAO.HostEarningDAO;
 import dao.DBConnection;
 
 import jakarta.servlet.ServletException;
@@ -24,6 +27,8 @@ import java.util.Map;
 public class HostRevenueController extends HttpServlet {
     
     private BookingDAO bookingDAO = new BookingDAO();
+    private HostBalanceDAO hostBalanceDAO = new HostBalanceDAO();
+    private HostEarningDAO hostEarningDAO = new HostEarningDAO();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -134,6 +139,13 @@ public class HostRevenueController extends HttpServlet {
             request.setAttribute("selectedYear", year);
             request.setAttribute("selectedMonthRevenue", selectedMonthRevenue);
             request.setAttribute("selectedMonthBookings", selectedMonthBookings);
+            
+            // Xử lý chuyển PENDING → AVAILABLE (kiểm tra 24h sau check-out)
+            hostEarningDAO.processPendingToAvailable();
+            
+            // Lấy HostBalance để hiển thị số dư
+            HostBalance balance = hostBalanceDAO.getOrCreateHostBalance(currentUser.getUserID());
+            request.setAttribute("balance", balance);
             
         } catch (SQLException e) {
             e.printStackTrace();

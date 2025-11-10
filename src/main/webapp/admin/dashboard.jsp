@@ -1,6 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.sql.*" %>
 <%@ page import="dao.DBConnection" %>
+<%@ page import="model.Withdrawal" %>
+<%@ page import="paymentDAO.WithdrawalDAO" %>
+<%@ page import="java.util.List" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -181,6 +185,8 @@
     int totalListings = 0;
     int totalBookings = 0;
     double totalRevenue = 0.0;
+    double totalCommission = 0.0;
+    double totalHeldAmount = 0.0;
     
     // Analytics variables
     double usageRate = 0.0; // Tỷ lệ sử dụng (%)
@@ -197,6 +203,14 @@
     
     // Payment variables
     double totalRefund = 0.0; // Tổng hoàn tiền
+    
+    // Withdrawals variables
+    List<Withdrawal> withdrawals = new java.util.ArrayList<>();
+    String withdrawalStatusFilter = request.getParameter("withdrawalStatus");
+    long pendingWithdrawalCount = 0;
+    long approvedWithdrawalCount = 0;
+    long completedWithdrawalCount = 0;
+    long rejectedWithdrawalCount = 0;
     
     try {
       // Get database connection using DBConnection class
@@ -331,13 +345,54 @@
           } catch (SQLException e) {
             totalRefund = 0.0;
           }
+          
+          // 8. Tổng commission đã thu (từ HostEarnings)
+          try {
+            rs = stmt.executeQuery("SELECT ISNULL(SUM(CommissionAmount), 0) AS commission FROM HostEarnings");
+            if (rs.next()) {
+              totalCommission = rs.getDouble("commission");
+            }
+            rs.close();
+          } catch (SQLException e) {
+            totalCommission = 0.0;
+            System.out.println("Warning: Could not fetch commission - " + e.getMessage());
+          }
+          
+          // 9. Tổng số tiền đang giữ (PendingBalance + AvailableBalance từ tất cả hosts)
+          try {
+            rs = stmt.executeQuery("SELECT ISNULL(SUM(PendingBalance + AvailableBalance), 0) AS held_amount FROM HostBalances");
+            if (rs.next()) {
+              totalHeldAmount = rs.getDouble("held_amount");
+            }
+            rs.close();
+          } catch (SQLException e) {
+            totalHeldAmount = 0.0;
+            System.out.println("Warning: Could not fetch held amount - " + e.getMessage());
+          }
         } catch (SQLException e) {
           System.out.println("Warning: Could not fetch analytics - " + e.getMessage());
         }
       }
-      
     } catch (Exception e) {
       out.println("<div style='color: red; padding: 20px;'>Database connection error: " + e.getMessage() + "</div>");
+    }
+    
+    // Load withdrawals data
+    try {
+      WithdrawalDAO withdrawalDAO = new WithdrawalDAO();
+      if (withdrawalStatusFilter != null && !withdrawalStatusFilter.isEmpty()) {
+        withdrawals = withdrawalDAO.getWithdrawalsByStatus(withdrawalStatusFilter);
+      } else {
+        withdrawals = withdrawalDAO.getAllWithdrawals();
+      }
+      
+      pendingWithdrawalCount = withdrawalDAO.getWithdrawalsByStatus("PENDING").size();
+      approvedWithdrawalCount = withdrawalDAO.getWithdrawalsByStatus("APPROVED").size();
+      completedWithdrawalCount = withdrawalDAO.getWithdrawalsByStatus("COMPLETED").size();
+      rejectedWithdrawalCount = withdrawalDAO.getWithdrawalsByStatus("REJECTED").size();
+    } catch (Exception e) {
+      System.out.println("Warning: Could not fetch withdrawals - " + e.getMessage());
+      e.printStackTrace();
     }
   %>
   
@@ -401,6 +456,10 @@
           <a href="#" class="nav-item" data-section="payments">
             <span class="nav-icon">💵</span>
             <span>Payments</span>
+          </a>
+          <a href="#" class="nav-item" data-section="withdrawals">
+            <span class="nav-icon">💰</span>
+            <span>Quản lý rút tiền</span>
           </a>
         </div>
         
@@ -1232,11 +1291,20 @@
           
           <div class="stat-card">
             <div class="stat-header">
-              <span class="stat-title">Hoa hồng</span>
+              <span class="stat-title">Hoa hồng đã thu</span>
               <div class="stat-icon blue">💵</div>
             </div>
-            <div class="stat-value"><%= totalRevenue > 0 ? currencyFormat.format(totalRevenue * 0.15) : "0" %> VNĐ</div>
-            <div class="stat-change">15% doanh thu</div>
+            <div class="stat-value"><%= totalCommission > 0 ? currencyFormat.format(totalCommission) : "0" %> VNĐ</div>
+            <div class="stat-change">Tổng commission từ HostEarnings</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Số tiền đang giữ</span>
+              <div class="stat-icon purple">💼</div>
+            </div>
+            <div class="stat-value"><%= totalHeldAmount > 0 ? currencyFormat.format(totalHeldAmount) : "0" %> VNĐ</div>
+            <div class="stat-change">Pending + Available balances</div>
           </div>
           
           <div class="stat-card">
@@ -1388,6 +1456,241 @@
             %>
           </tbody>
         </table>
+      </div>
+      
+      <!-- Withdrawals Section -->
+      <div id="withdrawals" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">Quản lý rút tiền</h1>
+          <p class="page-subtitle">Duyệt và quản lý yêu cầu rút tiền từ host</p>
+        </div>
+        
+        <% 
+          String withdrawalSuccess = (String) session.getAttribute("withdrawalSuccess");
+          String withdrawalError = (String) session.getAttribute("withdrawalError");
+          if (withdrawalSuccess != null) {
+            session.removeAttribute("withdrawalSuccess");
+          }
+          if (withdrawalError != null) {
+            session.removeAttribute("withdrawalError");
+          }
+        %>
+        
+        <% if (withdrawalSuccess != null) { %>
+          <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 20px;">
+            <i class="fas fa-check-circle me-2"></i><%= withdrawalSuccess %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        <% } %>
+        <% if (withdrawalError != null) { %>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin: 20px;">
+            <i class="fas fa-exclamation-circle me-2"></i><%= withdrawalError %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        <% } %>
+        
+        <!-- Statistics -->
+        <div class="stats-grid">
+          <div class="stat-card" style="border-left-color: #f59e0b;">
+            <div class="stat-value"><%= pendingWithdrawalCount %></div>
+            <div class="stat-label">Đang chờ duyệt</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #10b981;">
+            <div class="stat-value"><%= approvedWithdrawalCount %></div>
+            <div class="stat-label">Đã duyệt</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #3b82f6;">
+            <div class="stat-value"><%= completedWithdrawalCount %></div>
+            <div class="stat-label">Hoàn tất</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #ef4444;">
+            <div class="stat-value"><%= rejectedWithdrawalCount %></div>
+            <div class="stat-label">Từ chối</div>
+          </div>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="filter-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+          <a href="#" class="filter-tab <%= (withdrawalStatusFilter == null || withdrawalStatusFilter.isEmpty()) ? "active" : "" %>" 
+             onclick="filterWithdrawals(''); return false;" style="padding: 10px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-decoration: none; color: inherit; transition: all 0.3s;">
+            Tất cả
+          </a>
+          <a href="#" class="filter-tab <%= "PENDING".equals(withdrawalStatusFilter) ? "active" : "" %>" 
+             onclick="filterWithdrawals('PENDING'); return false;" style="padding: 10px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-decoration: none; color: inherit; transition: all 0.3s;">
+            Đang chờ
+          </a>
+          <a href="#" class="filter-tab <%= "APPROVED".equals(withdrawalStatusFilter) ? "active" : "" %>" 
+             onclick="filterWithdrawals('APPROVED'); return false;" style="padding: 10px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-decoration: none; color: inherit; transition: all 0.3s;">
+            Đã duyệt
+          </a>
+          <a href="#" class="filter-tab <%= "COMPLETED".equals(withdrawalStatusFilter) ? "active" : "" %>" 
+             onclick="filterWithdrawals('COMPLETED'); return false;" style="padding: 10px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-decoration: none; color: inherit; transition: all 0.3s;">
+            Hoàn tất
+          </a>
+          <a href="#" class="filter-tab <%= "REJECTED".equals(withdrawalStatusFilter) ? "active" : "" %>" 
+             onclick="filterWithdrawals('REJECTED'); return false;" style="padding: 10px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-decoration: none; color: inherit; transition: all 0.3s;">
+            Từ chối
+          </a>
+        </div>
+        
+        <!-- Withdrawals Table -->
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã yêu cầu</th>
+              <th>Host</th>
+              <th>Số tiền</th>
+              <th>Ngân hàng</th>
+              <th>Số tài khoản</th>
+              <th>Chủ tài khoản</th>
+              <th>Ngày yêu cầu</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (withdrawals.isEmpty()) { %>
+              <tr>
+                <td colspan="9" style="text-align: center; padding: 40px; color: #6b7280;">
+                  <i class="fas fa-inbox" style="font-size: 3rem; opacity: 0.3; margin-bottom: 10px; display: block;"></i>
+                  Chưa có yêu cầu rút tiền nào
+                </td>
+              </tr>
+            <% } else { %>
+              <% for (Withdrawal w : withdrawals) { %>
+                <tr>
+                  <td>#<%= w.getWithdrawalID() %></td>
+                  <td>
+                    <div><strong><%= w.getHostName() != null ? w.getHostName() : "Host #" + w.getHostID() %></strong></div>
+                    <% if (w.getHostEmail() != null) { %>
+                      <small style="color: #6b7280;"><%= w.getHostEmail() %></small>
+                    <% } %>
+                  </td>
+                  <td style="color: #667eea; font-weight: 700;">
+                    <fmt:formatNumber value="<%= w.getAmount().doubleValue() %>" type="number" maxFractionDigits="0" /> VNĐ
+                  </td>
+                  <td><%= w.getBankName() %></td>
+                  <td><%= w.getBankAccount() %></td>
+                  <td><%= w.getAccountHolderName() %></td>
+                  <td><%= w.getFormattedRequestedAt() %></td>
+                  <td>
+                    <% if (w.isPending()) { %>
+                      <span class="badge" style="background: #fef3c7; color: #92400e; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem;">Đang chờ</span>
+                    <% } else if (w.isApproved()) { %>
+                      <span class="badge" style="background: #d1fae5; color: #065f46; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem;">Đã duyệt</span>
+                    <% } else if (w.isCompleted()) { %>
+                      <span class="badge" style="background: #dbeafe; color: #1e40af; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem;">Hoàn tất</span>
+                    <% } else if (w.isRejected()) { %>
+                      <span class="badge" style="background: #fee2e2; color: #991b1b; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem;">Từ chối</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                      <% if (w.isPending()) { %>
+                        <button type="button" class="btn-action" 
+                                onclick="openApproveModal(<%= w.getWithdrawalID() %>)" 
+                                style="background: #10b981; color: white; padding: 5px 12px; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
+                          <i class="fas fa-check me-1"></i>Duyệt
+                        </button>
+                        <button type="button" class="btn-action" 
+                                onclick="openRejectModal(<%= w.getWithdrawalID() %>)" 
+                                style="background: #ef4444; color: white; padding: 5px 12px; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
+                          <i class="fas fa-times me-1"></i>Từ chối
+                        </button>
+                      <% } else if (w.isApproved()) { %>
+                        <button type="button" class="btn-action" 
+                                onclick="openCompleteModal(<%= w.getWithdrawalID() %>)" 
+                                style="background: #3b82f6; color: white; padding: 5px 12px; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
+                          <i class="fas fa-check-double me-1"></i>Hoàn tất
+                        </button>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+              <% } %>
+            <% } %>
+          </tbody>
+        </table>
+        
+        <!-- Withdrawal Modals -->
+        <!-- Approve Modal -->
+        <div class="modal fade" id="approveWithdrawalModal" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Duyệt yêu cầu rút tiền</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <form method="POST" action="<%=request.getContextPath()%>/admin/withdrawals">
+                <input type="hidden" name="action" value="approve">
+                <input type="hidden" name="withdrawalId" id="approveWithdrawalId">
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label class="form-label">Ghi chú (tùy chọn)</label>
+                    <textarea name="notes" class="form-control" rows="3" placeholder="Nhập ghi chú..."></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                  <button type="submit" class="btn btn-success">Xác nhận duyệt</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Reject Modal -->
+        <div class="modal fade" id="rejectWithdrawalModal" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Từ chối yêu cầu rút tiền</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <form method="POST" action="<%=request.getContextPath()%>/admin/withdrawals">
+                <input type="hidden" name="action" value="reject">
+                <input type="hidden" name="withdrawalId" id="rejectWithdrawalId">
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label class="form-label">Lý do từ chối <span class="text-danger">*</span></label>
+                    <textarea name="rejectionReason" class="form-control" rows="3" required placeholder="Nhập lý do từ chối..."></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                  <button type="submit" class="btn btn-danger">Xác nhận từ chối</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Complete Modal -->
+        <div class="modal fade" id="completeWithdrawalModal" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Hoàn tất yêu cầu rút tiền</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <form method="POST" action="<%=request.getContextPath()%>/admin/withdrawals">
+                <input type="hidden" name="action" value="complete">
+                <input type="hidden" name="withdrawalId" id="completeWithdrawalId">
+                <div class="modal-body">
+                  <p>Xác nhận đã chuyển khoản thành công cho host?</p>
+                  <div class="mb-3">
+                    <label class="form-label">Ghi chú (tùy chọn)</label>
+                    <textarea name="notes" class="form-control" rows="3" placeholder="Nhập ghi chú..."></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                  <button type="submit" class="btn btn-primary">Xác nhận hoàn tất</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
       
       <!-- Analytics Section -->
@@ -3719,6 +4022,71 @@
         });
       }
     });
+    
+    // Withdrawal functions
+    function filterWithdrawals(status) {
+      const url = new URL(window.location.href);
+      if (status) {
+        url.searchParams.set('withdrawalStatus', status);
+      } else {
+        url.searchParams.delete('withdrawalStatus');
+      }
+      // Show withdrawals section
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
+        section.style.display = 'none';
+      });
+      const withdrawalsSection = document.getElementById('withdrawals');
+      if (withdrawalsSection) {
+        withdrawalsSection.classList.add('active');
+        withdrawalsSection.style.display = 'block';
+      }
+      // Update active nav item
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      const withdrawalsNav = document.querySelector('.nav-item[data-section="withdrawals"]');
+      if (withdrawalsNav) {
+        withdrawalsNav.classList.add('active');
+      }
+      // Reload page with filter
+      window.location.href = url.toString();
+    }
+    
+    function openApproveModal(withdrawalId) {
+      document.getElementById('approveWithdrawalId').value = withdrawalId;
+      new bootstrap.Modal(document.getElementById('approveWithdrawalModal')).show();
+    }
+    
+    function openRejectModal(withdrawalId) {
+      document.getElementById('rejectWithdrawalId').value = withdrawalId;
+      new bootstrap.Modal(document.getElementById('rejectWithdrawalModal')).show();
+    }
+    
+    function openCompleteModal(withdrawalId) {
+      document.getElementById('completeWithdrawalId').value = withdrawalId;
+      new bootstrap.Modal(document.getElementById('completeWithdrawalModal')).show();
+    }
+    
+    // Check if we should show withdrawals section on page load
+    <% if (request.getParameter("withdrawalStatus") != null) { %>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Show withdrawals section
+        document.querySelectorAll('.content-section').forEach(section => {
+          section.classList.remove('active');
+          section.style.display = 'none';
+        });
+        const withdrawalsSection = document.getElementById('withdrawals');
+        if (withdrawalsSection) {
+          withdrawalsSection.classList.add('active');
+          withdrawalsSection.style.display = 'block';
+        }
+        // Update active nav item
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        const withdrawalsNav = document.querySelector('.nav-item[data-section="withdrawals"]');
+        if (withdrawalsNav) {
+          withdrawalsNav.classList.add('active');
+        }
+      });
+    <% } %>
   </script>
 </body>
 </html>

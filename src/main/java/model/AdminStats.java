@@ -15,6 +15,10 @@ public class AdminStats implements Serializable {
     private int approvedHostRequests;
     private int rejectedHostRequests;
     private int totalHostRequests;
+    
+    // Commission and holding statistics
+    private double totalCommission; // Tổng commission đã thu
+    private double totalHeldAmount; // Tổng số tiền đang giữ (pending + available balances)
 
     // Constructors
     public AdminStats() {}
@@ -107,8 +111,25 @@ public class AdminStats implements Serializable {
         return totalHostRequests; 
     }
     
-    public void setTotalHostRequests(int totalHostRequests) { 
-        this.totalHostRequests = totalHostRequests; 
+    public void setTotalHostRequests(int totalHostRequests) {
+        this.totalHostRequests = totalHostRequests;
+    }
+    
+    // Commission and holding statistics getters and setters
+    public double getTotalCommission() {
+        return totalCommission;
+    }
+    
+    public void setTotalCommission(double totalCommission) {
+        this.totalCommission = totalCommission;
+    }
+    
+    public double getTotalHeldAmount() {
+        return totalHeldAmount;
+    }
+    
+    public void setTotalHeldAmount(double totalHeldAmount) {
+        this.totalHeldAmount = totalHeldAmount;
     }
 
     // Utility methods

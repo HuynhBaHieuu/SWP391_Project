@@ -24,4 +24,9 @@ public class Iconstant {
     public static final String GOOGLE_LINK_GET_TOKEN = "https://accounts.google.com/o/oauth2/token";
 
     public static final String GOOGLE_LINK_GET_USER_INFO = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=";
+    
+    // Withdrawal System Constants
+    public static final int MIN_WITHDRAWAL_AMOUNT = 100000; // 100,000 VNĐ
+    public static final double COMMISSION_RATE = 0.15; // 15% commission
+    public static final int HOLD_PERIOD_HOURS = 24; // 24 hours after check-out
 }

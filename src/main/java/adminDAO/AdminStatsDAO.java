@@ -83,6 +83,20 @@ public class AdminStatsDAO {
                  ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) stats.setTotalRevenue(rs.getDouble(1));
             }
+            
+            // Tổng commission đã thu (từ HostEarnings)
+            try (PreparedStatement ps = con.prepareStatement(
+                    "SELECT ISNULL(SUM(CommissionAmount), 0) FROM HostEarnings");
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) stats.setTotalCommission(rs.getDouble(1));
+            }
+            
+            // Tổng số tiền đang giữ (PendingBalance + AvailableBalance từ tất cả hosts)
+            try (PreparedStatement ps = con.prepareStatement(
+                    "SELECT ISNULL(SUM(PendingBalance + AvailableBalance), 0) FROM HostBalances");
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) stats.setTotalHeldAmount(rs.getDouble(1));
+            }
         }
         
         return stats;

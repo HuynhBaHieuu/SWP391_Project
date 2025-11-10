@@ -2,13 +2,19 @@ package controller;
 
 import paymentDAO.BookingDAO;
 import paymentDAO.PaymentDAO;
+import paymentDAO.HostBalanceDAO;
+import paymentDAO.HostEarningDAO;
 import listingDAO.ListingDAO;
 import model.Booking;
 import model.Listing;
 import model.Payment;
+import model.HostEarning;
 import model.User;
 import service.VNPayService;
 import service.NotificationService;
+import constant.Iconstant;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -27,6 +33,8 @@ public class VNPayReturnController extends HttpServlet {
     private BookingDAO bookingDAO = new BookingDAO();
     private PaymentDAO paymentDAO = new PaymentDAO();
     private ListingDAO listingDAO = new ListingDAO();
+    private HostBalanceDAO hostBalanceDAO = new HostBalanceDAO();
+    private HostEarningDAO hostEarningDAO = new HostEarningDAO();
     private VNPayService vnpayService = new VNPayService();
     private NotificationService notificationService = new NotificationService();
     
@@ -151,6 +159,14 @@ public class VNPayReturnController extends HttpServlet {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        
+                        // Tạo HostEarning và cập nhật HostBalance
+                        try {
+                            createHostEarningForPayment(payment, booking, listing);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.err.println("Error creating host earning: " + e.getMessage());
+                        }
                     }
                 }
                 
@@ -230,5 +246,53 @@ public class VNPayReturnController extends HttpServlet {
         request.setAttribute("error", "Thanh toán thất bại: " + errorMessage);
         
         request.getRequestDispatcher("booking/payment-result.jsp").forward(request, response);
+    }
+    
+    /**
+     * Tạo HostEarning và cập nhật HostBalance khi payment completed
+     */
+    private void createHostEarningForPayment(Payment payment, Booking booking, Listing listing) {
+        try {
+            // Kiểm tra xem đã có HostEarning cho payment này chưa
+            HostEarning existingEarning = hostEarningDAO.getHostEarningByPaymentId(payment.getPaymentID());
+            if (existingEarning != null) {
+                System.out.println("HostEarning already exists for PaymentID: " + payment.getPaymentID());
+                return;
+            }
+            
+            // Tính toán commission và host amount
+            BigDecimal totalAmount = booking.getTotalPrice();
+            BigDecimal commissionAmount = totalAmount.multiply(BigDecimal.valueOf(Iconstant.COMMISSION_RATE))
+                                                     .setScale(2, RoundingMode.HALF_UP);
+            BigDecimal hostAmount = totalAmount.subtract(commissionAmount);
+            
+            // Tạo HostEarning
+            HostEarning earning = new HostEarning();
+            earning.setHostID(listing.getHostID());
+            earning.setBookingID(booking.getBookingID());
+            earning.setPaymentID(payment.getPaymentID());
+            earning.setTotalAmount(totalAmount);
+            earning.setCommissionAmount(commissionAmount);
+            earning.setHostAmount(hostAmount);
+            earning.setStatus("PENDING");
+            earning.setCheckOutDate(booking.getCheckOutDate());
+            // AvailableAt = CheckOutDate + 24 hours
+            earning.setAvailableAt(booking.getCheckOutDate().atTime(0, 0).plusHours(Iconstant.HOLD_PERIOD_HOURS));
+            earning.setCreatedAt(java.time.LocalDateTime.now());
+            
+            // Lưu HostEarning
+            if (hostEarningDAO.createHostEarning(earning)) {
+                System.out.println("HostEarning created successfully: " + earning.getHostEarningID());
+                
+                // Cập nhật HostBalance: thêm vào PendingBalance
+                hostBalanceDAO.addToPendingBalance(listing.getHostID(), hostAmount);
+                System.out.println("HostBalance updated: Added " + hostAmount + " to PendingBalance for HostID: " + listing.getHostID());
+            } else {
+                System.err.println("Failed to create HostEarning");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error in createHostEarningForPayment: " + e.getMessage());
+        }
     }
 }
