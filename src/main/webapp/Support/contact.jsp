@@ -181,10 +181,10 @@
 
                 <!-- Ô nhập email và số điện thoại -->
                 <div id="emailField">
-                    <input type="email" name="email" placeholder="Nhập email của bạn" required/>
+                    <input type="email" name="email" id="emailInput" placeholder="Nhập email của bạn" required/>
                 </div>
                 <div id="phoneField" style="display:none;">
-                    <input type="tel" name="phone" placeholder="Nhập số điện thoại của bạn" required pattern="[0-9]{10,11}" title="Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)"/>
+                    <input type="tel" name="phone" id="phoneInput" placeholder="Nhập số điện thoại của bạn" required pattern="[0-9]{10,11}" title="Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)" disabled/>
                 </div>
 
                 <p style="font-weight: bold;">Chọn loại phản hồi:</p>
@@ -200,17 +200,32 @@
 
                 <textarea name="content" placeholder="Nội dung phản hồi..." rows="6" required></textarea>
                 <!-- Google reCAPTCHA -->
-                <div class="g-recaptcha" data-sitekey="6LeqXO8rAAAAADgZiP0vhuJj6_K9vCFaTjkT1Kb4"></div>
+                <div class="g-recaptcha" data-sitekey="6LeqXO8rAAAAADgZiP0vhuJj6_K9vCFaTjkT1Kb4" data-callback="onRecaptchaSuccess"></div>
                 <button class="btn" type="submit" style="margin-top: 15px;">Gửi phản hồi</button>
             </form>
         </section>
 
-        <% if (request.getAttribute("message") != null) {%>
+        <% 
+          // Lấy message từ session (nếu có) hoặc từ request
+          String feedbackMessage = null;
+          String feedbackType = null;
+          
+          if (session.getAttribute("feedbackMessage") != null) {
+            feedbackMessage = (String) session.getAttribute("feedbackMessage");
+            feedbackType = (String) session.getAttribute("feedbackType");
+            session.removeAttribute("feedbackMessage");
+            session.removeAttribute("feedbackType");
+          } else if (request.getAttribute("message") != null) {
+            feedbackMessage = (String) request.getAttribute("message");
+            feedbackType = (String) request.getAttribute("type");
+          }
+        %>
+        <% if (feedbackMessage != null) {%>
         <div id="autoDismissAlert" 
-             class="alert alert-<%= "success".equals(request.getAttribute("type")) ? "success" : "danger"%> alert-dismissible fade show" 
+             class="alert alert-<%= "success".equals(feedbackType) ? "success" : "danger"%> alert-dismissible fade show" 
              role="alert"
              style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
-            <%= request.getAttribute("message")%>
+            <%= feedbackMessage %>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <% }%>
@@ -224,24 +239,45 @@
                     const method = document.querySelector('input[name="contactMethod"]:checked').value;
                     const emailField = document.getElementById('emailField');
                     const phoneField = document.getElementById('phoneField');
+                    const emailInput = document.getElementById('emailInput');
+                    const phoneInput = document.getElementById('phoneInput');
 
                     if (method === 'email') {
                         emailField.style.display = 'block';
                         phoneField.style.display = 'none';
-                        emailField.querySelector('input').required = true;
-                        phoneField.querySelector('input').required = false;
-                        phoneField.querySelector('input').value = '';
+                        emailInput.required = true;
+                        emailInput.disabled = false; // Enable email field
+                        phoneInput.required = false;
+                        phoneInput.value = '';
+                        phoneInput.disabled = true; // Disable để không gửi trong form
                     } else {
                         emailField.style.display = 'none';
                         phoneField.style.display = 'block';
-                        phoneField.querySelector('input').required = true;
-                        emailField.querySelector('input').required = false;
-                        emailField.querySelector('input').value = '';
+                        phoneInput.required = true;
+                        phoneInput.disabled = false; // Enable phone field
+                        emailInput.required = false;
+                        emailInput.value = '';
+                        emailInput.disabled = true; // Disable để không gửi trong form
                     }
                 }
+                
+                // Đảm bảo khi trang load, set đúng trạng thái cho các field
+                window.addEventListener('DOMContentLoaded', function() {
+                    const method = document.querySelector('input[name="contactMethod"]:checked');
+                    const emailInput = document.getElementById('emailInput');
+                    const phoneInput = document.getElementById('phoneInput');
+                    
+                    if (method && method.value === 'email') {
+                        emailInput.disabled = false;
+                        phoneInput.disabled = true;
+                    } else {
+                        phoneInput.disabled = false;
+                        emailInput.disabled = true;
+                    }
+                });
         </script>
         <script>
-            // Tự động đóng alert sau 3 giây
+            // Tự động đóng alert sau 5 giây và reset form + reCAPTCHA
             const alertBox = document.getElementById('autoDismissAlert');
             if (alertBox) {
                 setTimeout(() => {
@@ -249,7 +285,47 @@
                     alert.close();
                 }, 5000); // 5000ms = 5 giây
             }
+            
+            // Callback khi reCAPTCHA được giải quyết thành công
+            function onRecaptchaSuccess(token) {
+                // Không cần làm gì, chỉ để reCAPTCHA biết đã được giải quyết
+            }
+            
+            // Reset form và reCAPTCHA sau khi submit thành công
+            <% if (feedbackMessage != null && "success".equals(feedbackType)) { %>
+            window.addEventListener('DOMContentLoaded', function() {
+                // Reset form
+                const form = document.querySelector('form[action*="FeedbackController"]');
+                if (form) {
+                    form.reset();
+                }
+                
+                // Reset reCAPTCHA sau một chút delay để đảm bảo reCAPTCHA đã load
+                setTimeout(function() {
+                    if (typeof grecaptcha !== 'undefined') {
+                        try {
+                            // Tìm widget ID của reCAPTCHA
+                            const recaptchaElement = document.querySelector('.g-recaptcha');
+                            if (recaptchaElement) {
+                                const widgetId = recaptchaElement.getAttribute('data-widget-id');
+                                if (widgetId) {
+                                    grecaptcha.reset(parseInt(widgetId));
+                                } else {
+                                    // Nếu không có widget ID, thử reset widget đầu tiên
+                                    grecaptcha.reset();
+                                }
+                            }
+                        } catch(e) {
+                            console.log('reCAPTCHA reset error:', e);
+                            // Nếu có lỗi, reload lại trang để reset reCAPTCHA
+                            // Không reload để tránh mất thông báo thành công
+                        }
+                    }
+                }, 1000);
+            });
+            <% } %>
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>
+

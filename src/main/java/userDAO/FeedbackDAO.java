@@ -31,8 +31,21 @@ public class FeedbackDAO {
                 ps.setNull(1, Types.INTEGER);
             }
             ps.setString(2, feedback.getName());
-            ps.setString(3, feedback.getEmail());
-            ps.setString(4, feedback.getPhone());
+            
+            // Xử lý email có thể null
+            if (feedback.getEmail() != null && !feedback.getEmail().trim().isEmpty()) {
+                ps.setString(3, feedback.getEmail());
+            } else {
+                ps.setNull(3, Types.VARCHAR);
+            }
+            
+            // Xử lý phone có thể null
+            if (feedback.getPhone() != null && !feedback.getPhone().trim().isEmpty()) {
+                ps.setString(4, feedback.getPhone());
+            } else {
+                ps.setNull(4, Types.VARCHAR);
+            }
+            
             ps.setString(5, feedback.getType());
             ps.setString(6, feedback.getContent());
 

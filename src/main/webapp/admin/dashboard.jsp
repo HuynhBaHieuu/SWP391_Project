@@ -10,7 +10,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/jpg" href="image/logo.jpg">
+  <link rel="icon" type="image/png" href="image/logo.png">
   <title>Admin Dashboard - go2bnb</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<%=request.getContextPath()%>/css/dashboard.css">
@@ -402,7 +402,7 @@
       <div class="sidebar-header">
         <!-- Fixed logo path with context path -->
         <a href="#" class="sidebar-logo">
-          <img src="<%=request.getContextPath()%>/images/logo.png" alt="go2bnb" style="height: 40px; width: auto;">
+          <img src="<%=request.getContextPath()%>/image/logo.png" alt="go2bnb" style="height: 40px; width: auto;">
         </a>
       </div>
       
@@ -1466,6 +1466,15 @@
         </div>
         
         <% 
+          // Đảm bảo các biến withdrawal có scope đúng
+          List<Withdrawal> withdrawalsList = withdrawals != null ? withdrawals : new java.util.ArrayList<>();
+          String withdrawalStatusFilterParam = withdrawalStatusFilter != null ? withdrawalStatusFilter : "";
+          long pendingCount = pendingWithdrawalCount;
+          long approvedCount = approvedWithdrawalCount;
+          long completedCount = completedWithdrawalCount;
+          long rejectedCount = rejectedWithdrawalCount;
+          
+          // Lấy thông báo từ session (session là implicit object trong JSP, không cần khai báo)
           String withdrawalSuccess = (String) session.getAttribute("withdrawalSuccess");
           String withdrawalError = (String) session.getAttribute("withdrawalError");
           if (withdrawalSuccess != null) {
@@ -1492,42 +1501,47 @@
         <!-- Statistics -->
         <div class="stats-grid">
           <div class="stat-card" style="border-left-color: #f59e0b;">
-            <div class="stat-value"><%= pendingWithdrawalCount %></div>
+            <div class="stat-value"><%= pendingCount %></div>
             <div class="stat-label">Đang chờ duyệt</div>
           </div>
           <div class="stat-card" style="border-left-color: #10b981;">
-            <div class="stat-value"><%= approvedWithdrawalCount %></div>
+            <div class="stat-value"><%= approvedCount %></div>
             <div class="stat-label">Đã duyệt</div>
           </div>
           <div class="stat-card" style="border-left-color: #3b82f6;">
-            <div class="stat-value"><%= completedWithdrawalCount %></div>
+            <div class="stat-value"><%= completedCount %></div>
             <div class="stat-label">Hoàn tất</div>
           </div>
           <div class="stat-card" style="border-left-color: #ef4444;">
-            <div class="stat-value"><%= rejectedWithdrawalCount %></div>
+            <div class="stat-value"><%= rejectedCount %></div>
             <div class="stat-label">Từ chối</div>
           </div>
         </div>
         
         <!-- Filter Tabs -->
         <div class="filter-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-          <a href="#" class="filter-tab <%= (withdrawalStatusFilter == null || withdrawalStatusFilter.isEmpty()) ? "active" : "" %>" 
+          <a href="#" class="filter-tab <%= (withdrawalStatusFilterParam == null || withdrawalStatusFilterParam.isEmpty()) ? "active" : "" %>" 
+             data-filter-status=""
              onclick="filterWithdrawals(''); return false;" style="padding: 10px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-decoration: none; color: inherit; transition: all 0.3s;">
             Tất cả
           </a>
-          <a href="#" class="filter-tab <%= "PENDING".equals(withdrawalStatusFilter) ? "active" : "" %>" 
+          <a href="#" class="filter-tab <%= "PENDING".equals(withdrawalStatusFilterParam) ? "active" : "" %>"
+             data-filter-status="PENDING"
              onclick="filterWithdrawals('PENDING'); return false;" style="padding: 10px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-decoration: none; color: inherit; transition: all 0.3s;">
             Đang chờ
           </a>
-          <a href="#" class="filter-tab <%= "APPROVED".equals(withdrawalStatusFilter) ? "active" : "" %>" 
+          <a href="#" class="filter-tab <%= "APPROVED".equals(withdrawalStatusFilterParam) ? "active" : "" %>"
+             data-filter-status="APPROVED"
              onclick="filterWithdrawals('APPROVED'); return false;" style="padding: 10px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-decoration: none; color: inherit; transition: all 0.3s;">
             Đã duyệt
           </a>
-          <a href="#" class="filter-tab <%= "COMPLETED".equals(withdrawalStatusFilter) ? "active" : "" %>" 
+          <a href="#" class="filter-tab <%= "COMPLETED".equals(withdrawalStatusFilterParam) ? "active" : "" %>"
+             data-filter-status="COMPLETED"
              onclick="filterWithdrawals('COMPLETED'); return false;" style="padding: 10px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-decoration: none; color: inherit; transition: all 0.3s;">
             Hoàn tất
           </a>
-          <a href="#" class="filter-tab <%= "REJECTED".equals(withdrawalStatusFilter) ? "active" : "" %>" 
+          <a href="#" class="filter-tab <%= "REJECTED".equals(withdrawalStatusFilterParam) ? "active" : "" %>"
+             data-filter-status="REJECTED"
              onclick="filterWithdrawals('REJECTED'); return false;" style="padding: 10px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-decoration: none; color: inherit; transition: all 0.3s;">
             Từ chối
           </a>
@@ -1549,7 +1563,7 @@
             </tr>
           </thead>
           <tbody>
-            <% if (withdrawals.isEmpty()) { %>
+            <% if (withdrawalsList.isEmpty()) { %>
               <tr>
                 <td colspan="9" style="text-align: center; padding: 40px; color: #6b7280;">
                   <i class="fas fa-inbox" style="font-size: 3rem; opacity: 0.3; margin-bottom: 10px; display: block;"></i>
@@ -1557,8 +1571,8 @@
                 </td>
               </tr>
             <% } else { %>
-              <% for (Withdrawal w : withdrawals) { %>
-                <tr>
+              <% for (Withdrawal w : withdrawalsList) { %>
+                <tr data-withdrawal-status="<%= w.getStatus() %>">
                   <td>#<%= w.getWithdrawalID() %></td>
                   <td>
                     <div><strong><%= w.getHostName() != null ? w.getHostName() : "Host #" + w.getHostID() %></strong></div>
@@ -4025,30 +4039,54 @@
     
     // Withdrawal functions
     function filterWithdrawals(status) {
+      // Lấy tất cả các row trong bảng withdrawals
+      const tableBody = document.querySelector('#withdrawals table tbody');
+      if (!tableBody) return;
+      
+      const rows = tableBody.querySelectorAll('tr[data-withdrawal-status]');
+      let visibleCount = 0;
+      
+      // Filter rows
+      rows.forEach(row => {
+        const rowStatus = row.getAttribute('data-withdrawal-status');
+        if (!status || status === '' || rowStatus === status) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      // Hiển thị thông báo nếu không có dữ liệu
+      const emptyRow = tableBody.querySelector('tr:not([data-withdrawal-status])');
+      if (emptyRow) {
+        if (visibleCount === 0) {
+          emptyRow.style.display = '';
+        } else {
+          emptyRow.style.display = 'none';
+        }
+      }
+      
+      // Cập nhật active tab
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Tìm và active tab tương ứng dựa trên data-filter-status
+      const filterStatus = status || '';
+      const activeTab = document.querySelector('.filter-tab[data-filter-status="' + filterStatus + '"]');
+      if (activeTab) {
+        activeTab.classList.add('active');
+      }
+      
+      // Cập nhật URL mà không reload trang (tùy chọn - để có thể bookmark/share)
       const url = new URL(window.location.href);
       if (status) {
         url.searchParams.set('withdrawalStatus', status);
       } else {
         url.searchParams.delete('withdrawalStatus');
       }
-      // Show withdrawals section
-      document.querySelectorAll('.content-section').forEach(section => {
-        section.classList.remove('active');
-        section.style.display = 'none';
-      });
-      const withdrawalsSection = document.getElementById('withdrawals');
-      if (withdrawalsSection) {
-        withdrawalsSection.classList.add('active');
-        withdrawalsSection.style.display = 'block';
-      }
-      // Update active nav item
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-      const withdrawalsNav = document.querySelector('.nav-item[data-section="withdrawals"]');
-      if (withdrawalsNav) {
-        withdrawalsNav.classList.add('active');
-      }
-      // Reload page with filter
-      window.location.href = url.toString();
+      window.history.pushState({status: status}, '', url.toString());
     }
     
     function openApproveModal(withdrawalId) {
@@ -4066,25 +4104,13 @@
       new bootstrap.Modal(document.getElementById('completeWithdrawalModal')).show();
     }
     
-    // Check if we should show withdrawals section on page load
-    <% if (request.getParameter("withdrawalStatus") != null) { %>
+    // Filter withdrawals khi trang load nếu có parameter withdrawalStatus
+    <% 
+      String withdrawalStatusParam = request.getParameter("withdrawalStatus");
+    %>
+    <% if (withdrawalStatusParam != null && !withdrawalStatusParam.isEmpty()) { %>
       document.addEventListener('DOMContentLoaded', function() {
-        // Show withdrawals section
-        document.querySelectorAll('.content-section').forEach(section => {
-          section.classList.remove('active');
-          section.style.display = 'none';
-        });
-        const withdrawalsSection = document.getElementById('withdrawals');
-        if (withdrawalsSection) {
-          withdrawalsSection.classList.add('active');
-          withdrawalsSection.style.display = 'block';
-        }
-        // Update active nav item
-        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-        const withdrawalsNav = document.querySelector('.nav-item[data-section="withdrawals"]');
-        if (withdrawalsNav) {
-          withdrawalsNav.classList.add('active');
-        }
+        filterWithdrawals('<%= withdrawalStatusParam %>');
       });
     <% } %>
   </script>
