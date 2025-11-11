@@ -38,8 +38,8 @@ import userDAO.UserDAO;
 public class FacebookCallbackServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(FacebookCallbackServlet.class.getName());
-    private static final String CLIENT_ID = "1351533986672455";
-    private static final String CLIENT_SECRET = "2ce92be8996e4e5d83a209808875bc50";
+    private static final String CLIENT_ID = "869750485484400";
+    private static final String CLIENT_SECRET = "f6934b6bcc389df6d79bdc40b8000b20";
     private static final String CALLBACK_URL = "http://localhost:8080/GO2BNB_Project/facebook-callback";
 
     /**
