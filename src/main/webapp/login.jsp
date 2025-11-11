@@ -183,6 +183,11 @@
           Đăng nhập với Google
         </a>
 
+        <a class="btn btn-google" href="facebook-login">
+           <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Facebook_icon.svg" alt="Login with Facebook" style="width:24px;height:24px;margin-right:8px;">
+           Đăng nhập với Facebook
+        </a>         
+          
         <div class="row-links">
           <a href="<%=request.getContextPath()%>/register">Tạo tài khoản mới</a>
           <a href="<%=request.getContextPath()%>/forgot">Quên mật khẩu?</a>

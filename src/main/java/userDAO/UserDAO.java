@@ -475,7 +475,9 @@ public class UserDAO {
             tailParams.add(role.trim());
         }
 
-        sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
+        sql.append(" ORDER BY created_at DESC ");
+        sql.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ");
+
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql.toString())) {
@@ -502,6 +504,78 @@ public class UserDAO {
         }
     }
 
+    public static List<User> getAll(String q, String status, String role, int page, int size) throws SQLException {
+
+    if (page < 1) page = 1;
+    if (size < 1) size = 10;
+    int offset = (page - 1) * size;
+
+    // luôn khởi tạo list để không bị null
+    List<User> result = new ArrayList<>();
+
+    StringBuilder sql = new StringBuilder();
+    sql.append("SELECT UserID, FullName, Email, ProfileImage, Role, IsActive, CreatedAt ");
+    sql.append("FROM Users WHERE 1=1");
+
+    List<Object> params = new ArrayList<>();
+
+    // Search theo tên hoặc email
+    if (q != null && !q.trim().isEmpty()) {
+        sql.append(" AND (FullName LIKE ? OR Email LIKE ?)");
+        String kw = "%" + q.trim() + "%";
+        params.add(kw);
+        params.add(kw);
+    }
+
+    // Lọc status (IsActive)
+    if (status != null && !status.trim().isEmpty()) {
+        sql.append(" AND IsActive = ?");
+        params.add(status.equals("active") ? 1 : 0);
+    }
+
+    // Lọc role
+    if (role != null && !role.trim().isEmpty()) {
+        sql.append(" AND Role = ?");
+        params.add(role.trim());
+    }
+
+    // Phân trang cho SQL Server
+    sql.append(" ORDER BY CreatedAt DESC ");
+    sql.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+    try (Connection con = DBConnection.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+        int idx = 1;
+
+        // Set params filter
+        for (Object p : params) {
+            ps.setObject(idx++, p);
+        }
+
+        // Set OFFSET và LIMIT
+        ps.setInt(idx++, offset);  
+        ps.setInt(idx, size);      
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                User u = new User();
+                u.setId(rs.getInt("UserID"));
+                u.setFullName(rs.getString("FullName"));
+                u.setEmail(rs.getString("Email"));
+                u.setAvatarUrl(rs.getString("ProfileImage"));  
+                u.setRole(rs.getString("Role"));
+                u.setStatus(rs.getInt("IsActive") == 1 ? "active" : "inactive");
+                u.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                result.add(u);
+            }
+        }
+    }
+
+    return result;  // luôn trả về list, không bao giờ null
+}
+
+    
     /**
      * Cập nhật trạng thái người dùng
      */
@@ -592,5 +666,10 @@ public class UserDAO {
         java.time.LocalDateTime createdAt = created == null ? null : created.toLocalDateTime();
         u.setCreatedAt(createdAt);
         return u;
+    }
+    
+    public static void main(String[] args) throws SQLException {
+       
+        System.out.println(UserDAO.getAll(null, null, null, 1, 10000));
     }
 }
