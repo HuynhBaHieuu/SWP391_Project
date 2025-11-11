@@ -674,6 +674,10 @@
         <div class="search-bar">
           <input type="text" class="search-input" placeholder="Tìm kiếm người dùng...">
           <button class="btn btn-primary">+ Thêm người dùng</button>
+          <a href="${pageContext.request.contextPath}/export-users" 
+            class="btn btn-success">
+            Export to Excel
+         </a>
         </div>
         
         <!-- User table now fetches from database -->
@@ -1087,6 +1091,10 @@
             <option value="Failed">Đã hủy</option>
           </select>
           <button class="btn btn-primary" onclick="filterBookings()">Lọc</button>
+          <a href="${pageContext.request.contextPath}/export-bookings-excel" 
+            class="btn btn-success">
+            Xuất Excel
+         </a>
         </div>
         
         <!-- Bookings table now fetches from database -->
@@ -1320,7 +1328,15 @@
         <div class="search-bar">
           <input type="text" class="search-input" placeholder="Tìm kiếm giao dịch...">
           <button class="btn btn-primary">+ Tạo mã giảm giá</button>
+          
+          <a href="${pageContext.request.contextPath}/export-payments-excel" 
+            class="btn btn-success">
+            Xuất Excel
+         </a>
         </div>
+            
+       
+
         
         <table class="data-table">
           <thead>
