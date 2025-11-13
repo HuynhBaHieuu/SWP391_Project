@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@page import="model.User"%>
+<%@ page import="reportDAO.ReportDAO" %>
 <%
     // Get currentUser from session - reuse the variable from including page
     User hostUser = (User) session.getAttribute("user");
@@ -36,6 +37,25 @@
         <a href="${pageContext.request.contextPath}/booking?action=list" class="nav-link ${param.active eq 'bookings' ? 'active' : ''}" data-i18n="header.host.nav.bookings">Phòng đặt</a>
         <a href="${pageContext.request.contextPath}/host/revenue" class="nav-link nav-link-revenue ${param.active eq 'revenue' ? 'active' : ''}" title="Tổng doanh thu">
             Doanh thu
+        </a>
+        <a href="${pageContext.request.contextPath}/host/reports" class="nav-link ${param.active eq 'reports' ? 'active' : ''}" title="Báo cáo về tôi">
+            Báo Cáo
+            <%
+                // Đếm số báo cáo chưa xử lý (Open hoặc UnderReview)
+                if (hostUser != null && hostUser.isHost()) {
+                    try {
+                        reportDAO.ReportDAO reportDAO = new reportDAO.ReportDAO();
+                        int unprocessedCount = reportDAO.countUnprocessedReportsByHost(hostUser.getUserID());
+                        if (unprocessedCount > 0) {
+            %>
+            <span class="badge bg-danger" style="margin-left: 5px; font-size: 10px; padding: 2px 6px;"><%= unprocessedCount %></span>
+            <%
+                        }
+                    } catch (Exception e) {
+                        // Ignore errors
+                    }
+                }
+            %>
         </a>
     </nav>
     <div class="host-header-right">

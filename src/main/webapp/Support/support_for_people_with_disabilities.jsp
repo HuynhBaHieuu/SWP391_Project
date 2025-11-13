@@ -10,6 +10,7 @@
     <head>
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
         <title>Hỗ trợ người có nhu cầu đặc biệt tại Go2Bnb (Demo JSP)</title>
 
         <style>
@@ -441,17 +442,8 @@
     <body>
 
         <!-- Header -->
-        <header class="header">
-            <div class="container header-in">
-                <a class="brand" href="<%=request.getContextPath()%>/home.jsp">
-                    <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fill="currentColor" d="M12 3c2.8 3.8 5.8 8.4 6.7 10.7a4.7 4.7 0 1 1-8.7 3.6l2-3.4a1.9 1.9 0 1 0-3.3 0l2 3.4A4.7 4.7 0 1 1 5.3 13.7C6.2 11.4 9.2 6.8 12 3Z"/>
-                    </svg>
-                    <strong>Go2BNB</strong>
-                </a>
-            </div>
-        </header>
-
+         <jsp:include page="/design/header.jsp" />
+       
         <!-- Hero -->
         <section class="hero">
             <div class="container">

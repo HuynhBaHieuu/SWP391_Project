@@ -196,7 +196,7 @@
 
     <main class="container">
         <nav aria-label="breadcrumb" class="breadcrumb">
-            <a href="${pageContext.request.contextPath}/index.jsp">Trang chủ</a> ›
+            <a href="${pageContext.request.contextPath}/home">Trang chủ</a> ›
             <span>Đón tiếp khách</span> ›
             <strong>Cho thuê nhà trên GO2BNB</strong>
         </nav>
@@ -204,7 +204,7 @@
         <header class="hero">
             <h1>Cho thuê nhà trên GO2BNB</h1>
             <p>Biến không gian của bạn thành thu nhập — an toàn, minh bạch và linh hoạt cùng GO2BNB.</p>
-            <a class="btn" href="${pageContext.request.contextPath}/host/create-listing.jsp">Bắt đầu đăng nhà</a>
+            <a class="btn" href="${pageContext.request.contextPath}/become-host">Bắt đầu đăng nhà</a>
         </header>
 
         <section>
@@ -261,7 +261,7 @@
         </section>
 
         <div class="cta">
-            <a class="btn btn-primary" href="${pageContext.request.contextPath}/host/create-listing.jsp">Tạo danh sách cho thuê</a>
+            <a class="btn btn-primary" href="${pageContext.request.contextPath}/become-host">Tạo danh sách cho thuê</a>
             <a class="btn btn-secondary" href="${pageContext.request.contextPath}/go2bnb_footer/hosting/hosting_resources.jsp">Xem tài nguyên cho Host</a>
         </div>
     </main>

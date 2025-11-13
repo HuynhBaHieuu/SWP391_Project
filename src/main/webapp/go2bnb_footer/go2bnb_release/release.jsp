@@ -7,6 +7,7 @@
   <link rel="icon" type="image/jpg" href="image/logo.jpg">
   <title>Bản phát hành Mùa hè 2025 - Go2BnB</title>
   <link rel="stylesheet" href="<%=request.getContextPath()%>/css/footer.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
   <link href="https://fonts.googleapis.com/css2?family=Circular:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
@@ -30,7 +31,7 @@
     
     /* Hero Section */
     .hero-section {
-  padding: 80px 0 60px;
+  padding: 23px 0 60px;
   text-align: center;
   background: #fff;
   color: #222222;
@@ -533,6 +534,7 @@
   </style>
 </head>
 <body>
+  <jsp:include page="/design/header.jsp" />
   <!-- Hero Section -->
   <section class="hero-section">
     <div class="container">

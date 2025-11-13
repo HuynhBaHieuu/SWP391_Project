@@ -6,7 +6,7 @@
 <%@page import="model.User"%>
 <%@page import="userDAO.ConversationDAO"%>
 <%@page import="userDAO.NotificationDAO"%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%-- Removed contentType directive to avoid conflict with including pages --%>
 <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lang_modal.css?v=2">
 <script src="<%=request.getContextPath()%>/js/i18n.js?v=13"></script>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -543,6 +543,12 @@
                                 <% if (unreadNotificationCount > 0) {%>
                                 <span class="message-badge-2" id="notification-badge"><%= unreadNotificationCount%></span>
                                 <% }%>
+                            </a>
+
+                            <a href="<%= (currentUser != null) ? (request.getContextPath() + "/report/") : (request.getContextPath() + "/login.jsp")%>" 
+                               class="menu-item user-profile">
+                                <i class="bi bi-flag"></i>
+                                <span>Báo Cáo</span>
                             </a>
 
                             <a href="<%= (currentUser != null) ? (request.getContextPath() + "/profile") : (request.getContextPath() + "/login.jsp")%>" 

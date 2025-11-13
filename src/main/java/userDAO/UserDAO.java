@@ -602,6 +602,24 @@ public class UserDAO {
         }
     }
 
+    /**
+     * Lấy tất cả admin users
+     */
+    public List<User> getAllAdmins() throws SQLException {
+        List<User> admins = new ArrayList<>();
+        String sql = "SELECT * FROM Users WHERE Role = 'Admin' AND IsActive = 1 ORDER BY FullName";
+        
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                admins.add(mapRow(rs));
+            }
+        }
+        return admins;
+    }
+
     // --- New CRUD aligned to MySQL users schema ---
     public static boolean create(User u) throws SQLException {
         String sql = "INSERT INTO users (full_name, email, avatar_url, role, status, created_at) VALUES (?,?,?,?,?,?)";

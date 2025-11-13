@@ -11,7 +11,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" href="css/services.css"/>
         <link rel="stylesheet" href="css/chatbot.css"/>
-        <link rel="stylesheet" href="css/home.css"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
         <!-- Linking Google fonts for icons -->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">

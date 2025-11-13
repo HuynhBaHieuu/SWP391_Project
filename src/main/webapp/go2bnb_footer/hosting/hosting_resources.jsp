@@ -201,7 +201,7 @@
         </section>
 
         <div class="cta">
-            <a class="btn btn-primary" href="${pageContext.request.contextPath}/host/create-listing.jsp">Tạo danh sách cho thuê</a>
+            <a class="btn btn-primary" href="${pageContext.request.contextPath}/become-host">Tạo danh sách cho thuê</a>
             <a class="btn btn-secondary" href="${pageContext.request.contextPath}/go2bnb_footer/hosting/hosting_resources.jsp">Xem thêm tài nguyên cho Host</a>
         </div>
     </main>

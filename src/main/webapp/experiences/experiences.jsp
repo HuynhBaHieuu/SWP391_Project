@@ -9,7 +9,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="icon" type="image/jpg" href="${pageContext.request.contextPath}/image/logo.jpg">
         <!-- Styles giống trang chủ -->
-        <link rel="stylesheet" href="<c:url value='/css/home.css'/>"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
         <link rel="stylesheet" href="<c:url value='/css/no-underline.css'/>"/>
         <link rel="stylesheet" href="<c:url value='/css/experiences.css'/>"/>
         <link rel="stylesheet" href="<c:url value='/css/chatbot.css'/>"/>

@@ -5,18 +5,18 @@
 package controller.admin;
 
 import model.Feedback;
+import model.User;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import service.FeedbackService;
 import service.NotificationService;
 
-@WebServlet("/admin/feedback")
+@WebServlet({"/admin/feedback", "/admin/feedback/create"})
 public class AdminFeedbackController extends HttpServlet {
 
     private FeedbackService feedbackService = new FeedbackService();
@@ -24,6 +24,22 @@ public class AdminFeedbackController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+        User admin = (User) session.getAttribute("user");
+        
+        if (admin == null || !admin.isAdmin()) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        String requestURI = request.getRequestURI();
+        
+        // Xử lý hiển thị form tạo feedback/notification
+        if (requestURI != null && requestURI.endsWith("/admin/feedback/create")) {
+            request.getRequestDispatcher("/admin/feedback-create.jsp").forward(request, response);
+            return;
+        }
 
         String action = request.getParameter("action");
         String idParam = request.getParameter("id");
@@ -84,6 +100,94 @@ public class AdminFeedbackController extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        HttpSession session = request.getSession();
+        User admin = (User) session.getAttribute("user");
+        
+        if (admin == null || !admin.isAdmin()) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        
+        String requestURI = request.getRequestURI();
+        
+        // Xử lý tạo phản hồi mới
+        if (requestURI != null && requestURI.endsWith("/admin/feedback/create")) {
+            createFeedbackForUser(request, response, admin);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+    
+    /**
+     * Tạo phản hồi/notification cho user
+     */
+    private void createFeedbackForUser(HttpServletRequest request, HttpServletResponse response, User admin)
+            throws ServletException, IOException {
+        
+        try {
+            String userIDStr = request.getParameter("userID");
+            String title = request.getParameter("title");
+            String type = request.getParameter("type");
+            String content = request.getParameter("content");
+            
+            if (userIDStr == null || title == null || type == null || content == null) {
+                request.setAttribute("error", "Vui lòng điền đầy đủ thông tin");
+                request.getRequestDispatcher("/admin/feedback-create.jsp").forward(request, response);
+                return;
+            }
+            
+            int userID = Integer.parseInt(userIDStr);
+            
+            // Tạo message với thông tin admin (tên và avatar)
+            String adminName = admin.getFullName() != null ? admin.getFullName() : "Quản trị viên";
+            String adminAvatar = admin.getProfileImage() != null ? admin.getProfileImage() : "";
+            if (adminAvatar != null && !adminAvatar.isEmpty() && !adminAvatar.startsWith("http")) {
+                adminAvatar = request.getContextPath() + "/" + adminAvatar;
+            } else if (adminAvatar == null || adminAvatar.isEmpty()) {
+                adminAvatar = "https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg";
+            }
+            
+            // Tạo message với metadata về admin
+            String fullContent = content.trim();
+            // Thêm thông tin admin vào đầu message (sẽ được parse và hiển thị riêng)
+            String messageWithSender = "[SENDER:" + admin.getUserID() + ":" + adminName + ":" + adminAvatar + "]" + fullContent;
+            
+            // Tạo notification cho user
+            NotificationService notificationService = new NotificationService();
+            notificationService.createNotification(
+                userID,
+                title,
+                messageWithSender,
+                "Feedback"
+            );
+            
+            // Tạo feedback record trong database (optional - để lưu lịch sử)
+            Feedback feedback = new Feedback();
+            feedback.setUserID(userID);
+            feedback.setName(admin.getFullName());
+            feedback.setEmail(admin.getEmail());
+            feedback.setType(type);
+            feedback.setContent(content);
+            feedback.setStatus("Resolved");
+            
+            feedbackService.addFeedback(feedback);
+            
+            request.setAttribute("message", "Đã gửi thông báo thành công cho người dùng");
+            request.setAttribute("type", "success");
+            // Reset form sau khi gửi thành công
+            request.getRequestDispatcher("/admin/feedback-create.jsp").forward(request, response);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+            request.getRequestDispatcher("/admin/feedback-create.jsp").forward(request, response);
         }
     }
 }

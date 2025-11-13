@@ -31,11 +31,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/css/host-calendar.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/host-header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css">
 </head>
 <body>
     <!-- Include Host Header -->
-    <jsp:include page="/design/host_header.jsp" />
-    
+    <jsp:include page="/design/host_header.jsp">
+                <jsp:param name="active" value="calendar" />
+            </jsp:include>
     <div class="calendar-container">
         <div class="container-fluid">
             <!-- Header -->

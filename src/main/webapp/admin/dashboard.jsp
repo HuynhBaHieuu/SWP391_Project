@@ -453,6 +453,10 @@
             <span class="nav-icon">💬</span>
             <span>Feedbacks Management</span>
           </a>
+          <a href="#" class="nav-item" data-section="report-management">
+            <span class="nav-icon">🚩</span>
+            <span>Report Management</span>
+          </a>
           <a href="#" class="nav-item" data-section="payments">
             <span class="nav-icon">💵</span>
             <span>Payments</span>
@@ -672,8 +676,12 @@
         </div>
         
         <div class="search-bar">
-          <input type="text" class="search-input" placeholder="Tìm kiếm người dùng...">
-          <button class="btn btn-primary">+ Thêm người dùng</button>
+          <input type="text" id="userSearchInput" class="search-input" placeholder="Tìm kiếm người dùng...">
+          <select class="form-select" id="userStatusFilter" style="width: auto;">
+            <option value="">Tất cả</option>
+            <option value="active">Mở khoá</option>
+            <option value="blocked">Khoá</option>
+          </select>
           <a href="${pageContext.request.contextPath}/export-users" 
             class="btn btn-success">
             Export to Excel
@@ -681,13 +689,14 @@
         </div>
         
         <!-- User table now fetches from database -->
-        <table class="data-table">
+        <table class="data-table" id="usersTable">
           <thead>
             <tr>
               <th>Người dùng</th>
               <th>Vai trò</th>
               <th>Trạng thái</th>
               <th>Ngày tham gia</th>
+              <th>Chi tiết</th>
               <th>Hành động</th>
             </tr>
           </thead>
@@ -702,7 +711,7 @@
                 );
                 
                 if (!rs.isBeforeFirst()) {
-                  out.println("<tr><td colspan='5' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có người dùng nào</td></tr>");
+                  out.println("<tr><td colspan='6' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có người dùng nào</td></tr>");
                 } else {
                   while (rs.next()) {
                     // Process user avatar path
@@ -734,6 +743,13 @@
               </td>
               <td><%= rs.getDate("created_at") %></td>
               <td>
+                <button class="action-btn action-btn-view" 
+                        onclick="viewUserDetail(<%= rs.getInt("id") %>)"
+                        title="Xem chi tiết">
+                  <i class="fas fa-eye"></i> Chi tiết
+                </button>
+              </td>
+              <td>
                 <div class="action-buttons">
                   <% if (!"admin".equalsIgnoreCase(rs.getString("role"))) { %>
                     <button class="action-btn action-btn-delete" 
@@ -741,7 +757,7 @@
                             data-user-id="<%= rs.getInt("id") %>"
                             data-current-status="<%= rs.getString("status") %>"
                             onclick="toggleUserStatus(<%= rs.getInt("id") %>, '<%= rs.getString("status") %>')">
-                      <%= rs.getString("status").equals("active") ? "Khóa" : "Đã khóa" %>
+                      <%= rs.getString("status").equals("active") ? "Khoá" : "Mở khoá" %>
                     </button>
                   <% } else { %>
                     <span style="color: #6c757d; font-style: italic;"></span>
@@ -753,7 +769,7 @@
                   }
                 }
               } catch (Exception e) {
-                out.println("<tr><td colspan='5' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                out.println("<tr><td colspan='6' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
               }
             %>
           </tbody>
@@ -768,17 +784,16 @@
         </div>
         
         <div class="search-bar">
-          <input type="text" class="search-input" placeholder="Tìm kiếm chỗ ở...">
-          <select class="form-select" style="width: auto;">
-            <option>Tất cả trạng thái</option>
-            <option>Chờ duyệt</option>
-            <option>Đã duyệt</option>
-            <option>Bị từ chối</option>
+          <input type="text" id="listingSearchInput" class="search-input" placeholder="Tìm kiếm chỗ ở...">
+          <select class="form-select" id="listingStatusFilter" style="width: auto;">
+            <option value="">Tất cả</option>
+            <option value="Active">Mở khoá</option>
+            <option value="Inactive">Khoá</option>
           </select>
         </div>
         
         <!-- Listings table now fetches from database -->
-        <table class="data-table">
+        <table class="data-table" id="listingsTable">
           <thead>
             <tr>
               <th>Chỗ ở</th>
@@ -786,6 +801,7 @@
               <th>Giá/đêm</th>
               <th>Trạng thái</th>
               <th>Ngày đăng</th>
+              <th>Chi tiết</th>
               <th>Hành động</th>
             </tr>
           </thead>
@@ -803,7 +819,7 @@
                 );
                 
                 if (!rs.isBeforeFirst()) {
-                  out.println("<tr><td colspan='6' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có chỗ ở nào</td></tr>");
+                  out.println("<tr><td colspan='7' style='text-align: center; padding: 40px; color: #6b7280;'>Chưa có chỗ ở nào</td></tr>");
                 } else {
                   while (rs.next()) {
                     // Process listing image path - same logic as avatar
@@ -841,6 +857,13 @@
               </td>
               <td><%= rs.getDate("created_at") %></td>
               <td>
+                <button class="action-btn action-btn-view" 
+                        onclick="viewListingDetail(<%= rs.getInt("id") %>)"
+                        title="Xem chi tiết">
+                  <i class="fas fa-eye"></i> Chi tiết
+                </button>
+              </td>
+              <td>
                 <div class="action-buttons">
                   <% 
                     String currentStatus = rs.getString("status");
@@ -859,11 +882,90 @@
                   }
                 }
               } catch (Exception e) {
-                out.println("<tr><td colspan='6' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                out.println("<tr><td colspan='7' style='text-align: center; padding: 40px; color: #ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
               }
             %>
           </tbody>
         </table>
+      </div>
+      
+      <!-- Modal chi tiết listing -->
+      <div class="modal fade" id="listingDetailModal" tabindex="-1" aria-labelledby="listingDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="listingDetailModalLabel">
+                <i class="fas fa-home"></i> Chi tiết chỗ ở
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-8">
+                  <h4 id="listingDetailTitle" class="mb-3"></h4>
+                  <p id="listingDetailDescription" class="text-muted mb-4"></p>
+                  
+                  <div class="mb-4">
+                    <h6 class="mb-3"><i class="fas fa-images"></i> Hình ảnh</h6>
+                    <div class="row" id="listingDetailImages">
+                      <!-- Hình ảnh sẽ được load ở đây -->
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card">
+                    <div class="card-body">
+                      <h6 class="card-title mb-3">Thông tin chi tiết</h6>
+                      <table class="table table-borderless">
+                        <tr>
+                          <td style="width: 150px; font-weight: 600;">Địa chỉ:</td>
+                          <td id="listingDetailAddress"></td>
+                        </tr>
+                        <tr>
+                          <td style="font-weight: 600;">Giá/đêm:</td>
+                          <td id="listingDetailPrice" class="text-primary fw-bold"></td>
+                        </tr>
+                        <tr>
+                          <td style="font-weight: 600;">Số khách tối đa:</td>
+                          <td id="listingDetailMaxGuests"></td>
+                        </tr>
+                        <tr>
+                          <td style="font-weight: 600;">Trạng thái:</td>
+                          <td><span class="badge" id="listingDetailStatus"></span></td>
+                        </tr>
+                        <tr>
+                          <td style="font-weight: 600;">Ngày đăng:</td>
+                          <td id="listingDetailCreatedAt"></td>
+                        </tr>
+                        <tr>
+                          <td style="font-weight: 600;">Chủ nhà:</td>
+                          <td id="listingDetailHostName"></td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Modal xem hình ảnh lớn -->
+      <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+              <img id="imageModalImg" src="" alt="Hình ảnh" class="img-fluid">
+            </div>
+          </div>
+        </div>
       </div>
       
       <!-- Experiences Management Section -->
@@ -1090,7 +1192,6 @@
             <option value="Completed">Đã hoàn thành</option>
             <option value="Failed">Đã hủy</option>
           </select>
-          <button class="btn btn-primary" onclick="filterBookings()">Lọc</button>
           <a href="${pageContext.request.contextPath}/export-bookings-excel" 
             class="btn btn-success">
             Xuất Excel
@@ -1233,47 +1334,273 @@
       <!-- Reviews & Reports Section -->
       <div id="reviews" class="content-section">
         <div class="content-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
           <h1 class="page-title">Quản lý phản hồi</h1>
-          <p class="page-subtitle">Xem và xử lý các phản hồi từ người dùng</p>
+              <p class="page-subtitle">Xem và xử lý các phản hồi từ người dùng, tạo phản hồi thông báo</p>
+            </div>
+            <a href="${pageContext.request.contextPath}/admin/feedback/create" class="btn btn-primary">
+              <i class="fas fa-plus"></i> Tạo phản hồi mới
+            </a>
+          </div>
         </div>
         
-        <table class="data-table">
+        <div class="search-bar">
+          <input type="text" id="feedbackSearchInput" class="search-input" placeholder="Tìm kiếm phản hồi...">
+          <select class="form-select" id="feedbackStatusFilter" style="width: auto;">
+            <option value="">Tất cả</option>
+            <option value="Pending">Đang xử lí</option>
+            <option value="Resolved">Đã xử lí</option>
+          </select>
+        </div>
+        
+        <table class="data-table" id="feedbacksTable">
           <thead>
             <tr>
               <th>Tên người gửi</th>
               <th>Loại phản hồi</th>
-              <th>Ngày gửi</th>
+              <th>Trạng thái</th>
+              <th>Chi tiết</th>
+            </tr>
+          </thead>
+          <tbody>
+              <%
+                    ResultSet feedbackRs = null;
+                    try {
+                        // Đóng ResultSet trước đó nếu có
+                        if (rs != null) {
+                            try { rs.close(); } catch (Exception e) {}
+                        }
+                        
+                        // Tạo query mới cho feedbacks
+                        feedbackRs = stmt.executeQuery(                               
+                            "SELECT FeedbackID, Name, Type, CreatedAt, Status " +
+                            "FROM Feedbacks " +
+                            "ORDER BY CreatedAt DESC"
+                        );
+                        
+                        boolean hasData = false;
+                        while (feedbackRs.next()) {
+                            hasData = true;
+                            String feedbackStatus = feedbackRs.getString("Status");
+                            String statusClass = "badge-warning";
+                            String statusText = "Đang xử lí";
+                            
+                            if ("Resolved".equalsIgnoreCase(feedbackStatus)) {
+                                statusClass = "badge-success";
+                                statusText = "Đã xử lý";
+                            } else if ("Closed".equalsIgnoreCase(feedbackStatus)) {
+                                statusClass = "badge-secondary";
+                                statusText = "Đã đóng";
+                            }
+                            
+                            java.sql.Timestamp createdAt = feedbackRs.getTimestamp("CreatedAt");
+                            String formattedDate = createdAt != null ? 
+                                new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(createdAt) : "N/A";
+                %>
+            <tr>
+                    <td><%= feedbackRs.getString("Name") != null ? feedbackRs.getString("Name") : "N/A" %></td>
+                    <td><%= feedbackRs.getString("Type") != null ? feedbackRs.getString("Type") : "N/A" %></td>
+                    <td>
+                      <span class="badge <%= statusClass %>" style="font-size: 14px; padding: 6px 12px;">
+                        <%= statusText %>
+                      </span>
+                    </td>
+                    <td>
+                        <a href="${pageContext.request.contextPath}/admin/feedback?action=view&id=<%= feedbackRs.getInt("FeedbackID")%>" 
+                           class="action-btn action-btn-view" title="Xem chi tiết">
+                            <i class="fas fa-eye"></i> Chi tiết
+                        </a>
+                    </td>
+                </tr>
+                            <%
+                            }
+                        
+                        if (!hasData) {
+                            out.println("<tr><td colspan='4' style='text-align:center;padding:40px;color:#6b7280;'>Chưa có phản hồi nào từ người dùng</td></tr>");
+                        }
+                        
+                        // Đóng ResultSet
+                        if (feedbackRs != null) {
+                            feedbackRs.close();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        out.println("<tr><td colspan='4' style='text-align:center;padding:40px;color:#ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                        if (feedbackRs != null) {
+                            try { feedbackRs.close(); } catch (Exception ex) {}
+                        }
+                    }
+                %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Report Management Section -->
+      <div id="report-management" class="content-section">
+        <div class="content-header">
+          <h1 class="page-title">Quản lý báo cáo</h1>
+          <p class="page-subtitle">Xem và xử lý các báo cáo từ khách hàng về chủ nhà</p>
+        </div>
+        
+        <div class="search-bar">
+          <input type="text" id="reportSearchInput" class="search-input" placeholder="Tìm kiếm báo cáo...">
+          <select class="form-select" id="reportReporterFilter" style="width: auto;">
+            <option value="">Tất cả người báo cáo</option>
+          </select>
+          <select class="form-select" id="reportReportedFilter" style="width: auto;">
+            <option value="">Tất cả người bị báo cáo</option>
+          </select>
+          <select class="form-select" id="reportCategoryFilter" style="width: auto;">
+            <option value="">Tất cả loại</option>
+          </select>
+          <select class="form-select" id="reportSeverityFilter" style="width: auto;">
+            <option value="">Tất cả mức độ</option>
+            <option value="Low">Thấp</option>
+            <option value="Medium">Trung bình</option>
+            <option value="High">Cao</option>
+            <option value="Critical">Nghiêm trọng</option>
+          </select>
+          <select class="form-select" id="reportStatusFilter" style="width: auto;">
+            <option value="">Tất cả trạng thái</option>
+            <option value="Open">Mở</option>
+            <option value="UnderReview">Đang xem xét</option>
+            <option value="Resolved">Đã xử lý</option>
+            <option value="Rejected">Từ chối</option>
+          </select>
+        </div>
+        
+        <table class="data-table" id="reportsTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Người báo cáo</th>
+              <th>Bị báo cáo (Host)</th>
+              <th>Loại báo cáo</th>
+              <th>Mức độ</th>
+              <th>Ngày tạo</th>
               <th>Trạng thái</th>
               <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
               <%
+                    ResultSet reportRs = null;
                     try {
-                        rs = stmt.executeQuery(                               
-                            "SELECT * FROM Feedbacks WHERE Status = 'Pending' ORDER BY CreatedAt DESC;"
+                        // Đóng ResultSet trước đó nếu có
+                        if (rs != null) {
+                            try { rs.close(); } catch (Exception e) {}
+                        }
+                        
+                        // Tạo query mới cho reports
+                        reportRs = stmt.executeQuery(                               
+                            "SELECT r.ReportID, r.Severity, r.Status, r.CreatedAt, " +
+                            "u1.FullName AS ReporterName, u2.FullName AS ReportedHostName, " +
+                            "rc.DisplayName AS CategoryName " +
+                            "FROM Reports r " +
+                            "LEFT JOIN Users u1 ON r.ReporterUserID = u1.UserID " +
+                            "LEFT JOIN Users u2 ON r.ReportedHostID = u2.UserID " +
+                            "LEFT JOIN ReportCategories rc ON r.CategoryID = rc.CategoryID " +
+                            "ORDER BY r.CreatedAt DESC"
                         );
-                        if (!rs.isBeforeFirst()) {
-                            out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#6b7280;'>Chưa có phản hồi nào từ người dùng</td></tr>");
-                        } else {
-                            while (rs.next()) {
+                        
+                        boolean hasReportData = false;
+                        java.util.Set<String> reporterNames = new java.util.HashSet<>();
+                        java.util.Set<String> reportedNames = new java.util.HashSet<>();
+                        java.util.Set<String> categoryNames = new java.util.HashSet<>();
+                        
+                        while (reportRs.next()) {
+                            hasReportData = true;
+                            String reporterName = reportRs.getString("ReporterName");
+                            String reportedName = reportRs.getString("ReportedHostName");
+                            String categoryName = reportRs.getString("CategoryName");
+                            
+                            if (reporterName != null) reporterNames.add(reporterName);
+                            if (reportedName != null) reportedNames.add(reportedName);
+                            if (categoryName != null) categoryNames.add(categoryName);
+                        }
+                        
+                        // Reset ResultSet để hiển thị lại
+                        reportRs.close();
+                        reportRs = stmt.executeQuery(                               
+                            "SELECT r.ReportID, r.Severity, r.Status, r.CreatedAt, " +
+                            "u1.FullName AS ReporterName, u2.FullName AS ReportedHostName, " +
+                            "rc.DisplayName AS CategoryName " +
+                            "FROM Reports r " +
+                            "LEFT JOIN Users u1 ON r.ReporterUserID = u1.UserID " +
+                            "LEFT JOIN Users u2 ON r.ReportedHostID = u2.UserID " +
+                            "LEFT JOIN ReportCategories rc ON r.CategoryID = rc.CategoryID " +
+                            "ORDER BY r.CreatedAt DESC"
+                        );
+                        
+                        hasReportData = false;
+                        while (reportRs.next()) {
+                            hasReportData = true;
+                            String reportStatus = reportRs.getString("Status");
+                            String statusClass = "badge-warning";
+                            String statusText = "Mở";
+                            
+                            if ("UnderReview".equalsIgnoreCase(reportStatus)) {
+                                statusClass = "badge-info";
+                                statusText = "Đang xem xét";
+                            } else if ("Resolved".equalsIgnoreCase(reportStatus)) {
+                                statusClass = "badge-success";
+                                statusText = "Đã xử lý";
+                            } else if ("Rejected".equalsIgnoreCase(reportStatus)) {
+                                statusClass = "badge-danger";
+                                statusText = "Từ chối";
+                            }
+                            
+                            String severity = reportRs.getString("Severity");
+                            String severityClass = "badge-secondary";
+                            if ("Critical".equalsIgnoreCase(severity)) {
+                                severityClass = "badge-danger";
+                            } else if ("High".equalsIgnoreCase(severity)) {
+                                severityClass = "badge-warning";
+                            } else if ("Low".equalsIgnoreCase(severity)) {
+                                severityClass = "badge-success";
+                            }
+                            
+                            java.sql.Timestamp createdAt = reportRs.getTimestamp("CreatedAt");
+                            String formattedDate = createdAt != null ? 
+                                new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(createdAt) : "N/A";
                 %>
-            <tr>
-                    <td><%= rs.getString("Name")%></td>
-                    <td><%= rs.getString("Type")%></td>
-                    <td><%= rs.getTimestamp("CreatedAt")%></td>
-                    <td><span class="badge badge-warning">Đang xử lí</span></td>
+            <tr data-reporter="<%= reportRs.getString("ReporterName") != null ? reportRs.getString("ReporterName") : "" %>"
+                data-reported="<%= reportRs.getString("ReportedHostName") != null ? reportRs.getString("ReportedHostName") : "" %>"
+                data-category="<%= reportRs.getString("CategoryName") != null ? reportRs.getString("CategoryName") : "" %>"
+                data-severity="<%= severity != null ? severity : "Medium" %>"
+                data-status="<%= reportStatus != null ? reportStatus : "" %>">
+                    <td>#<%= reportRs.getInt("ReportID") %></td>
+                    <td><%= reportRs.getString("ReporterName") != null ? reportRs.getString("ReporterName") : "N/A" %></td>
+                    <td><%= reportRs.getString("ReportedHostName") != null ? reportRs.getString("ReportedHostName") : "N/A" %></td>
+                    <td><%= reportRs.getString("CategoryName") != null ? reportRs.getString("CategoryName") : "N/A" %></td>
+                    <td><span class="badge <%= severityClass %>"><%= severity != null ? severity : "Medium" %></span></td>
+                    <td><%= formattedDate %></td>
+                    <td><span class="badge <%= statusClass %>"><%= statusText %></span></td>
                     <td>
-                        <a href="${pageContext.request.contextPath}/admin/feedback?action=view&id=<%= rs.getString("FeedbackID")%>"><i class="fas fa-eye"></i></a>
-                        <a href="${pageContext.request.contextPath}/admin/feedback?action=resolve&id=<%= rs.getString("FeedbackID")%>" onclick="return confirm('Đánh dấu là đã xử lý thành công?')" style="margin-left: 2rem;"><i class="fas fa-check"></i></a>
-                        <a href="${pageContext.request.contextPath}/admin/feedback?action=close&id=<%= rs.getString("FeedbackID")%>" onclick="return confirm('Đóng phản hồi này?')" style="margin-left: 2rem;"><i class="fas fa-times"></i></a>
+                        <a href="${pageContext.request.contextPath}/admin/reports/detail/<%= reportRs.getInt("ReportID")%>" 
+                           class="action-btn action-btn-view" title="Xem chi tiết & Xử lý">
+                            <i class="fas fa-eye"></i> Xử lý
+                        </a>
                     </td>
                 </tr>
                             <%
-                            }
+                        }
+                        
+                        if (!hasReportData) {
+                            out.println("<tr><td colspan='8' style='text-align:center;padding:40px;color:#6b7280;'>Chưa có báo cáo nào từ người dùng</td></tr>");
+                        }
+                        
+                        // Đóng ResultSet
+                        if (reportRs != null) {
+                            reportRs.close();
                         }
                     } catch (Exception e) {
-                        out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                        e.printStackTrace();
+                        out.println("<tr><td colspan='8' style='text-align:center;padding:40px;color:#ef4444;'>Lỗi khi tải dữ liệu: " + e.getMessage() + "</td></tr>");
+                        if (reportRs != null) {
+                            try { reportRs.close(); } catch (Exception ex) {}
+                        }
                     }
                 %>
           </tbody>
@@ -1326,9 +1653,11 @@
         </div>
         
         <div class="search-bar">
-          <input type="text" class="search-input" placeholder="Tìm kiếm giao dịch...">
-          <button class="btn btn-primary">+ Tạo mã giảm giá</button>
-          
+          <input type="text" id="paymentSearchInput" class="search-input" placeholder="Tìm kiếm giao dịch...">
+          <select class="form-select" id="paymentUserFilter" style="width: auto;">
+            <option value="">Tất cả người dùng</option>
+          </select>
+          <input type="date" id="paymentDateFilter" class="form-control" style="width: auto;">
           <a href="${pageContext.request.contextPath}/export-payments-excel" 
             class="btn btn-success">
             Xuất Excel
@@ -1338,16 +1667,16 @@
        
 
         
-        <table class="data-table">
+        <table class="data-table" id="paymentsTable">
           <thead>
             <tr>
               <th>Mã giao dịch</th>
               <th>Người dùng</th>
-              <th>Loại</th>
+              <th>Nơi cư trú</th>
               <th>Số tiền</th>
               <th>Ngày</th>
               <th>Trạng thái</th>
-              <th>Hành động</th>
+              <th>Xem chi tiết</th>
             </tr>
           </thead>
           <tbody>
@@ -1429,11 +1758,8 @@
               </td>
               <td>
                 <span style="font-weight: 500;">
-                  <%= rs.getString("transaction_type") != null ? rs.getString("transaction_type") : "N/A" %>
+                  <%= rs.getString("listing_title") != null ? rs.getString("listing_title") : "N/A" %>
                 </span>
-                <% if (rs.getString("listing_title") != null) { %>
-                  <br><small style="color: #6b7280; font-size: 12px;"><%= rs.getString("listing_title") %></small>
-                <% } %>
               </td>
               <td>
                 <span style="font-weight: 600; color: <%= "Failed".equals(status) ? "#ef4444" : "#10b981" %>;">
@@ -1447,19 +1773,9 @@
                 </span>
               </td>
               <td>
-                <div class="action-buttons">
-                  <button class="action-btn action-btn-view" onclick="viewTransactionDetail(<%= rs.getInt("booking_id") %>)" title="Xem chi tiết">
-                    <i class="fas fa-eye"></i>
+                <button class="action-btn action-btn-view" onclick="viewPaymentDetail(<%= rs.getInt("booking_id") %>)" title="Xem chi tiết">
+                  <i class="fas fa-eye"></i> Chi tiết
                   </button>
-                  <% if ("Processing".equals(status)) { %>
-                    <button class="action-btn action-btn-success" onclick="confirmTransaction(<%= rs.getInt("booking_id") %>)" title="Xác nhận">
-                      <i class="fas fa-check"></i>
-                    </button>
-                    <button class="action-btn action-btn-danger" onclick="refundTransaction(<%= rs.getInt("booking_id") %>)" title="Hoàn tiền">
-                      <i class="fas fa-undo"></i>
-                    </button>
-                  <% } %>
-                </div>
               </td>
             </tr>
             <%
@@ -2417,6 +2733,166 @@
       window.open('<%=request.getContextPath()%>/customer/detail.jsp?id=' + id, '_blank');
     }
     
+    // Function để tìm kiếm listings (real-time)
+    function searchListings() {
+      const searchTerm = document.getElementById('listingSearchInput').value.trim().toLowerCase();
+      const statusFilter = document.getElementById('listingStatusFilter').value;
+      const table = document.querySelector('#listingsTable tbody');
+      if (!table) return;
+      
+      const rows = table.querySelectorAll('tr');
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        if (row.cells.length < 2 || row.classList.contains('no-search-results')) {
+          row.style.display = '';
+          return;
+        }
+        
+        // Lấy thông tin từ các cột
+        const titleCell = row.cells[0];
+        const hostCell = row.cells[1];
+        const statusCell = row.cells[3];
+        
+        if (!titleCell || !hostCell || !statusCell) {
+          row.style.display = '';
+          return;
+        }
+        
+        const titleText = titleCell.textContent.trim().toLowerCase();
+        const hostText = hostCell.textContent.trim().toLowerCase();
+        const statusText = statusCell.textContent.trim();
+        
+        // Kiểm tra search term
+        const matchesSearch = searchTerm === '' || titleText.includes(searchTerm) || hostText.includes(searchTerm);
+        
+        // Kiểm tra status filter
+        let matchesStatus = true;
+        if (statusFilter !== '') {
+          if (statusFilter === 'Active') {
+            matchesStatus = statusText.toLowerCase() === 'active';
+          } else if (statusFilter === 'Inactive') {
+            matchesStatus = statusText.toLowerCase() === 'inactive';
+          }
+        }
+        
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      // Hiển thị thông báo nếu không có kết quả
+      let noResultsRow = table.querySelector('.no-search-results');
+      if (visibleCount === 0 && (searchTerm !== '' || statusFilter !== '')) {
+        if (!noResultsRow) {
+          noResultsRow = document.createElement('tr');
+          noResultsRow.className = 'no-search-results';
+          noResultsRow.innerHTML = '<td colspan="7" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-search"></i> Không tìm thấy chỗ ở nào phù hợp</td>';
+          table.appendChild(noResultsRow);
+        }
+        noResultsRow.style.display = '';
+      } else if (noResultsRow) {
+        noResultsRow.style.display = 'none';
+      }
+    }
+    
+    // Function để xem chi tiết listing
+    function viewListingDetail(listingId) {
+      fetch('<%=request.getContextPath()%>/admin/api/listing-detail?id=' + listingId)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.listing) {
+            const listing = data.listing;
+            
+            // Hiển thị thông tin cơ bản
+            document.getElementById('listingDetailTitle').textContent = listing.title || 'N/A';
+            document.getElementById('listingDetailDescription').textContent = listing.description || 'Chưa có mô tả';
+            document.getElementById('listingDetailAddress').textContent = (listing.address || '') + (listing.city ? ', ' + listing.city : '');
+            document.getElementById('listingDetailPrice').textContent = formatPrice(listing.pricePerNight) + ' VNĐ/đêm';
+            document.getElementById('listingDetailMaxGuests').textContent = listing.maxGuests || 'N/A';
+            document.getElementById('listingDetailStatus').textContent = listing.status === 'Active' ? 'Mở khoá' : 'Khoá';
+            document.getElementById('listingDetailStatus').className = 'badge badge-' + (listing.status === 'Active' ? 'success' : 'danger');
+            document.getElementById('listingDetailCreatedAt').textContent = listing.createdAt || 'N/A';
+            document.getElementById('listingDetailHostName').textContent = listing.hostName || 'N/A';
+            
+            // Hiển thị hình ảnh
+            const imagesContainer = document.getElementById('listingDetailImages');
+            imagesContainer.innerHTML = '';
+            
+            if (listing.images && listing.images.length > 0) {
+              listing.images.forEach((imageUrl, index) => {
+                const imgDiv = document.createElement('div');
+                imgDiv.className = 'col-md-4 mb-3';
+                imgDiv.innerHTML = `
+                  <img src="${imageUrl}" alt="Hình ảnh ${index + 1}" 
+                       class="img-fluid rounded" 
+                       style="width: 100%; height: 200px; object-fit: cover; cursor: pointer;"
+                       onclick="openImageModal('${imageUrl}')"
+                       onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop'">
+                `;
+                imagesContainer.appendChild(imgDiv);
+              });
+            } else {
+              imagesContainer.innerHTML = '<div class="col-12 text-center text-muted">Chưa có hình ảnh</div>';
+            }
+            
+            // Hiển thị modal
+            new bootstrap.Modal(document.getElementById('listingDetailModal')).show();
+          } else {
+            alert('Không thể tải thông tin chỗ ở: ' + (data.message || 'Lỗi không xác định'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Lỗi khi tải thông tin chỗ ở');
+        });
+    }
+    
+    // Helper function để format giá
+    function formatPrice(price) {
+      if (!price) return '0';
+      return new Intl.NumberFormat('vi-VN').format(price);
+    }
+    
+    // Function để mở modal xem hình ảnh lớn
+    function openImageModal(imageUrl) {
+      const modal = document.getElementById('imageModal');
+      const modalImg = document.getElementById('imageModalImg');
+      modalImg.src = imageUrl;
+      new bootstrap.Modal(modal).show();
+    }
+    
+    // Real-time search cho listings
+    document.addEventListener('DOMContentLoaded', function() {
+      const listingSearchInput = document.getElementById('listingSearchInput');
+      const listingStatusFilter = document.getElementById('listingStatusFilter');
+      
+      if (listingSearchInput) {
+        // Tìm kiếm real-time khi nhập
+        listingSearchInput.addEventListener('input', function() {
+          searchListings();
+        });
+        
+        // Tìm kiếm khi nhấn Enter
+        listingSearchInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            searchListings();
+          }
+        });
+      }
+      
+      if (listingStatusFilter) {
+        // Lọc khi thay đổi filter
+        listingStatusFilter.addEventListener('change', function() {
+          searchListings();
+        });
+      }
+    });
+    
     function toggleListingStatus(id, currentStatus) {
       console.log('[v0] Toggle listing status:', id, 'current:', currentStatus);
       
@@ -2465,9 +2941,24 @@
     }
     
     // Payment transaction functions
+    // Function để xem chi tiết payment (hiển thị modal)
+    function viewPaymentDetail(bookingId) {
+      // Fetch booking detail từ BookingDetailServlet
+      fetch('<%=request.getContextPath()%>/BookingDetailServlet?bookingId=' + bookingId)
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('paymentDetailContent').innerHTML = html;
+          new bootstrap.Modal(document.getElementById('paymentDetailModal')).show();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Lỗi khi tải thông tin thanh toán');
+        });
+    }
+    
     function viewTransactionDetail(bookingId) {
       console.log('Viewing transaction detail for booking:', bookingId);
-      viewBookingDetail(bookingId);
+      viewPaymentDetail(bookingId);
     }
     
     function confirmTransaction(bookingId) {
@@ -4129,7 +4620,659 @@
         filterWithdrawals('<%= withdrawalStatusParam %>');
       });
     <% } %>
+    
+    // Function để tìm kiếm và lọc feedbacks (real-time)
+    function searchFeedbacks() {
+      const searchTerm = document.getElementById('feedbackSearchInput').value.trim().toLowerCase();
+      const statusFilter = document.getElementById('feedbackStatusFilter').value;
+      const table = document.querySelector('#feedbacksTable tbody');
+      if (!table) return;
+      
+      const rows = table.querySelectorAll('tr');
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        if (row.cells.length < 2 || row.classList.contains('no-search-results')) {
+          row.style.display = '';
+          return;
+        }
+        
+        const nameCell = row.cells[0];
+        const typeCell = row.cells[1];
+        const statusCell = row.cells[2];
+        
+        if (!nameCell || !typeCell || !statusCell) {
+          row.style.display = '';
+          return;
+        }
+        
+        const nameText = nameCell.textContent.trim().toLowerCase();
+        const typeText = typeCell.textContent.trim().toLowerCase();
+        const statusText = statusCell.textContent.trim();
+        
+        // Map status text to status value
+        let currentStatus = '';
+        if (statusText.includes('Đang xử lí')) {
+          currentStatus = 'Pending';
+        } else if (statusText.includes('Đã xử lý') || statusText.includes('Đã xử lí')) {
+          currentStatus = 'Resolved';
+        } else if (statusText.includes('Đã đóng')) {
+          currentStatus = 'Closed';
+        }
+        
+        // Kiểm tra search term
+        const matchesSearch = searchTerm === '' || nameText.includes(searchTerm) || typeText.includes(searchTerm);
+        
+        // Kiểm tra status filter
+        let matchesStatus = true;
+        if (statusFilter !== '') {
+          matchesStatus = currentStatus === statusFilter;
+        }
+        
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      // Hiển thị thông báo nếu không có kết quả
+      let noResultsRow = table.querySelector('.no-search-results');
+      if (visibleCount === 0 && (searchTerm !== '' || statusFilter !== '')) {
+        if (!noResultsRow) {
+          noResultsRow = document.createElement('tr');
+          noResultsRow.className = 'no-search-results';
+          noResultsRow.innerHTML = '<td colspan="4" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-search"></i> Không tìm thấy phản hồi nào phù hợp</td>';
+          table.appendChild(noResultsRow);
+        }
+        noResultsRow.style.display = '';
+      } else if (noResultsRow) {
+        noResultsRow.style.display = 'none';
+      }
+    }
+    
+    // Real-time search cho feedbacks
+    document.addEventListener('DOMContentLoaded', function() {
+      const feedbackSearchInput = document.getElementById('feedbackSearchInput');
+      const feedbackStatusFilter = document.getElementById('feedbackStatusFilter');
+      
+      if (feedbackSearchInput) {
+        // Tìm kiếm real-time khi nhập
+        feedbackSearchInput.addEventListener('input', function() {
+          searchFeedbacks();
+        });
+        
+        // Tìm kiếm khi nhấn Enter
+        feedbackSearchInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            searchFeedbacks();
+          }
+        });
+      }
+      
+      if (feedbackStatusFilter) {
+        // Lọc khi thay đổi filter
+        feedbackStatusFilter.addEventListener('change', function() {
+          searchFeedbacks();
+        });
+      }
+      
+    });
+    
+    // Function để tìm kiếm và lọc reports (real-time)
+    function searchReports() {
+      const searchTerm = document.getElementById('reportSearchInput').value.trim().toLowerCase();
+      const reporterFilter = document.getElementById('reportReporterFilter').value;
+      const reportedFilter = document.getElementById('reportReportedFilter').value;
+      const categoryFilter = document.getElementById('reportCategoryFilter').value;
+      const severityFilter = document.getElementById('reportSeverityFilter').value;
+      const statusFilter = document.getElementById('reportStatusFilter').value;
+      const table = document.querySelector('#reportsTable tbody');
+      if (!table) return;
+      
+      const rows = table.querySelectorAll('tr');
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        if (row.cells.length < 2 || row.classList.contains('no-search-results')) {
+          row.style.display = '';
+          return;
+        }
+        
+        const reporter = row.dataset.reporter || '';
+        const reported = row.dataset.reported || '';
+        const category = row.dataset.category || '';
+        const severity = row.dataset.severity || '';
+        const status = row.dataset.status || '';
+        
+        const rowText = (reporter + ' ' + reported + ' ' + category).toLowerCase();
+        
+        // Kiểm tra search term
+        const matchesSearch = searchTerm === '' || rowText.includes(searchTerm);
+        
+        // Kiểm tra filters
+        const matchesReporter = reporterFilter === '' || reporter === reporterFilter;
+        const matchesReported = reportedFilter === '' || reported === reportedFilter;
+        const matchesCategory = categoryFilter === '' || category === categoryFilter;
+        const matchesSeverity = severityFilter === '' || severity === severityFilter;
+        const matchesStatus = statusFilter === '' || status === statusFilter;
+        
+        if (matchesSearch && matchesReporter && matchesReported && matchesCategory && matchesSeverity && matchesStatus) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      // Hiển thị thông báo nếu không có kết quả
+      let noResultsRow = table.querySelector('.no-search-results');
+      if (visibleCount === 0 && (searchTerm !== '' || reporterFilter !== '' || reportedFilter !== '' || categoryFilter !== '' || severityFilter !== '' || statusFilter !== '')) {
+        if (!noResultsRow) {
+          noResultsRow = document.createElement('tr');
+          noResultsRow.className = 'no-search-results';
+          noResultsRow.innerHTML = '<td colspan="8" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-search"></i> Không tìm thấy báo cáo nào phù hợp</td>';
+          table.appendChild(noResultsRow);
+        }
+        noResultsRow.style.display = '';
+      } else if (noResultsRow) {
+        noResultsRow.style.display = 'none';
+      }
+    }
+    
+    // Real-time search cho reports
+    document.addEventListener('DOMContentLoaded', function() {
+      const reportSearchInput = document.getElementById('reportSearchInput');
+      const reportReporterFilter = document.getElementById('reportReporterFilter');
+      const reportReportedFilter = document.getElementById('reportReportedFilter');
+      const reportCategoryFilter = document.getElementById('reportCategoryFilter');
+      const reportSeverityFilter = document.getElementById('reportSeverityFilter');
+      const reportStatusFilter = document.getElementById('reportStatusFilter');
+      
+      if (reportSearchInput) {
+        reportSearchInput.addEventListener('input', function() {
+          searchReports();
+        });
+      }
+      
+      [reportReporterFilter, reportReportedFilter, reportCategoryFilter, reportSeverityFilter, reportStatusFilter].forEach(filter => {
+        if (filter) {
+          filter.addEventListener('change', function() {
+            searchReports();
+          });
+        }
+      });
+      
+      // Populate filter dropdowns từ data attributes
+      const table = document.querySelector('#reportsTable tbody');
+      if (table) {
+        const reporters = new Set();
+        const reporteds = new Set();
+        const categories = new Set();
+        
+        table.querySelectorAll('tr[data-reporter]').forEach(row => {
+          const reporter = row.dataset.reporter;
+          const reported = row.dataset.reported;
+          const category = row.dataset.category;
+          
+          if (reporter) reporters.add(reporter);
+          if (reported) reporteds.add(reported);
+          if (category) categories.add(category);
+        });
+        
+        reporters.forEach(name => {
+          const option = document.createElement('option');
+          option.value = name;
+          option.textContent = name;
+          reportReporterFilter.appendChild(option);
+        });
+        
+        reporteds.forEach(name => {
+          const option = document.createElement('option');
+          option.value = name;
+          option.textContent = name;
+          reportReportedFilter.appendChild(option);
+        });
+        
+        categories.forEach(name => {
+          const option = document.createElement('option');
+          option.value = name;
+          option.textContent = name;
+          reportCategoryFilter.appendChild(option);
+        });
+      }
+    });
+    
+    // Function để tìm kiếm và lọc payments (real-time)
+    function searchPayments() {
+      const searchTerm = document.getElementById('paymentSearchInput').value.trim().toLowerCase();
+      const userFilter = document.getElementById('paymentUserFilter').value;
+      const dateFilter = document.getElementById('paymentDateFilter').value;
+      const table = document.querySelector('#paymentsTable tbody');
+      if (!table) return;
+      
+      const rows = table.querySelectorAll('tr');
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        if (row.cells.length < 2 || row.classList.contains('no-search-results')) {
+          row.style.display = '';
+          return;
+        }
+        
+        const transactionIdCell = row.cells[0];
+        const userCell = row.cells[1];
+        const dateCell = row.cells[4];
+        
+        if (!transactionIdCell || !userCell || !dateCell) {
+          row.style.display = '';
+          return;
+        }
+        
+        const transactionId = transactionIdCell.textContent.trim().toLowerCase();
+        const userName = userCell.querySelector('.user-name') ? userCell.querySelector('.user-name').textContent.trim().toLowerCase() : '';
+        const userEmail = userCell.querySelector('.user-email') ? userCell.querySelector('.user-email').textContent.trim().toLowerCase() : '';
+        const dateText = dateCell.textContent.trim();
+        
+        // Kiểm tra search term
+        const matchesSearch = searchTerm === '' || transactionId.includes(searchTerm) || userName.includes(searchTerm) || userEmail.includes(searchTerm);
+        
+        // Kiểm tra user filter
+        const matchesUser = userFilter === '' || userName.includes(userFilter.toLowerCase()) || userEmail.includes(userFilter.toLowerCase());
+        
+        // Kiểm tra date filter
+        let matchesDate = true;
+        if (dateFilter !== '') {
+          const filterDate = new Date(dateFilter).toLocaleDateString('vi-VN');
+          matchesDate = dateText.includes(filterDate);
+        }
+        
+        if (matchesSearch && matchesUser && matchesDate) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      // Hiển thị thông báo nếu không có kết quả
+      let noResultsRow = table.querySelector('.no-search-results');
+      if (visibleCount === 0 && (searchTerm !== '' || userFilter !== '' || dateFilter !== '')) {
+        if (!noResultsRow) {
+          noResultsRow = document.createElement('tr');
+          noResultsRow.className = 'no-search-results';
+          noResultsRow.innerHTML = '<td colspan="7" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-search"></i> Không tìm thấy giao dịch nào phù hợp</td>';
+          table.appendChild(noResultsRow);
+        }
+        noResultsRow.style.display = '';
+      } else if (noResultsRow) {
+        noResultsRow.style.display = 'none';
+      }
+    }
+    
+    // Real-time search cho payments
+    document.addEventListener('DOMContentLoaded', function() {
+      const paymentSearchInput = document.getElementById('paymentSearchInput');
+      const paymentUserFilter = document.getElementById('paymentUserFilter');
+      const paymentDateFilter = document.getElementById('paymentDateFilter');
+      
+      if (paymentSearchInput) {
+        paymentSearchInput.addEventListener('input', function() {
+          searchPayments();
+        });
+      }
+      
+      if (paymentUserFilter) {
+        paymentUserFilter.addEventListener('change', function() {
+          searchPayments();
+        });
+      }
+      
+      if (paymentDateFilter) {
+        paymentDateFilter.addEventListener('change', function() {
+          searchPayments();
+        });
+      }
+      
+      // Populate user filter từ table
+      const table = document.querySelector('#paymentsTable tbody');
+      if (table) {
+        const users = new Set();
+        table.querySelectorAll('tr').forEach(row => {
+          const userCell = row.cells[1];
+          if (userCell) {
+            const userName = userCell.querySelector('.user-name');
+            if (userName) {
+              users.add(userName.textContent.trim());
+            }
+          }
+        });
+        
+        users.forEach(name => {
+          const option = document.createElement('option');
+          option.value = name;
+          option.textContent = name;
+          paymentUserFilter.appendChild(option);
+        });
+      }
+    });
+    
+    // Function để tìm user theo email
+    function searchUserForFeedback() {
+      const email = document.getElementById('feedbackUserEmail').value.trim();
+      if (!email) {
+        alert('Vui lòng nhập email người dùng');
+        return;
+      }
+      
+      // Gọi API để tìm user
+      fetch('<%=request.getContextPath()%>/admin/api/user?email=' + encodeURIComponent(email))
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.user) {
+            document.getElementById('feedbackUserId').value = data.user.userID;
+            document.getElementById('feedbackUserName').value = data.user.fullName;
+            document.getElementById('userSearchResult').innerHTML = 
+              '<div class="alert alert-success mt-2"><i class="fas fa-check"></i> Tìm thấy: ' + data.user.fullName + '</div>';
+          } else {
+            document.getElementById('feedbackUserId').value = '';
+            document.getElementById('feedbackUserName').value = '';
+            document.getElementById('userSearchResult').innerHTML = 
+              '<div class="alert alert-warning mt-2"><i class="fas fa-exclamation-triangle"></i> Không tìm thấy người dùng với email này</div>';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('userSearchResult').innerHTML = 
+            '<div class="alert alert-danger mt-2"><i class="fas fa-times"></i> Lỗi khi tìm kiếm người dùng</div>';
+        });
+    }
+    
+    // Function để tìm kiếm và lọc danh sách users (real-time)
+    function searchUsers() {
+      const searchInput = document.getElementById('userSearchInput');
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      const statusFilter = document.getElementById('userStatusFilter').value;
+      const table = document.querySelector('#users .data-table tbody');
+      if (!table) return;
+      
+      const rows = table.querySelectorAll('tr');
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        // Bỏ qua row "Chưa có người dùng nào" hoặc "Lỗi khi tải dữ liệu"
+        if (row.cells.length < 2 || row.classList.contains('no-search-results')) {
+          row.style.display = '';
+          return;
+        }
+        
+        // Lấy thông tin user từ row
+        const userInfoCell = row.cells[0];
+        const statusCell = row.cells[2];
+        
+        if (!userInfoCell || !statusCell) {
+          row.style.display = '';
+          return;
+        }
+        
+        const userNameElement = userInfoCell.querySelector('.user-name');
+        const userEmailElement = userInfoCell.querySelector('.user-email');
+        
+        if (!userNameElement || !userEmailElement) {
+          row.style.display = '';
+          return;
+        }
+        
+        const userName = userNameElement.textContent.trim().toLowerCase();
+        const userEmail = userEmailElement.textContent.trim().toLowerCase();
+        const statusText = statusCell.textContent.trim().toLowerCase();
+        
+        // Kiểm tra search term
+        const matchesSearch = searchTerm === '' || userName.includes(searchTerm) || userEmail.includes(searchTerm);
+        
+        // Kiểm tra status filter
+        let matchesStatus = true;
+        if (statusFilter !== '') {
+          if (statusFilter === 'active') {
+            matchesStatus = statusText === 'active';
+          } else if (statusFilter === 'blocked') {
+            matchesStatus = statusText === 'blocked';
+          }
+        }
+        
+        // Kiểm tra nếu search term khớp với tên hoặc email và status filter
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      // Hiển thị thông báo nếu không tìm thấy
+      let noResultsRow = table.querySelector('.no-search-results');
+      if (visibleCount === 0 && (searchTerm !== '' || statusFilter !== '')) {
+        if (!noResultsRow) {
+          noResultsRow = document.createElement('tr');
+          noResultsRow.className = 'no-search-results';
+          noResultsRow.innerHTML = '<td colspan="6" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-search"></i> Không tìm thấy người dùng nào phù hợp</td>';
+          table.appendChild(noResultsRow);
+        }
+        noResultsRow.style.display = '';
+      } else if (noResultsRow) {
+        noResultsRow.style.display = 'none';
+      }
+    }
+    
+    // Real-time search cho users
+    document.addEventListener('DOMContentLoaded', function() {
+      const userSearchInput = document.getElementById('userSearchInput');
+      const userStatusFilter = document.getElementById('userStatusFilter');
+      
+      if (userSearchInput) {
+        // Tìm kiếm real-time khi nhập
+        userSearchInput.addEventListener('input', function() {
+          searchUsers();
+        });
+        
+        // Tìm kiếm khi nhấn Enter
+        userSearchInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            searchUsers();
+          }
+        });
+      }
+      
+      if (userStatusFilter) {
+        // Lọc khi thay đổi filter
+        userStatusFilter.addEventListener('change', function() {
+          searchUsers();
+        });
+      }
+    });
+    
+    // Function để xem chi tiết user
+    function viewUserDetail(userId) {
+      // Gọi API để lấy thông tin chi tiết user
+      fetch('<%=request.getContextPath()%>/admin/api/user?id=' + userId)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.user) {
+            const user = data.user;
+            // Xử lý avatar URL
+            let avatarUrl = 'https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg';
+            if (user.profileImage) {
+              if (user.profileImage.startsWith('http')) {
+                avatarUrl = user.profileImage;
+              } else {
+                avatarUrl = '<%=request.getContextPath()%>/' + user.profileImage;
+              }
+            }
+            
+            // Điền thông tin vào modal
+            document.getElementById('userDetailAvatar').src = avatarUrl;
+            document.getElementById('userDetailFullName').textContent = user.fullName || 'N/A';
+            document.getElementById('userDetailEmail').textContent = user.email || 'N/A';
+            document.getElementById('userDetailPhone').textContent = user.phoneNumber || 'Chưa cập nhật';
+            document.getElementById('userDetailRole').textContent = user.role || 'N/A';
+            document.getElementById('userDetailStatus').textContent = user.isActive ? 'Hoạt động' : 'Đã khóa';
+            document.getElementById('userDetailStatus').className = 'badge badge-' + (user.isActive ? 'success' : 'danger');
+            document.getElementById('userDetailCreatedAt').textContent = user.createdAt || 'N/A';
+            document.getElementById('userDetailUserID').textContent = user.userID || userId;
+            
+            // Hiển thị modal
+            new bootstrap.Modal(document.getElementById('userDetailModal')).show();
+          } else {
+            alert('Không thể tải thông tin người dùng: ' + (data.message || 'Lỗi không xác định'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Lỗi khi tải thông tin người dùng');
+        });
+    }
   </script>
+  
+  <!-- Modal xem chi tiết user -->
+  <div class="modal fade" id="userDetailModal" tabindex="-1" aria-labelledby="userDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="userDetailModalLabel">
+            <i class="fas fa-user"></i> Chi tiết người dùng
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-4 text-center mb-4">
+              <img id="userDetailAvatar" src="" alt="Avatar" 
+                   class="img-thumbnail rounded-circle" 
+                   style="width: 150px; height: 150px; object-fit: cover;"
+                   onerror="this.src='https://aic.com.vn/wp-content/uploads/2024/10/avatar-fb-mac-dinh-1.jpg'">
+            </div>
+            <div class="col-md-8">
+              <h4 id="userDetailFullName" class="mb-3"></h4>
+              <table class="table table-borderless">
+                <tr>
+                  <td style="width: 150px; font-weight: 600;">ID:</td>
+                  <td id="userDetailUserID"></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Email:</td>
+                  <td id="userDetailEmail"></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Số điện thoại:</td>
+                  <td id="userDetailPhone"></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Vai trò:</td>
+                  <td><span class="badge badge-info" id="userDetailRole"></span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Trạng thái:</td>
+                  <td><span class="badge" id="userDetailStatus"></span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Ngày tham gia:</td>
+                  <td id="userDetailCreatedAt"></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal tạo phản hồi -->
+  <div class="modal fade" id="createFeedbackModal" tabindex="-1" aria-labelledby="createFeedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createFeedbackModalLabel">
+            <i class="fas fa-envelope"></i> Tạo phản hồi thông báo cho người dùng
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="createFeedbackForm" action="<%=request.getContextPath()%>/admin/feedback/create" method="POST">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Tìm người dùng (Email) <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="email" class="form-control" id="feedbackUserEmail" placeholder="Nhập email người dùng" required>
+                <button type="button" class="btn btn-outline-secondary" onclick="searchUserForFeedback()">
+                  <i class="fas fa-search"></i> Tìm
+                </button>
+              </div>
+              <input type="hidden" id="feedbackUserId" name="userID" required>
+              <input type="hidden" id="feedbackUserName" name="userName">
+              <div id="userSearchResult"></div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="title" placeholder="Ví dụ: Phản hồi về yêu cầu hỗ trợ của bạn" required>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Loại phản hồi <span class="text-danger">*</span></label>
+              <select class="form-select" name="type" required>
+                <option value="">-- Chọn loại --</option>
+                <option value="Thông báo">Thông báo</option>
+                <option value="Trả lời thắc mắc">Trả lời thắc mắc</option>
+                <option value="Hỗ trợ">Hỗ trợ</option>
+                <option value="Khác">Khác</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Nội dung <span class="text-danger">*</span></label>
+              <textarea class="form-control" name="content" rows="6" 
+                        placeholder="Nhập nội dung phản hồi, trả lời thắc mắc hoặc thông báo cho người dùng..." required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-paper-plane"></i> Gửi phản hồi
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal chi tiết payment -->
+  <div class="modal fade" id="paymentDetailModal" tabindex="-1" aria-labelledby="paymentDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="paymentDetailModalLabel">
+            <i class="fas fa-receipt"></i> Chi tiết thanh toán
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="paymentDetailContent">
+          <p class="text-center text-muted">Đang tải...</p>
+        </div>
+        <div class="modal-footer">
+          <a href="${pageContext.request.contextPath}/admin/dashboard#payments" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+          </a>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
+    
     

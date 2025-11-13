@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/css/footer.css">
-    <title>go2bnb.org - Một nơi để gọi là nhà</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
     <style>
         * {
             margin: 0;
@@ -405,18 +405,7 @@
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-container">
-            <a href="#" class="logo">go2bnb.org</a>
-            <nav>
-                <ul class="nav-menu">
-                    <li><a href="#">Nơi tạm trú</a></li>
-                    <li><a href="#">Tham gia</a></li>
-                </ul>
-            </nav>
-            <a href="#" class="donate-btn">Quyên góp</a>
-        </div>
-    </header>
+    <jsp:include page="/design/header.jsp" />
 
     
     <section class="hero">

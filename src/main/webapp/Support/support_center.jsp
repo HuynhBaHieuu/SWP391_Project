@@ -10,6 +10,8 @@
     <head>
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <link rel="stylesheet" href="css/home.css"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
         <title>Trung tâm trợ giúp - Go2Bnb</title>
         <style>
             :root{
@@ -136,16 +138,8 @@
     </head>
     <body>
 
-        <!-- Header with Logo -->       
-        <header class="site-header">
-            <div class="container header-inner">
-                <!-- Logo with a link to the home page -->
-                <a class="brand" href="<%=request.getContextPath()%>/home.jsp">
-                    <!-- Use SVG or image as logo here -->
-                    <img src="<%=request.getContextPath()%>/image/logo.jpg" alt="Go2Bnb Logo" width="36" height="36" />
-                </a>
-            </div>
-        </header>
+        <!-- Header with Logo -->
+         <jsp:include page="/design/header.jsp" />
 
         <!-- Hero Section -->
         <section class="hero">

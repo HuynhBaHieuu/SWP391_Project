@@ -139,4 +139,44 @@ public class ReviewDAO extends DBConnection {
         }
         return 0;
     }
+
+    // 🔹 Kiểm tra xem booking đã được review chưa
+    public boolean hasReviewed(int bookingID) {
+        String sql = "SELECT COUNT(*) AS CountReview FROM Reviews WHERE BookingID = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bookingID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("CountReview") > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // 🔹 Kiểm tra xem user có thể review booking này không (theo bookingID)
+    public boolean canReviewBooking(int userID, int bookingID) {
+        // Cho phép review nếu booking đã completed và chưa có review
+        // Không cần đợi qua ngày checkout, chỉ cần status = Completed
+        String sql = """
+            SELECT COUNT(*) AS CountBooking
+            FROM Bookings
+            WHERE BookingID = ? AND GuestID = ? AND Status = 'Completed'
+              AND BookingID NOT IN (SELECT BookingID FROM Reviews WHERE BookingID IS NOT NULL)
+        """;
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bookingID);
+            ps.setInt(2, userID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("CountBooking") > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
