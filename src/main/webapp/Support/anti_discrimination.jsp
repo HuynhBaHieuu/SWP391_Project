@@ -12,6 +12,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <link rel="icon" type="image/jpg" href="image/logo.jpg">
         <link rel="stylesheet" href="css/home.css"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
         <title>Cập nhật năm 2024 — Chống phân biệt đối xử | Project Lighthouse (Demo)</title>
         <style>
             :root{
@@ -215,21 +216,8 @@
     </head>
     <body>
         <!-- Header -->
-        <header class="site-header">
-            <div class="container header-inner">
-                <a class="brand" href="<%=request.getContextPath()%>/home.jsp">
-                    <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 3c2.8 3.8 5.8 8.4 6.7 10.7a4.7 4.7 0 1 1-8.7 3.6l2-3.4a1.9 1.9 0 1 0-3.3 0l2 3.4A4.7 4.7 0 1 1 5.3 13.7C6.2 11.4 9.2 6.8 12 3Z" fill="currentColor"/>
-                    </svg>
-                    <span>Go2bnb</span>
-                </a>
-                <nav class="nav">
-                    <a href="#cong-viec">Công việc</a>
-                    <a href="#commit">Cam kết</a>
-                    <a href="#bao-cao" class="btn btn--ghost">Xem báo cáo</a>
-                </nav>
-            </div>
-        </header>
+         <jsp:include page="/design/header.jsp" />
+        
 
         <!-- Hero -->
         <section class="hero">

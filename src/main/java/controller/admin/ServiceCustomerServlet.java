@@ -2,7 +2,7 @@ package controller.admin;
 
 import adminDAO.ServiceCustomerDAO;
 import model.ServiceCustomer;
-import utils.ImageUploadUtil;
+import utils.FileUploadUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -12,9 +12,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
+import java.io.File;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.UUID;
 
 @WebServlet(urlPatterns = {"/admin/services"})
 @MultipartConfig(fileSizeThreshold = 1024 * 1024, maxFileSize = 5L * 1024 * 1024, maxRequestSize = 20L * 1024 * 1024)
@@ -22,6 +25,7 @@ public class ServiceCustomerServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     private ServiceCustomerDAO serviceCustomerDAO;
+    private static final String UPLOAD_SUBFOLDER = "services";
 
     @Override
     public void init() throws ServletException {
@@ -255,12 +259,8 @@ public class ServiceCustomerServlet extends HttpServlet {
                 }
                 
                 if (imagePart != null && imagePart.getSize() > 0) {
-                    // Lấy đường dẫn webapp
-                    String webAppPath = getServletContext().getRealPath("/");
-                    System.out.println("Web app path: " + webAppPath);
-                    
-                    // Upload ảnh
-                    imageUrl = ImageUploadUtil.uploadImage(imagePart, webAppPath);
+                    // Upload ảnh sử dụng FileUploadUtil (lưu vào thư mục bên ngoài dự án)
+                    imageUrl = saveServiceImage(imagePart);
                     System.out.println("Image uploaded successfully: " + imageUrl);
                 } else {
                     System.out.println("No image file provided or file is empty");
@@ -300,8 +300,7 @@ public class ServiceCustomerServlet extends HttpServlet {
             } else {
                 // Nếu thêm vào database thất bại, xóa ảnh đã upload
                 if (imageUrl != null) {
-                    String webAppPath = getServletContext().getRealPath("/");
-                    ImageUploadUtil.deleteImage(imageUrl, webAppPath);
+                    deleteServiceImage(imageUrl);
                 }
                 sendJsonResponse(response, false, "Không thể thêm dịch vụ");
             }
@@ -346,8 +345,7 @@ public class ServiceCustomerServlet extends HttpServlet {
             if (success) {
                 // Xóa ảnh nếu có
                 if (service.getImageURL() != null && !service.getImageURL().isEmpty()) {
-                    String webAppPath = getServletContext().getRealPath("/");
-                    ImageUploadUtil.deleteImage(service.getImageURL(), webAppPath);
+                    deleteServiceImage(service.getImageURL());
                 }
                 sendJsonResponse(response, true, "Xóa dịch vụ thành công");
             } else {
@@ -443,16 +441,13 @@ public class ServiceCustomerServlet extends HttpServlet {
             try {
                 Part imagePart = request.getPart("image");
                 if (imagePart != null && imagePart.getSize() > 0) {
-                    // Lấy đường dẫn webapp
-                    String webAppPath = getServletContext().getRealPath("/");
-                    
-                    // Upload ảnh mới
-                    newImageUrl = ImageUploadUtil.uploadImage(imagePart, webAppPath);
+                    // Upload ảnh mới sử dụng FileUploadUtil
+                    newImageUrl = saveServiceImage(imagePart);
                     System.out.println("New image uploaded successfully: " + newImageUrl);
                     
                     // Xóa ảnh cũ nếu có
                     if (existingService.getImageURL() != null && !existingService.getImageURL().isEmpty()) {
-                        ImageUploadUtil.deleteImage(existingService.getImageURL(), webAppPath);
+                        deleteServiceImage(existingService.getImageURL());
                     }
                 }
             } catch (Exception imageError) {
@@ -562,6 +557,107 @@ public class ServiceCustomerServlet extends HttpServlet {
                  .replace("\n", "\\n")
                  .replace("\r", "\\r")
                  .replace("\t", "\\t");
+    }
+    
+    /**
+     * Lưu ảnh service và trả về đường dẫn URL
+     * Sử dụng FileUploadUtil để lưu vào thư mục bên ngoài dự án (không bị mất khi clean build)
+     */
+    private String saveServiceImage(Part imagePart) throws IOException {
+        if (imagePart == null || imagePart.getSize() == 0) {
+            return null;
+        }
+        
+        // Kiểm tra kích thước file (5MB)
+        if (imagePart.getSize() > 5 * 1024 * 1024) {
+            throw new IOException("File quá lớn. Kích thước tối đa là 5MB.");
+        }
+        
+        // Lấy tên file và extension
+        String fileName = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
+        if (fileName == null || fileName.isEmpty()) {
+            throw new IOException("Tên file không hợp lệ.");
+        }
+        
+        String fileExtension = "";
+        if (fileName.contains(".")) {
+            fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+        }
+        
+        // Kiểm tra extension hợp lệ
+        String[] allowedExtensions = {".jpg", ".jpeg", ".png", ".gif", ".webp"};
+        boolean isValidExtension = false;
+        for (String ext : allowedExtensions) {
+            if (ext.equals(fileExtension)) {
+                isValidExtension = true;
+                break;
+            }
+        }
+        
+        if (!isValidExtension) {
+            throw new IOException("Định dạng file không được hỗ trợ. Chỉ chấp nhận: " + 
+                String.join(", ", allowedExtensions));
+        }
+        
+        // Tạo tên file unique
+        String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+        
+        // Sử dụng FileUploadUtil để lấy đường dẫn an toàn (bên ngoài dự án)
+        String uploadPath = FileUploadUtil.getSmartUploadPath(getServletContext(), UPLOAD_SUBFOLDER);
+        
+        // Lưu file
+        String filePath = uploadPath + File.separator + uniqueFileName;
+        imagePart.write(filePath);
+        
+        // Trả về URL để lưu vào database (sẽ được ImageServlet xử lý)
+        return "uploads/" + UPLOAD_SUBFOLDER + "/" + uniqueFileName;
+    }
+    
+    /**
+     * Xóa ảnh service
+     */
+    private void deleteServiceImage(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return;
+        }
+        
+        try {
+            // URL có dạng: uploads/services/filename hoặc image_service/filename
+            // Cần xử lý cả hai trường hợp (ảnh cũ và ảnh mới)
+            String fileName = null;
+            String subFolder = null;
+            
+            if (imageUrl.startsWith("uploads/")) {
+                // URL mới: uploads/services/filename
+                String pathWithoutPrefix = imageUrl.substring("uploads/".length());
+                int firstSlash = pathWithoutPrefix.indexOf("/");
+                if (firstSlash > 0) {
+                    subFolder = pathWithoutPrefix.substring(0, firstSlash);
+                    fileName = pathWithoutPrefix.substring(firstSlash + 1);
+                }
+            } else if (imageUrl.startsWith("image_service/")) {
+                // URL cũ: image_service/filename (ảnh cũ trong webapp, có thể không còn tồn tại)
+                fileName = imageUrl.substring("image_service/".length());
+                // Không cần xóa vì đã bị mất khi clean build
+                return;
+            } else {
+                // Chỉ có filename
+                fileName = imageUrl;
+                subFolder = UPLOAD_SUBFOLDER;
+            }
+            
+            if (fileName != null && subFolder != null) {
+                String uploadPath = FileUploadUtil.getSmartUploadPath(getServletContext(), subFolder);
+                File imageFile = new File(uploadPath, fileName);
+                if (imageFile.exists()) {
+                    imageFile.delete();
+                    System.out.println("Deleted service image: " + imageFile.getAbsolutePath());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error deleting service image: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
 

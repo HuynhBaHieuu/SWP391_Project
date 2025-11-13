@@ -1,214 +1,236 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Listings</title>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css?v=7">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/host-header.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/lang_modal.css">
-        <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
-    </head>
-    <body>
-        <jsp:include page="/design/host_header.jsp">
-            <jsp:param name="active" value="listings" />
-        </jsp:include>
+    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+        <!DOCTYPE html>
+        <html lang="en">
 
-        <div class="listing-container">
-            <div class="listings-header">
-                <h2 class="page-title" data-i18n="host.listings.title">Your listings</h2>
-                <div class="listings-actions">
-                    <button type="button" class="icon-btn" id="btnTable" title="Table view">☷</button>
-                    <button type="button" class="icon-btn" id="btnGrid"  title="Grid view">▦</button>
-                    <a class="btn btn-primary add-listing" href="${pageContext.request.contextPath}/host/listing/new" data-i18n="host.listings.add_btn">+ Add accommodation</a>
+        <head>
+            <meta charset="UTF-8">
+            <title>Listings</title>
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css?v=7">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/host-header.css">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/lang_modal.css">
+            <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/host-header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/go2bnb_host.css">
+        </head>
+
+        <body>
+            <jsp:include page="/design/host_header.jsp">
+                <jsp:param name="active" value="listings" />
+            </jsp:include>
+
+            <div class="listing-container">
+                <div class="listings-header">
+                    <h2 class="page-title" data-i18n="host.listings.title">Your listings</h2>
+                    <div class="listings-actions">
+                        <button type="button" class="icon-btn" id="btnTable" title="Table view">☷</button>
+                        <button type="button" class="icon-btn" id="btnGrid" title="Grid view">▦</button>
+                        <a class="btn btn-primary add-listing"
+                            href="${pageContext.request.contextPath}/host/listing/new"
+                            data-i18n="host.listings.add_btn">+ Add accommodation</a>
+                    </div>
                 </div>
-            </div>
 
-            <!-- GRID (card lớn + carousel) -->
-            <c:if test="${not empty listings}">
-                <div class="listings-grid" id="modeGrid">
-                    <c:forEach var="listing" items="${listings}">
-                        <a href="${pageContext.request.contextPath}/host/listing/edit?id=${listing.listingID}" class="bigcard-link">
-                            <article class="bigcard">
-                                <div class="bigcard-media">
-                                    <span class="listing-status ${listing.status == 'Active' ? 'status-active' : 'status-inactive'}" data-i18n="${listing.status == 'Active' ? 'host.listings.active' : ''}">
-                                        ${listing.status == 'Active' ? 'Active' : listing.status}
-                                    </span>
+                <!-- GRID (card lớn + carousel) -->
+                <c:if test="${not empty listings}">
+                    <div class="listings-grid" id="modeGrid">
+                        <c:forEach var="listing" items="${listings}">
+                            <a href="${pageContext.request.contextPath}/host/listing/edit?id=${listing.listingID}"
+                                class="bigcard-link">
+                                <article class="bigcard">
+                                    <div class="bigcard-media">
+                                        <span
+                                            class="listing-status ${listing.status == 'Active' ? 'status-active' : 'status-inactive'}"
+                                            data-i18n="${listing.status == 'Active' ? 'host.listings.active' : ''}">
+                                            ${listing.status == 'Active' ? 'Active' : listing.status}
+                                        </span>
 
-                                    <c:set var="imgKey" value="${'images_'}${listing.listingID}" />
-                                    <c:choose>
-                                        <c:when test="${not empty requestScope[imgKey]}">
-                                            <div class="bigcard-carousel" id="bc_${listing.listingID}">
-                                                <c:forEach var="image" items="${requestScope[imgKey]}" varStatus="s">
-                                                    <div class="bigcard-slide ${s.first ? 'on' : ''}" style="background-image:url('${image}')"></div>
-                                                </c:forEach>
-                                                <button class="bc-nav prev" onclick="event.preventDefault(); event.stopPropagation(); slidePrev('${listing.listingID}')">‹</button>
-                                                <button class="bc-nav next" onclick="event.preventDefault(); event.stopPropagation(); slideNext('${listing.listingID}')">›</button>
-                                                <div class="bc-dots">
-                                                    <c:forEach var="image" items="${requestScope[imgKey]}" varStatus="s">
-                                                        <span class="bc-dot ${s.first ? 'on' : ''}"
-                                                              onclick="event.preventDefault(); event.stopPropagation(); gotoSlide('${listing.listingID}', ${s.index})"></span>
+                                        <c:set var="imgKey" value="${'images_'}${listing.listingID}" />
+                                        <c:choose>
+                                            <c:when test="${not empty requestScope[imgKey]}">
+                                                <div class="bigcard-carousel" id="bc_${listing.listingID}">
+                                                    <c:forEach var="image" items="${requestScope[imgKey]}"
+                                                        varStatus="s">
+                                                        <div class="bigcard-slide ${s.first ? 'on' : ''}"
+                                                            style="background-image:url('${image}')"></div>
                                                     </c:forEach>
+                                                    <button class="bc-nav prev"
+                                                        onclick="event.preventDefault(); event.stopPropagation(); slidePrev('${listing.listingID}')">‹</button>
+                                                    <button class="bc-nav next"
+                                                        onclick="event.preventDefault(); event.stopPropagation(); slideNext('${listing.listingID}')">›</button>
+                                                    <div class="bc-dots">
+                                                        <c:forEach var="image" items="${requestScope[imgKey]}"
+                                                            varStatus="s">
+                                                            <span class="bc-dot ${s.first ? 'on' : ''}"
+                                                                onclick="event.preventDefault(); event.stopPropagation(); gotoSlide('${listing.listingID}', ${s.index})"></span>
+                                                        </c:forEach>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div class="bigcard-placeholder"></div>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+
+                                    <div class="bigcard-body">
+                                        <h3 class="bigcard-title">${listing.title}</h3>
+                                        <p class="bigcard-meta">${listing.address}, ${listing.city}</p>
+                                    </div>
+                                </article>
+                            </a>
+                        </c:forEach>
+                    </div>
+                </c:if>
+
+                <!-- TABLE (có thumbnail ảnh đầu tiên) -->
+                <div class="listings-table" id="modeTable" style="display:none;">
+                    <div class="lt-head">
+                        <div class="lt-col lt-col-item" data-i18n="host.listings.rental_item">Rental item</div>
+                        <div class="lt-col lt-col-type" data-i18n="host.listings.type">Type</div>
+                        <div class="lt-col lt-col-loc" data-i18n="host.listings.location">Location</div>
+                        <div class="lt-col lt-col-status" data-i18n="host.listings.status">Status</div>
+                    </div>
+
+                    <c:forEach var="listing" items="${listings}">
+                        <c:set var="imgKey" value="${'images_'}${listing.listingID}" />
+                        <c:set var="firstImg" value="" />
+                        <!-- Lấy đúng ảnh đầu an toàn -->
+                        <c:if test="${not empty requestScope[imgKey]}">
+                            <c:forEach var="img" items="${requestScope[imgKey]}" begin="0" end="0">
+                                <c:set var="firstImg" value="${img}" />
+                            </c:forEach>
+                        </c:if>
+
+                        <a href="${pageContext.request.contextPath}/host/listing/edit?id=${listing.listingID}"
+                            class="lt-row-link">
+                            <div class="lt-row">
+                                <div class="lt-col lt-col-item">
+                                    <c:choose>
+                                        <c:when test="${not empty firstImg}">
+                                            <img class="lt-thumb-img" src="${firstImg}" alt="thumb">
                                         </c:when>
                                         <c:otherwise>
-                                            <div class="bigcard-placeholder"></div>
+                                            <div class="lt-thumb"></div>
                                         </c:otherwise>
                                     </c:choose>
+                                    <div class="lt-title" data-i18n="host.listings.house_room_created">House/room for
+                                        rent created on ${listing.createdAt}</div>
                                 </div>
-
-                                <div class="bigcard-body">
-                                    <h3 class="bigcard-title">${listing.title}</h3>
-                                    <p class="bigcard-meta">${listing.address}, ${listing.city}</p>
+                                <div class="lt-col lt-col-type" data-i18n="host.listings.house">House</div>
+                                <div class="lt-col lt-col-loc">${listing.city}</div>
+                                <div class="lt-col lt-col-status">
+                                    <span class="dot ${listing.status == 'Active' ? 'dot-on' : ''}"></span>
+                                    <span class="lt-status-text"
+                                        data-i18n="${listing.status == 'Active' ? 'host.listings.active' : ''}">${listing.status
+                                        == 'Active' ? 'Active' : listing.status}</span>
                                 </div>
-                            </article>
+                            </div>
                         </a>
                     </c:forEach>
-                </div>
-            </c:if>
 
-            <!-- TABLE (có thumbnail ảnh đầu tiên) -->
-            <div class="listings-table" id="modeTable" style="display:none;">
-                <div class="lt-head">
-                    <div class="lt-col lt-col-item" data-i18n="host.listings.rental_item">Rental item</div>
-                    <div class="lt-col lt-col-type" data-i18n="host.listings.type">Type</div>
-                    <div class="lt-col lt-col-loc" data-i18n="host.listings.location">Location</div>
-                    <div class="lt-col lt-col-status" data-i18n="host.listings.status">Status</div>
-                </div>
-
-                <c:forEach var="listing" items="${listings}">
-                    <c:set var="imgKey" value="${'images_'}${listing.listingID}" />
-                    <c:set var="firstImg" value="" />
-                    <!-- Lấy đúng ảnh đầu an toàn -->
-                    <c:if test="${not empty requestScope[imgKey]}">
-                        <c:forEach var="img" items="${requestScope[imgKey]}" begin="0" end="0">
-                            <c:set var="firstImg" value="${img}" />
-                        </c:forEach>
+                    <c:if test="${empty listings}">
+                        <div class="lt-empty" data-i18n="host.listings.empty">You have no listings yet.</div>
                     </c:if>
-
-                    <a href="${pageContext.request.contextPath}/host/listing/edit?id=${listing.listingID}" class="lt-row-link">
-                        <div class="lt-row">
-                            <div class="lt-col lt-col-item">
-                                <c:choose>
-                                    <c:when test="${not empty firstImg}">
-                                        <img class="lt-thumb-img" src="${firstImg}" alt="thumb">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="lt-thumb"></div>
-                                    </c:otherwise>
-                                </c:choose>
-                                <div class="lt-title" data-i18n="host.listings.house_room_created">House/room for rent created on ${listing.createdAt}</div>
-                            </div>
-                            <div class="lt-col lt-col-type" data-i18n="host.listings.house">House</div>
-                            <div class="lt-col lt-col-loc">${listing.city}</div>
-                            <div class="lt-col lt-col-status">
-                                <span class="dot ${listing.status == 'Active' ? 'dot-on' : ''}"></span>
-                                <span class="lt-status-text" data-i18n="${listing.status == 'Active' ? 'host.listings.active' : ''}">${listing.status == 'Active' ? 'Active' : listing.status}</span>
-                            </div>
-                        </div>
-                    </a>
-                </c:forEach>
+                </div>
 
                 <c:if test="${empty listings}">
-                    <div class="lt-empty" data-i18n="host.listings.empty">You have no listings yet.</div>
+                    <div class="empty-wrap">
+                        <p data-i18n="host.listings.empty">You have no listings yet.</p>
+                        <a class="btn btn-primary add-listing"
+                            href="${pageContext.request.contextPath}/host/listing/new"
+                            data-i18n="host.listings.add_btn">+ Add accommodation</a>
+                    </div>
                 </c:if>
             </div>
 
-            <c:if test="${empty listings}">
-                <div class="empty-wrap">
-                    <p data-i18n="host.listings.empty">You have no listings yet.</p>
-                    <a class="btn btn-primary add-listing" href="${pageContext.request.contextPath}/host/listing/new" data-i18n="host.listings.add_btn">+ Add accommodation</a>
-                </div>
-            </c:if>
-        </div>
-
-        <!-- Toggle + Carousel -->
-        <script>
-            (function () {
-                const g = document.getElementById('modeGrid');
-                const t = document.getElementById('modeTable');
-                const bG = document.getElementById('btnGrid');
-                const bT = document.getElementById('btnTable');
-                function setMode(mode) {
-                    if (mode === 'grid') {
-                        if (g)
-                            g.style.display = 'grid';
-                        if (t)
-                            t.style.display = 'none';
-                    } else {
-                        if (g)
-                            g.style.display = 'none';
-                        if (t)
-                            t.style.display = 'block';
+            <!-- Toggle + Carousel -->
+            <script>
+                (function () {
+                    const g = document.getElementById('modeGrid');
+                    const t = document.getElementById('modeTable');
+                    const bG = document.getElementById('btnGrid');
+                    const bT = document.getElementById('btnTable');
+                    function setMode(mode) {
+                        if (mode === 'grid') {
+                            if (g)
+                                g.style.display = 'grid';
+                            if (t)
+                                t.style.display = 'none';
+                        } else {
+                            if (g)
+                                g.style.display = 'none';
+                            if (t)
+                                t.style.display = 'block';
+                        }
+                        localStorage.setItem('listMode', mode);
                     }
-                    localStorage.setItem('listMode', mode);
-                }
-                bG && bG.addEventListener('click', () => setMode('grid'));
-                bT && bT.addEventListener('click', () => setMode('table'));
-                setMode(localStorage.getItem('listMode') || 'grid');
-            })();
+                    bG && bG.addEventListener('click', () => setMode('grid'));
+                    bT && bT.addEventListener('click', () => setMode('table'));
+                    setMode(localStorage.getItem('listMode') || 'grid');
+                })();
 
-            (function () {
-                window._bcIndex = window._bcIndex || {};
-                function setSlide(id, idx) {
-                    const wrap = document.getElementById('bc_' + id);
-                    if (!wrap)
-                        return;
-                    const slides = wrap.querySelectorAll('.bigcard-slide');
-                    const dots = wrap.querySelectorAll('.bc-dot');
-                    if (!slides.length)
-                        return;
-                    const n = slides.length;
-                    const i = ((idx % n) + n) % n;
-                    slides.forEach((el, k) => el.classList.toggle('on', k === i));
-                    dots.forEach((el, k) => el.classList.toggle('on', k === i));
-                    window._bcIndex[id] = i;
-                }
-                window.slideNext = id => setSlide(id, (window._bcIndex[id] || 0) + 1);
-                window.slidePrev = id => setSlide(id, (window._bcIndex[id] || 0) - 1);
-                window.gotoSlide = (id, i) => setSlide(id, i);
-                document.addEventListener('DOMContentLoaded', () => {
-                    document.querySelectorAll('.bigcard-carousel').forEach(wrap => {
-                        const id = wrap.id.replace('bc_', '');
-                        window._bcIndex[id] = 0;
+                (function () {
+                    window._bcIndex = window._bcIndex || {};
+                    function setSlide(id, idx) {
+                        const wrap = document.getElementById('bc_' + id);
+                        if (!wrap)
+                            return;
+                        const slides = wrap.querySelectorAll('.bigcard-slide');
+                        const dots = wrap.querySelectorAll('.bc-dot');
+                        if (!slides.length)
+                            return;
+                        const n = slides.length;
+                        const i = ((idx % n) + n) % n;
+                        slides.forEach((el, k) => el.classList.toggle('on', k === i));
+                        dots.forEach((el, k) => el.classList.toggle('on', k === i));
+                        window._bcIndex[id] = i;
+                    }
+                    window.slideNext = id => setSlide(id, (window._bcIndex[id] || 0) + 1);
+                    window.slidePrev = id => setSlide(id, (window._bcIndex[id] || 0) - 1);
+                    window.gotoSlide = (id, i) => setSlide(id, i);
+                    document.addEventListener('DOMContentLoaded', () => {
+                        document.querySelectorAll('.bigcard-carousel').forEach(wrap => {
+                            const id = wrap.id.replace('bc_', '');
+                            window._bcIndex[id] = 0;
+                        });
                     });
-                });
-            })();
-        </script>
-        
-        <!-- Language Selector Button -->
-        <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-            <button data-open-lang-modal style="background: #ff5a5f; color: white; border: none; padding: 12px 16px; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; font-weight: 500;">
-                🌐 <span data-lang-label>English</span>
-            </button>
-        </div>
-        
-        <script>
-            // Update language button text and apply translation
-            document.addEventListener('DOMContentLoaded', function() {
-                function updateLangButton() {
-                    const langLabel = document.querySelector('[data-lang-label]');
-                    if (langLabel && window.I18N) {
-                        const currentLang = window.I18N.lang || 'en';
-                        langLabel.textContent = currentLang === 'vi' ? 'Tiếng Việt' : 'English';
+                })();
+            </script>
+
+            <!-- Language Selector Button -->
+            <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+                <button data-open-lang-modal
+                    style="background: #ff5a5f; color: white; border: none; padding: 12px 16px; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; font-weight: 500;">
+                    🌐 <span data-lang-label>English</span>
+                </button>
+            </div>
+
+            <script>
+                // Update language button text and apply translation
+                document.addEventListener('DOMContentLoaded', function () {
+                    function updateLangButton() {
+                        const langLabel = document.querySelector('[data-lang-label]');
+                        if (langLabel && window.I18N) {
+                            const currentLang = window.I18N.lang || 'en';
+                            langLabel.textContent = currentLang === 'vi' ? 'Tiếng Việt' : 'English';
+                        }
                     }
-                }
-                
-                
-                // Update on page load
-                updateLangButton();
-                
-                // Listen for language changes
-                const originalSetLang = window.I18N?.setLang;
-                if (originalSetLang) {
-                    window.I18N.setLang = function(lang) {
-                        originalSetLang.call(this, lang);
-                        updateLangButton();
-                    };
-                }
-            });
-        </script>
-    </body>
-</html>
+
+
+                    // Update on page load
+                    updateLangButton();
+
+                    // Listen for language changes
+                    const originalSetLang = window.I18N?.setLang;
+                    if (originalSetLang) {
+                        window.I18N.setLang = function (lang) {
+                            originalSetLang.call(this, lang);
+                            updateLangButton();
+                        };
+                    }
+                });
+            </script>
+        </body>
+
+        </html>

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/jpg" href="image/logo.jpg">
-    <title>GO2BNB Newsroom - Tin tức và cập nhật mới nhất</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
     <style>
         * {
             margin: 0;
@@ -307,36 +307,7 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <div class="logo-section">
-                <div class="logo">G2B</div>
-                <h1 class="newsroom-title">Newsroom</h1>
-            </div>
-            
-            <nav class="nav-menu">
-                <ul class="nav-links">
-                    <li><a href="#about">Về chúng tôi</a></li>
-                    <li><a href="#media">Tài nguyên truyền thông</a></li>
-                    <li><a href="#releases">Phát hành sản phẩm</a></li>
-                    <li><a href="#contact">Liên hệ</a></li>
-                </ul>
-                
-                <div class="header-actions">
-                    <div class="language-selector">
-                        <span>🌐</span>
-                        <span>VI</span>
-                        <span>▼</span>
-                    </div>
-                    <button class="search-btn">
-                        <span>🔍</span>
-                        <span>Tìm kiếm</span>
-                    </button>
-                </div>
-            </nav>
-        </div>
-    </header>
+    <jsp:include page="/design/header.jsp" />
 
     <!-- Main Content -->
     <main class="main-content">

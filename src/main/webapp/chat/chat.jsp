@@ -33,7 +33,7 @@
         }
 
         .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
             color: white;
             padding: 20px;
             text-align: center;
@@ -295,8 +295,6 @@
     </style>
 </head>
 <body>
-    <%@ include file="../design/header.jsp" %>
-
     <main>
     <div class="chat-container">
         <div class="chat-header position-relative">

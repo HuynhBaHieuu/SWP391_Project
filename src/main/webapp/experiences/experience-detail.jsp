@@ -10,7 +10,7 @@
     <link rel="icon" type="image/jpg" href="${pageContext.request.contextPath}/image/logo.jpg">
     
     <!-- CSS -->
-    <link rel="stylesheet" href="<c:url value='/css/home.css'/>"/>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
     <link rel="stylesheet" href="<c:url value='/css/chatbot.css'/>"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     

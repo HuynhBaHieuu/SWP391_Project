@@ -49,7 +49,7 @@
         <meta charset="UTF-8">
         <title><%= (listing != null) ? listing.getTitle() : "Chi tiết nơi lưu trú"%></title>
         <link rel="icon" type="image/jpg" href="../image/logo.jpg">
-        <link rel="stylesheet" href="../css/home.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
         <link rel="stylesheet" href="../css/recommendations.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -592,8 +592,27 @@
             <div class="host-info">
                 <h3><i class="bi bi-person-circle"></i> Thông tin Host</h3>
                 <div class="d-flex align-items-center">
-                    <% if (host != null && host.getProfileImage() != null && !host.getProfileImage().isEmpty()) { %>
-                        <img src="<%= host.getProfileImage() %>" alt="Host Avatar" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px;">
+                    <% 
+                        String hostImagePath = null;
+                        if (host != null && host.getProfileImage() != null && !host.getProfileImage().isEmpty()) {
+                            String profileImage = host.getProfileImage();
+                            if (profileImage.startsWith("http")) {
+                                // Ảnh từ Google/Facebook (đường dẫn tuyệt đối)
+                                hostImagePath = profileImage;
+                            } else if (profileImage.startsWith("uploads/")) {
+                                // Ảnh mới từ FileUploadUtil (sẽ được ImageServlet xử lý)
+                                hostImagePath = request.getContextPath() + "/" + profileImage;
+                            } else {
+                                // Ảnh cũ hoặc đường dẫn tương đối khác
+                                hostImagePath = request.getContextPath() + "/" + profileImage;
+                            }
+                        }
+                    %>
+                    <% if (hostImagePath != null) { %>
+                        <img src="<%= hostImagePath %>" alt="Host Avatar" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="host-avatar" style="display: none;">
+                            <%= host != null && host.getFullName() != null && !host.getFullName().isEmpty() ? host.getFullName().charAt(0) : "H" %>
+                        </div>
                     <% } else { %>
                         <div class="host-avatar">
                             <%= host != null && host.getFullName() != null && !host.getFullName().isEmpty() ? host.getFullName().charAt(0) : "H" %>

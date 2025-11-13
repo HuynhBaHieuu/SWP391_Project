@@ -16,7 +16,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/image/logo.jpg">
         <title>Chuyến đi của bạn</title>
-        <link rel="stylesheet" href="<%= request.getContextPath() %>/css/home.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
         <style>
@@ -249,6 +249,45 @@
 
         <div class="trips-container">
             <%
+                // Hiển thị thông báo success/error
+                String success = request.getParameter("success");
+                String error = request.getParameter("error");
+                if (success != null) {
+            %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                <% if (success.equals("review_added")) { %>
+                    Đánh giá của bạn đã được gửi thành công!
+                <% } %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <%
+                }
+                if (error != null) {
+            %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <% if (error.equals("invalid_rating")) { %>
+                    Đánh giá phải từ 1 đến 5 sao!
+                <% } else if (error.equals("empty_comment")) { %>
+                    Vui lòng nhập bình luận!
+                <% } else if (error.equals("cannot_review")) { %>
+                    Bạn chưa hoàn tất chuyến đi hoặc đã đánh giá rồi!
+                <% } else if (error.equals("no_booking")) { %>
+                    Không tìm thấy booking để đánh giá!
+                <% } else if (error.equals("invalid_data")) { %>
+                    Dữ liệu không hợp lệ!
+                <% } else if (error.equals("server_error")) { %>
+                    Có lỗi xảy ra. Vui lòng thử lại!
+                <% } else { %>
+                    <%= error %>
+                <% } %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <%
+                }
+            %>
+            <%
                 if (bookings == null || bookings.isEmpty()) {
             %>
             <!-- Empty State -->
@@ -331,13 +370,13 @@
 
         <!-- Modal hiển thị chi tiết -->
         <div class="modal fade" id="bookingDetailModal" tabindex="-1" aria-labelledby="detailLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
                 <div class="modal-content rounded-4">
                     <div class="modal-header">
                         <h4 class="modal-title fw-bold" id="detailLabel">Chi tiết chuyến đi</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body" id="bookingDetailContent">
+                    <div class="modal-body" id="bookingDetailContent" style="max-height: 70vh; overflow-y: auto;">
                         <p class="text-center text-muted">Đang tải...</p>
                     </div>
                 </div>
@@ -346,6 +385,8 @@
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         
         <script>
             // Show booking detail modal
@@ -358,12 +399,75 @@
                     })
                     .then(html => {
                         document.getElementById("bookingDetailContent").innerHTML = html;
-                        new bootstrap.Modal(document.getElementById("bookingDetailModal")).show();
+                        const modal = new bootstrap.Modal(document.getElementById("bookingDetailModal"));
+                        modal.show();
+                        
+                        // Attach event listeners to review forms after modal content is loaded
+                        attachReviewFormHandlers();
                     })
                     .catch(err => {
                         document.getElementById("bookingDetailContent").innerHTML =
                             "<div class='text-danger text-center py-3'>Lỗi tải dữ liệu: " + err + "</div>";
                     });
+            }
+            
+            // Attach handlers to review forms (giống detail.jsp)
+            function attachReviewFormHandlers() {
+                const reviewForms = document.querySelectorAll('.review-form');
+                reviewForms.forEach(form => {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        const rating = form.querySelector('input[name="rating"]:checked');
+                        const comment = form.querySelector('textarea[name="comment"]');
+                        
+                        // Validation giống detail.jsp
+                        if (!rating) {
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: 'Vui lòng chọn đánh giá sao!',
+                                icon: 'warning'
+                            });
+                            return;
+                        }
+                        
+                        if (!comment || !comment.value.trim()) {
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: 'Vui lòng nhập bình luận!',
+                                icon: 'warning'
+                            });
+                            return;
+                        }
+                        
+                        // Debug: Log form data before submit
+                        console.log('=== Form Data Debug ===');
+                        console.log('rating:', rating ? rating.value : 'null');
+                        console.log('comment:', comment ? comment.value : 'null');
+                        console.log('bookingID:', form.querySelector('input[name="bookingID"]') ? form.querySelector('input[name="bookingID"]').value : 'null');
+                        console.log('listingID:', form.querySelector('input[name="listingID"]') ? form.querySelector('input[name="listingID"]').value : 'null');
+                        console.log('form action:', form.action);
+                        
+                        // Hiển thị loading (giống detail.jsp)
+                        Swal.fire({
+                            title: 'Đang gửi đánh giá...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        
+                        // Submit form trực tiếp - để browser xử lý tự nhiên
+                        // Đóng modal trước khi submit
+                        const modal = bootstrap.Modal.getInstance(document.getElementById("bookingDetailModal"));
+                        if (modal) {
+                            modal.hide();
+                        }
+                        
+                        // Submit form - browser sẽ tự động follow redirect
+                        form.submit();
+                    });
+                });
             }
         </script>
     </body>

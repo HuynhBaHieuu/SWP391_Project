@@ -12,6 +12,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <link rel="icon" type="image/jpg" href="image/logo.jpg"> <!-- Logo nhỏ hiển thị trên tab -->
         <link rel="stylesheet" href="css/home.css"/>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
         <title>Liên hệ - Go2Bnb</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <style>
@@ -141,15 +142,8 @@
     </head>
     <body>
         <!-- Header with Logo -->
-        <header class="site-header">
-            <div class="container header-inner">
-                <!-- Logo with a link to the home page -->
-                <a class="brand" href="<%=request.getContextPath()%>/home">
-                    <!-- Use SVG or image as logo here -->
-                    <img src="<%=request.getContextPath()%>/image/logo.png" alt="Go2Bnb Logo" height="36" />
-                </a>
-            </div>
-        </header>
+         <jsp:include page="/design/header.jsp" />
+        
 
         <!-- Hero Section -->
         <section class="hero">

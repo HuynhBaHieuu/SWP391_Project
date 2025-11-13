@@ -329,8 +329,9 @@
 </head>
 <body>
     <!-- Include Host Header -->
-    <jsp:include page="/design/host_header.jsp" />
-    
+    <jsp:include page="/design/host_header.jsp">
+                <jsp:param name="active" value="today" />
+            </jsp:include>
     <!-- Page Header -->
     <div class="page-header">
         <div class="container">

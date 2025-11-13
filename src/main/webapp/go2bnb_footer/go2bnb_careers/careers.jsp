@@ -7,6 +7,7 @@
   <link rel="icon" type="image/jpg" href="image/logo.jpg">
   <title>Careers - GO2BNB</title>
   <link rel="stylesheet" href="<%=request.getContextPath()%>/css/footer.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css" />
   <link href="https://fonts.googleapis.com/css2?family=Circular:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
@@ -436,27 +437,7 @@
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="container">
-      <div class="header-content">
-        <a href="/" class="logo">
-          <span class="logo-text">GO2BNB</span>
-        </a>
-        <nav>
-          <ul class="nav-menu">
-            <li><a href="#teams">Teams</a></li>
-            <li><a href="#locations">Locations</a></li>
-            <li><a href="#university">University</a></li>
-            <li><a href="#culture">Life at GO2BNB</a></li>
-          </ul>
-        </nav>
-        <div class="header-actions">
-          <button class="search-btn">🔍</button>
-        </div>
-      </div>
-    </div>
-  </header>
+  <jsp:include page="/design/header.jsp" />
 
   <!-- Hero Section -->
   <section class="hero-section">

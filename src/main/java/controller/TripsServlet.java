@@ -29,8 +29,9 @@ public class TripsServlet extends HttpServlet {
             return;
         }
         
-        List<Booking> bookings = new BookingService().getAllBookingsByUserId(currentUser.getUserID());
-        request.setAttribute("bookings", bookings);
+        // Lấy tất cả bookings của user
+        List<Booking> allBookings = new BookingService().getAllBookingsByUserId(currentUser.getUserID());
+        request.setAttribute("bookings", allBookings);
 
         request.getRequestDispatcher("sidebar/trips.jsp").forward(request, response);
     }

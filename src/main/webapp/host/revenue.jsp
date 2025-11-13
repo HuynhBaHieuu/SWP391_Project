@@ -64,7 +64,7 @@
         }
         
         .page-header {
-            background: linear-gradient(135deg, #ff385c 0%, #e91e63 100%);
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
             color: white;
             padding: 40px 0;
             margin-bottom: 40px;
