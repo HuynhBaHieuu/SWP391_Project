@@ -204,14 +204,22 @@
             .back-link {
                 display: inline-flex;
                 align-items: center;
-                color: #0d6efd;
+                color: #495057;
                 text-decoration: none;
                 margin-bottom: 20px;
                 font-weight: 500;
+                padding: 10px 20px;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                background-color: #ffffff;
+                transition: all 0.3s ease;
             }
             
             .back-link:hover {
-                text-decoration: underline;
+                background-color: #f8f9fa;
+                border-color: #adb5bd;
+                color: #212529;
+                text-decoration: none;
             }
         </style>
     </head>
@@ -305,7 +313,10 @@
                                 }
                             }
                 %>
-                <div class="notification-item <%= unreadClass %>" data-id="<%= notif.getNotificationId() %>">
+                <div class="notification-item <%= unreadClass %>" 
+                     data-id="<%= notif.getNotificationId() %>"
+                     data-type="<%= notif.getNotificationType() %>"
+                     onclick="handleNotificationClick(event, <%= notif.getNotificationId() %>, '<%= notif.getNotificationType() %>')">
                     <div class="d-flex">
                         <%
                             // Parse thông tin người gửi từ message (nếu có)
@@ -510,15 +521,21 @@
                 }
             }
             
-            // Click vào notification item để đánh dấu đã đọc
-            document.querySelectorAll('.notification-item.unread').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    if (!e.target.closest('button')) {
-                        const notificationId = this.getAttribute('data-id');
-                        markAsRead(notificationId);
-                    }
-                });
-            });
+            // Xử lý click vào notification item
+            function handleNotificationClick(event, notificationId, notificationType) {
+                // Nếu click vào button, không làm gì
+                if (event.target.closest('button')) {
+                    return;
+                }
+                
+                // Nếu là Feedback notification, chuyển đến trang chi tiết
+                if (notificationType === 'Feedback') {
+                    window.location.href = '<%= request.getContextPath() %>/notifications?action=view&id=' + notificationId;
+                } else {
+                    // Các notification khác, đánh dấu đã đọc
+                    markAsRead(notificationId);
+                }
+            }
             
             // Hiển thị modal chi tiết resolution từ button
             function showResolutionDetailFromButton(button) {

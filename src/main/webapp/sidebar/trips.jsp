@@ -159,6 +159,36 @@
                 text-decoration: underline;
             }
 
+            .tt-action-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            .btn-complete-payment {
+                background: #ff385c;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                transition: all 0.2s ease;
+                white-space: nowrap;
+            }
+
+            .btn-complete-payment:hover {
+                background: #d70466;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(255, 56, 92, 0.3);
+                color: white;
+                text-decoration: none;
+            }
+
             /* ===== EMPTY STATE ===== */
             .empty-wrap {
                 text-align: center;
@@ -240,6 +270,17 @@
                     font-weight: 600;
                     color: #222;
                     min-width: 80px;
+                }
+
+                .tt-action-buttons {
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+
+                .btn-complete-payment {
+                    font-size: 12px;
+                    padding: 6px 12px;
                 }
             }
         </style>
@@ -379,6 +420,9 @@
                     <div class="modal-body" id="bookingDetailContent" style="max-height: 70vh; overflow-y: auto;">
                         <p class="text-center text-muted">Đang tải...</p>
                     </div>
+                    <div class="modal-footer" id="bookingDetailFooter" style="display: none;">
+                        <!-- Nút sẽ được thêm vào đây bởi JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -399,6 +443,27 @@
                     })
                     .then(html => {
                         document.getElementById("bookingDetailContent").innerHTML = html;
+                             // Kiểm tra xem booking có status Processing không để hiển thị nút thanh toán
+                             const contentDiv = document.querySelector("#bookingDetailContent .booking-detail-content");
+                        const footer = document.getElementById("bookingDetailFooter");
+                        
+                        if (contentDiv) {
+                            const bookingStatus = contentDiv.getAttribute("data-booking-status");
+                            const bookingIdFromData = contentDiv.getAttribute("data-booking-id");
+                            
+                            if (bookingStatus && bookingStatus === "Processing") {
+                                const contextPath = '<%= request.getContextPath()%>';
+                                footer.innerHTML = '<a href="' + contextPath + '/booking?action=payment&bookingId=' + bookingIdFromData + '" class="btn btn-primary" style="background: #ff385c; border: none; padding: 10px 24px; font-weight: 600; border-radius: 8px;">Hoàn tất thanh toán</a>';
+                                footer.style.display = "block";
+                            } else {
+                                footer.innerHTML = "";
+                                footer.style.display = "none";
+                            }
+                        } else {
+                            footer.style.display = "none";
+                        }
+                        
+                        
                         const modal = new bootstrap.Modal(document.getElementById("bookingDetailModal"));
                         modal.show();
                         
@@ -408,6 +473,7 @@
                     .catch(err => {
                         document.getElementById("bookingDetailContent").innerHTML =
                             "<div class='text-danger text-center py-3'>Lỗi tải dữ liệu: " + err + "</div>";
+                            document.getElementById("bookingDetailFooter").style.display = "none";
                     });
             }
             

@@ -44,6 +44,35 @@
             .remove-wishlist-btn i {
                 font-size: 18px;
             }
+            
+            .view-detail-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 20px;
+                background: #ff385c;
+                color: white;
+                text-decoration: none;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 8px rgba(255, 56, 92, 0.3);
+                margin-top: 12px;
+                width: 100%;
+            }
+            
+            .view-detail-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(255, 56, 92, 0.4);
+                color: white;
+                background: #e61e4d;
+            }
+            
+            .view-detail-btn i {
+                font-size: 16px;
+            }
         </style>
     </head>
     <body>
@@ -84,7 +113,10 @@
                             <p class="card-text text-truncate fs-6 mb-0"><%= l.getCity()%></p>
                         </div>
                         <a href="${pageContext.request.contextPath}/customer/detail.jsp?id=<%= l.getListingID()%>"
-                           class="text-center fs-6 mt-3">Xem chi tiết</a>
+                           class="view-detail-btn">
+                            <i class="bi bi-eye"></i>
+                            Xem chi tiết
+                        </a>
                     </div>
                 </div>
             </div>

@@ -49,6 +49,9 @@ public class NotificationController extends HttpServlet {
             } else if ("delete".equals(action)) {
                 // Xóa thông báo
                 handleDeleteNotification(request, response);
+            } else if ("view".equals(action)) {
+                // Xem chi tiết thông báo
+                handleViewNotificationDetail(request, response, user.getUserID());
             } else {
                 // Hiển thị trang danh sách thông báo
                 handleViewNotifications(request, response, user.getUserID());
@@ -167,5 +170,54 @@ public class NotificationController extends HttpServlet {
         request.setAttribute("unreadCount", unreadCount);
         
         request.getRequestDispatcher("/sidebar/notifications.jsp").forward(request, response);
+    }
+    
+    /**
+     * Hiển thị chi tiết thông báo
+     */
+    private void handleViewNotificationDetail(HttpServletRequest request, HttpServletResponse response, int userId) 
+            throws SQLException, ServletException, IOException {
+        
+        String notificationIdStr = request.getParameter("id");
+        if (notificationIdStr == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu ID thông báo");
+            return;
+        }
+        
+        try {
+            int notificationId = Integer.parseInt(notificationIdStr);
+            Notification notification = notificationService.getNotificationById(notificationId);
+            
+            if (notification == null || notification.getUserId() != userId) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền xem thông báo này");
+                return;
+            }
+            
+            // Đánh dấu đã đọc
+            notificationService.markAsRead(notificationId);
+            
+            // Nếu là thông báo Feedback, tìm feedback gần nhất của user
+            model.Feedback originalFeedback = null;
+            if ("Feedback".equals(notification.getNotificationType())) {
+                try {
+                    service.FeedbackService feedbackService = new service.FeedbackService();
+                    // Ưu tiên tìm feedback có status Resolved, nếu không có thì lấy feedback gần nhất
+                    originalFeedback = feedbackService.getLatestResolvedFeedbackByUserId(userId);
+                    if (originalFeedback == null) {
+                        originalFeedback = feedbackService.getLatestFeedbackByUserId(userId);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            
+            request.setAttribute("notification", notification);
+            request.setAttribute("originalFeedback", originalFeedback);
+            
+            request.getRequestDispatcher("/sidebar/notification-detail.jsp").forward(request, response);
+            
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID thông báo không hợp lệ");
+        }
     }
 }

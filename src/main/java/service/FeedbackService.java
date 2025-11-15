@@ -1,18 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package service;
 
 import java.sql.SQLException;
 import java.util.List;
 import model.Feedback;
 import userDAO.FeedbackDAO;
-
-/**
- *
- * @author Administrator
- */
 public class FeedbackService {
     private FeedbackDAO feedbackDAO = new FeedbackDAO();
 
@@ -26,5 +17,17 @@ public class FeedbackService {
     
     public void updateStatus(int id, String status) throws SQLException{
         feedbackDAO.updateStatus(id, status);
+    }
+    
+    public Feedback getLatestResolvedFeedbackByUserId(int userId) throws SQLException {
+        return feedbackDAO.getLatestResolvedFeedbackByUserId(userId);
+    }
+    
+    public Feedback getLatestFeedbackByUserId(int userId) throws SQLException {
+        return feedbackDAO.getLatestFeedbackByUserId(userId);
+    }
+    
+    public boolean deleteFeedback(int id) throws SQLException {
+        return feedbackDAO.deleteFeedback(id);
     }
 }

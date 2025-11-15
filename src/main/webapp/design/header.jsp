@@ -567,11 +567,22 @@
                                 <span data-i18n="header.dropdown.help_center">Trung tâm trợ giúp</span>
                             </a>
 
-                            <a href="#" class="menu-item" onclick="document.getElementById('logoutForm').submit(); return false;">
-                                <i class="bi bi-box-arrow-right"></i>
-                                <span data-i18n="header.dropdown.logout">Log Out</span>
-                            </a>                       
-                            <form id="logoutForm" action="<%= request.getContextPath()%>/logout" method="post" style="display:none;"></form>
+                            <% if (currentUser != null) { %>
+                                <%-- Admin: Hiển thị "Chế độ quản lý" thay vì "Đăng xuất" --%>
+                                <% if (currentUser.isAdmin() || "Admin".equals(currentUser.getRole())) { %>
+                                    <a href="<%=request.getContextPath()%>/admin/dashboard" class="menu-item">
+                                        <i class="bi bi-gear"></i>
+                                        <span>Chế độ quản lý</span>
+                                    </a>
+                                <% } else { %>
+                                    <%-- Guest/Host: Hiển thị "Đăng xuất" --%>
+                                    <a href="#" class="menu-item" onclick="document.getElementById('logoutForm').submit(); return false;">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        <span data-i18n="header.dropdown.logout">Log Out</span>
+                                    </a>                       
+                                    <form id="logoutForm" action="<%= request.getContextPath()%>/logout" method="post" style="display:none;"></form>
+                                <% } %>
+                            <% } %>
                         </div>
                     </div>
                 </nav>

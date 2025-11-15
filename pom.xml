@@ -65,45 +65,22 @@
             <version>2.11.0</version>
         </dependency>
 
-        <!-- (Tuỳ chọn) Jakarta Faces nếu dùng JSF -->
-        <!-- Apache HttpClient Fluent (used by controller.GoogleLogin) -->
+        <!-- Apache HttpClient 5 (used by controller.GoogleLogin) -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
             <version>5.2.1</version>
         </dependency>
-        <!-- HttpClient 5 fluent API module (provides org.apache.hc.client5.http.fluent.Request/Form) -->
+        <!-- HttpClient 5 fluent API module -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5-fluent</artifactId>
             <version>5.2.1</version>
         </dependency>
-        <!-- Apache HttpClient 4.x for fluent API used in controller.GoogleLogin -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents.core5</groupId>
             <artifactId>httpcore5</artifactId>
             <version>5.2.1</version>
-        </dependency>
-        <!-- JSTL for JSP -->
-        <dependency>
-            <groupId>org.glassfish.web</groupId>
-            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.faces</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.scribejava</groupId>
-            <artifactId>scribejava-core</artifactId>
-            <version>8.3.1</version>
         </dependency>
 
         <!-- Facebook OAuth API -->
@@ -126,10 +103,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.11.0</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>17</source>
+                    <target>17</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
@@ -164,12 +141,6 @@
                 <version>3.1.2</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <release>17</release>
                 </configuration>
             </plugin>
         </plugins>

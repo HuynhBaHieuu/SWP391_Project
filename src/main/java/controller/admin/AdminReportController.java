@@ -167,6 +167,7 @@ public class AdminReportController extends HttpServlet {
         try {
             String status = request.getParameter("status");
             String resolutionNote = request.getParameter("resolutionNote");
+            String assigneeUserIDStr = request.getParameter("assigneeUserID");
             
             if (status == null || status.isEmpty()) {
                 request.setAttribute("error", "Vui lòng chọn trạng thái.");
@@ -174,9 +175,69 @@ public class AdminReportController extends HttpServlet {
                 return;
             }
             
+            // Lấy thông tin report trước khi cập nhật để lấy reporterUserID
+            Report report = reportService.getReportById(reportID);
+            if (report == null) {
+                request.setAttribute("error", "Không tìm thấy báo cáo.");
+                showReportDetail(request, response, reportID);
+                return;
+            }
+            
+            // Gán admin nếu có chọn
+            if (assigneeUserIDStr != null && !assigneeUserIDStr.isEmpty()) {
+                try {
+                    int assigneeUserID = Integer.parseInt(assigneeUserIDStr);
+                    reportService.assignReport(reportID, assigneeUserID, user.getUserID());
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid assigneeUserID: " + assigneeUserIDStr);
+                } catch (Exception e) {
+                    System.err.println("Failed to assign report: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            
             boolean success = reportService.updateReportStatus(reportID, status, user.getUserID(), resolutionNote);
             
             if (success) {
+                // Gửi thông báo cho user (người báo cáo)
+                try {
+                    NotificationService notificationService = new NotificationService();
+                    String statusText = "";
+                    switch (status) {
+                        case "Open":
+                            statusText = "Mở";
+                            break;
+                        case "UnderReview":
+                            statusText = "Đang xem xét";
+                            break;
+                        case "Resolved":
+                            statusText = "Đã xử lý";
+                            break;
+                        case "Rejected":
+                            statusText = "Từ chối";
+                            break;
+                        default:
+                            statusText = status;
+                    }
+                    
+                    String message = "Báo cáo #" + reportID + " của bạn đã được cập nhật trạng thái thành \"" + statusText + "\"";
+                    if (resolutionNote != null && !resolutionNote.trim().isEmpty()) {
+                        message += ". Cách giải quyết: " + resolutionNote;
+                    }
+                    message += ". Vui lòng kiểm tra chi tiết báo cáo để xem thêm thông tin.";
+                    
+                    notificationService.createNotification(
+                        report.getReporterUserID(),
+                        "Cập nhật báo cáo #" + reportID,
+                        message,
+                        "Report"
+                    );
+                } catch (Exception e) {
+                    // Log lỗi nhưng không fail toàn bộ operation
+                    System.err.println("Failed to send notification to reporter: " + e.getMessage());
+                    e.printStackTrace();
+                }
+                
                 response.sendRedirect(request.getContextPath() + "/admin/reports/detail/" + reportID + "?success=updated");
             } else {
                 request.setAttribute("error", "Có lỗi xảy ra khi cập nhật trạng thái.");

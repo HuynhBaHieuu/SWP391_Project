@@ -67,7 +67,7 @@
     </div>
 
     <div class="actions">
-      <a class="btn" style="background:#fff;color:#111" href="${pageContext.request.contextPath}/host/dashboard">Cancel</a>
+      <a class="btn" style="background:#fff;color:#111" href="${pageContext.request.contextPath}/host/listings">Cancel</a>
       <button class="btn" type="submit">Post accommodation</button>
     </div>
   </form>

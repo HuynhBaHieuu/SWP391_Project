@@ -469,6 +469,11 @@
         
         <div class="nav-section">
           <div class="nav-section-title">Hệ thống</div>
+          <!-- User View Mode -->
+          <a href="<%=request.getContextPath()%>/home" class="nav-item">
+            <span class="nav-icon">👁️</span>
+            <span>Chế độ người dùng</span>
+          </a>
           <!-- Logout with confirmation -->
           <a href="#" class="nav-item" id="logout-link">
             <span class="nav-icon">🚪</span>
@@ -851,8 +856,12 @@
               <td><%= rs.getString("host_name") %></td>
               <td><%= currencyFormat.format(rs.getDouble("price_per_night")) %> VNĐ</td>
               <td>
-                <span class="badge badge-<%= rs.getString("status").equals("approved") ? "success" : "warning" %>">
-                  <%= rs.getString("status") %>
+                <% 
+                  String status = rs.getString("status");
+                  String badgeClass = "Active".equalsIgnoreCase(status) ? "badge-success" : "badge-danger";
+                %>
+                <span class="badge <%= badgeClass %>">
+                  <%= status %>
                 </span>
               </td>
               <td><%= rs.getDate("created_at") %></td>
@@ -868,8 +877,9 @@
                   <% 
                     String currentStatus = rs.getString("status");
                     boolean isActive = "Active".equalsIgnoreCase(currentStatus);
+                    String buttonClass = isActive ? "action-btn-danger" : "action-btn-success";
                   %>
-                  <button class="action-btn <%= isActive ? "action-btn-warning" : "action-btn-edit" %>" 
+                  <button class="action-btn <%= buttonClass %>" 
                           data-listing-id="<%= rs.getInt("id") %>" 
                           data-current-status="<%= currentStatus %>"
                           onclick="toggleListingStatus(this.dataset.listingId, this.dataset.currentStatus)">
@@ -1334,14 +1344,9 @@
       <!-- Reviews & Reports Section -->
       <div id="reviews" class="content-section">
         <div class="content-header">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-          <h1 class="page-title">Quản lý phản hồi</h1>
-              <p class="page-subtitle">Xem và xử lý các phản hồi từ người dùng, tạo phản hồi thông báo</p>
-            </div>
-            <a href="${pageContext.request.contextPath}/admin/feedback/create" class="btn btn-primary">
-              <i class="fas fa-plus"></i> Tạo phản hồi mới
-            </a>
+          <div>
+            <h1 class="page-title">Quản lý phản hồi</h1>
+            <p class="page-subtitle">Xem và xử lý các phản hồi từ người dùng, tạo phản hồi thông báo</p>
           </div>
         </div>
         
@@ -1361,6 +1366,7 @@
               <th>Loại phản hồi</th>
               <th>Trạng thái</th>
               <th>Chi tiết</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -1412,12 +1418,20 @@
                             <i class="fas fa-eye"></i> Chi tiết
                         </a>
                     </td>
+                    <td>
+                        <button onclick="deleteFeedback(<%= feedbackRs.getInt("FeedbackID")%>)" 
+                                class="action-btn action-btn-danger" 
+                                title="Xóa feedback"
+                                style="background: #fee2e2; color: #991b1b; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            <i class="fas fa-trash"></i> Xoá
+                        </button>
+                    </td>
                 </tr>
                             <%
                             }
                         
                         if (!hasData) {
-                            out.println("<tr><td colspan='4' style='text-align:center;padding:40px;color:#6b7280;'>Chưa có phản hồi nào từ người dùng</td></tr>");
+                            out.println("<tr><td colspan='5' style='text-align:center;padding:40px;color:#6b7280;'>Chưa có phản hồi nào từ người dùng</td></tr>");
                         }
                         
                         // Đóng ResultSet
@@ -5272,6 +5286,38 @@
       </div>
     </div>
   </div>
+  
+  <script>
+    // Function để xóa feedback
+    function deleteFeedback(feedbackID) {
+      if (confirm('Bạn có chắc muốn xóa feedback này? Hành động này không thể hoàn tác.')) {
+        // Show loading
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xóa...';
+        
+        // Gửi request xóa và reload ngay sau đó
+        fetch('<%=request.getContextPath()%>/admin/feedback?action=delete&id=' + feedbackID, {
+          method: 'GET',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          redirect: 'follow' // Follow redirects
+        })
+        .then(response => {
+          // Reload trang ngay lập tức sau khi request hoàn thành
+          // Không cần kiểm tra response vì server sẽ redirect về dashboard
+          window.location.href = '<%=request.getContextPath()%>/admin/dashboard#reviews';
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          // Ngay cả khi có lỗi, vẫn reload để đảm bảo UI được cập nhật
+          window.location.href = '<%=request.getContextPath()%>/admin/dashboard#reviews';
+        });
+      }
+    }
+  </script>
 </body>
 </html>
     

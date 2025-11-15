@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller;
 
 import model.Conversation;
@@ -19,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -107,10 +104,54 @@ public class ChatServlet extends HttpServlet {
     private void showConversationList(HttpServletRequest request, HttpServletResponse response, User currentUser) 
             throws ServletException, IOException {
         
-        List<Conversation> conversations = chatService.getUserConversations(currentUser.getUserID());
+        List<Conversation> allConversations = chatService.getUserConversations(currentUser.getUserID());
         int totalUnreadCount = chatService.getTotalUnreadCount(currentUser.getUserID());
         
-        request.setAttribute("conversations", conversations);
+        // Phân tách conversations theo vai trò
+        List<Conversation> guestConversations = new ArrayList<>(); // Khi user là Guest
+        List<Conversation> hostConversations = new ArrayList<>();   // Khi user là Host (với khách thuê)
+        
+        for (Conversation conv : allConversations) {
+            // Chỉ lấy GUEST_HOST conversations (bỏ qua GUEST_ADMIN, HOST_ADMIN ở đây)
+            if ("GUEST_HOST".equals(conv.getConversationType()) || 
+                conv.getConversationType() == null) { // Backward compatibility
+                
+                // Nếu user là Guest trong conversation này
+                if (conv.getGuestID() == currentUser.getUserID()) {
+                    guestConversations.add(conv);
+                }
+                // Nếu user là Host trong conversation này
+                else if (conv.getHostID() == currentUser.getUserID()) {
+                    hostConversations.add(conv);
+                }
+            }
+            // Với GUEST_ADMIN: chỉ Guest mới thấy
+            else if ("GUEST_ADMIN".equals(conv.getConversationType())) {
+                Integer guestID = conv.getGuestID();
+                if (guestID != null && guestID == currentUser.getUserID()) {
+                    guestConversations.add(conv);
+                }
+            }
+            // Với HOST_ADMIN: chỉ Host mới thấy
+            else if ("HOST_ADMIN".equals(conv.getConversationType())) {
+                Integer hostID = conv.getHostID();
+                if (hostID != null && hostID == currentUser.getUserID()) {
+                    hostConversations.add(conv);
+                }
+            }
+        }
+        
+        // Nếu user chỉ là Guest (chưa là Host), chỉ hiển thị guest conversations
+        if (!currentUser.isHost()) {
+            request.setAttribute("conversations", guestConversations);
+            request.setAttribute("isGuestOnly", true);
+        } else {
+            // Nếu user là Host, hiển thị cả 2 nhóm
+            request.setAttribute("guestConversations", guestConversations); // Khi đi thuê
+            request.setAttribute("hostConversations", hostConversations);     // Với khách thuê
+            request.setAttribute("isHost", true);
+        }
+        
         request.setAttribute("totalUnreadCount", totalUnreadCount);
         request.setAttribute("currentUser", currentUser);
         
@@ -227,21 +268,61 @@ public class ChatServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         String hostIdStr = request.getParameter("hostId");
+        String adminIdStr = request.getParameter("adminId");
+        String conversationType = request.getParameter("conversationType"); // "GUEST_HOST", "GUEST_ADMIN", "HOST_ADMIN"
+        String relatedBookingIDStr = request.getParameter("relatedBookingID");
+        String relatedListingIDStr = request.getParameter("relatedListingID");
+        String relatedReportIDStr = request.getParameter("relatedReportID");
         
         Map<String, Object> result = new HashMap<>();
         
         try {
-            int hostId = Integer.parseInt(hostIdStr);
+            Conversation conversation = null;
             
-            // Không cho phép nhắn tin với chính mình
-            if (hostId == currentUser.getUserID()) {
-                result.put("success", false);
-                result.put("message", "Cannot start conversation with yourself");
-                out.print(gson.toJson(result));
-                return;
+            // Xử lý theo loại conversation
+            if ("GUEST_ADMIN".equals(conversationType)) {
+                // Guest chat với Admin
+                Integer adminId = adminIdStr != null ? Integer.parseInt(adminIdStr) : null;
+                Integer relatedBookingID = relatedBookingIDStr != null ? Integer.parseInt(relatedBookingIDStr) : null;
+                Integer relatedReportID = relatedReportIDStr != null ? Integer.parseInt(relatedReportIDStr) : null;
+                
+                conversation = chatService.findOrCreateGuestAdminConversation(
+                    currentUser.getUserID(), adminId, relatedBookingID, relatedReportID);
+                    
+            } else if ("HOST_ADMIN".equals(conversationType)) {
+                // Host chat với Admin
+                Integer adminId = adminIdStr != null ? Integer.parseInt(adminIdStr) : null;
+                Integer relatedListingID = relatedListingIDStr != null ? Integer.parseInt(relatedListingIDStr) : null;
+                Integer relatedReportID = relatedReportIDStr != null ? Integer.parseInt(relatedReportIDStr) : null;
+                
+                conversation = chatService.findOrCreateHostAdminConversation(
+                    currentUser.getUserID(), adminId, relatedListingID, relatedReportID);
+                    
+            } else {
+                // Mặc định: Guest-Host (backward compatible)
+                if (hostIdStr == null) {
+                    result.put("success", false);
+                    result.put("message", "Host ID is required for GUEST_HOST conversation");
+                    out.print(gson.toJson(result));
+                    return;
+                }
+                
+                int hostId = Integer.parseInt(hostIdStr);
+                
+                // Không cho phép nhắn tin với chính mình
+                if (hostId == currentUser.getUserID()) {
+                    result.put("success", false);
+                    result.put("message", "Cannot start conversation with yourself");
+                    out.print(gson.toJson(result));
+                    return;
+                }
+                
+                Integer relatedBookingID = relatedBookingIDStr != null ? Integer.parseInt(relatedBookingIDStr) : null;
+                Integer relatedListingID = relatedListingIDStr != null ? Integer.parseInt(relatedListingIDStr) : null;
+                
+                conversation = chatService.findOrCreateGuestHostConversation(
+                    currentUser.getUserID(), hostId, relatedBookingID, relatedListingID);
             }
-
-            Conversation conversation = chatService.findOrCreateConversation(currentUser.getUserID(), hostId);
             
             if (conversation != null) {
                 result.put("success", true);
@@ -254,7 +335,7 @@ public class ChatServlet extends HttpServlet {
             
         } catch (NumberFormatException e) {
             result.put("success", false);
-            result.put("message", "Invalid property or host ID");
+            result.put("message", "Invalid ID format");
         }
         
         out.print(gson.toJson(result));

@@ -54,19 +54,47 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
         <style>
-            body {
+            /* Override home.css để đảm bảo layout đồng nhất cho tất cả listings */
+            body.listing-detail-page {
                 font-family: 'Airbnb Cereal VF', Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
                 background-color: #fafafa;
                 margin: 0;
             }
 
+            /* Đảm bảo main có width cố định cho tất cả listings */
+            body.listing-detail-page main,
+            body main.listing-detail-main {
+                max-width: 1100px !important;
+                width: 100% !important;
+                margin: 130px auto 60px !important;
+                background: #fff !important;
+                border-radius: 16px !important;
+                padding: 30px 40px !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+            }
+
+            /* Fallback nếu không có class - Đảm bảo tất cả listings có cùng width */
             main {
-                max-width: 1100px;
-                margin: 130px auto 60px;
-                background: #fff;
-                border-radius: 16px;
-                padding: 30px 40px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+                max-width: 1100px !important;
+                width: 100% !important;
+                margin: 130px auto 60px !important;
+                background: #fff !important;
+                border-radius: 16px !important;
+                padding: 30px 40px !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+            }
+            
+            /* Override bất kỳ CSS nào từ home.css ảnh hưởng đến main */
+            body.listing-detail-page main,
+            body main.listing-detail-main,
+            .listing-detail-page main {
+                max-width: 1100px !important;
+                width: 100% !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                margin-top: 130px !important;
+                margin-bottom: 60px !important;
+                padding: 30px 40px !important;
             }
 
             h1 {
@@ -551,10 +579,10 @@
 
         </style>
     </head>
-    <body>
+    <body class="listing-detail-page">
         <%@ include file="../design/header.jsp" %>
 
-        <main>
+        <main class="listing-detail-main">
             <% if (listing != null) {%>
             <h1><%= listing.getTitle()%></h1>
             <div class="city"><%= listing.getCity()%></div>
