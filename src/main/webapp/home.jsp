@@ -19,16 +19,16 @@
 
         <style>
             /* ===== Fix horizontal scrollbar ===== */
-            html, body {
-                overflow-x: hidden !important;
-                max-width: 100vw !important;
-                width: 100% !important;
-                position: relative;
+            html {
+                overflow-x: hidden;
+                width: 100%;
             }
             
-            body > * {
-                max-width: 100vw;
-                box-sizing: border-box;
+            body {
+                overflow-x: hidden;
+                width: 100%;
+                margin: 0;
+                padding: 0;
             }
             
             /* ===== Hiệu ứng Fade-in ===== */
@@ -60,9 +60,6 @@
                 margin-bottom: 50px;
                 position: relative;
                 width: 100%;
-                max-width: 100%;
-                overflow-x: hidden;
-                box-sizing: border-box;
             }
 
             .service-row-header {
@@ -102,8 +99,6 @@
                 gap: 20px;
                 padding-bottom: 10px;
                 width: 100%;
-                max-width: 100%;
-                box-sizing: border-box;
 
                 /* Ẩn scrollbar nhưng vẫn cuộn được */
                 scrollbar-width: none;          /* Firefox */

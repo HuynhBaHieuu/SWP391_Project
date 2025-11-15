@@ -49,29 +49,13 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
         <style>
-            /* Fix horizontal scrollbar globally */
-            html {
-                overflow-x: hidden !important;
-                max-width: 100vw !important;
-                width: 100% !important;
-            }
-            
-            body {
-                overflow-x: hidden !important;
-                max-width: 100vw !important;
-                width: 100% !important;
-            }
-            
             /* Cải thiện style cho dropdown menu */
             .header-top {
                 display: flex;
                 max-width: 96%;
-                width: 100%;
                 margin: 0 auto;
                 justify-content: space-between;
                 align-items: center;
-                padding: 0 2%;
-                box-sizing: border-box;
             }
             .profile-host a{
                 text-decoration: none;
@@ -203,17 +187,12 @@
                 align-items: center;
                 gap: 15px;
                 width: 100%;
-                max-width: 100%;
                 margin-left: 27%;
-                box-sizing: border-box;
-                overflow-x: hidden;
             }
 
             .header-bottom-container .header-bottom {
                 max-width: calc(100% - 200px); /* Để lại chỗ cho filter button */
-                min-width: 0; /* Cho phép shrink */
                 margin: 0; /* Override margin từ home.css */
-                box-sizing: border-box;
             }
 
             .filter-button {
@@ -426,13 +405,10 @@
                     flex-direction: column;
                     gap: 10px;
                     margin-left: 0;
-                    width: 100%;
-                    max-width: 100%;
                 }
 
                 .header-bottom-container .header-bottom {
                     max-width: 100%;
-                    width: 100%;
                 }
 
                 .filter-button {
