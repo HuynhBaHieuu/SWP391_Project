@@ -1,16 +1,3 @@
-body{
-    font-family: Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
-    font-size: 0.875rem;
-    line-height: 1.43;
-    color: #222222;
-    background-color: #fff;
-    margin: 0;
-    font-synthesis: none;
-    overflow-x: hidden; /* Ngăn cuộn ngang */
-    width: 100%;
-    max-width: 100%;
-}
-
 /* Đảm bảo tất cả elements không vượt quá viewport */
 * {
     box-sizing: border-box;
@@ -19,14 +6,39 @@ body{
 html {
     overflow-x: hidden;
     width: 100%;
-    max-width: 100%;
+    max-width: 100vw;
+    position: relative;
+}
+
+body{
+    font-family: Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.43;
+    color: #222222;
+    background-color: #fff;
+    margin: 0;
+    padding: 0;
+    font-synthesis: none;
+    overflow-x: hidden; /* Ngăn cuộn ngang */
+    width: 100%;
+    max-width: 100vw;
+    position: relative;
+}
+
+/* Đảm bảo tất cả container không vượt quá viewport */
+body > *,
+main,
+.container,
+.container-fluid {
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 .header{
 /*    position: fixed;*/
   top: 0;
   left: 0;
   width: 100%;              /* chiếm toàn bộ chiều ngang */
-  max-width: 100%;          /* Đảm bảo không vượt quá viewport */
+  max-width: 100vw;          /* Đảm bảo không vượt quá viewport */
   z-index: 999;             /* nổi lên trên cùng */
     background-color: #FBFBFB;
     padding: 30px 0;
@@ -35,13 +47,17 @@ html {
     box-shadow: 0 6px 8px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
     overflow-x: hidden;     /* Ngăn overflow */
+    position: relative;
 }
 .header-top{
     display: flex;
     max-width: 96%;
+    width: 100%;
     margin: 0 auto;
     justify-content: space-between;
-    align-items:  center
+    align-items: center;
+    padding: 0 2%;
+    box-sizing: border-box;
 }
 .menu{
     display: flex;
@@ -224,8 +240,12 @@ body {
 }
 
 main {
-    max-width: 100%;
+    max-width: 100vw;
+    width: 100%;
     padding: 0 2%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    position: relative;
 }
 
 h1 {

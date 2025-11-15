@@ -18,6 +18,19 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
         <style>
+            /* ===== Fix horizontal scrollbar ===== */
+            html, body {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
+                width: 100% !important;
+                position: relative;
+            }
+            
+            body > * {
+                max-width: 100vw;
+                box-sizing: border-box;
+            }
+            
             /* ===== Hiệu ứng Fade-in ===== */
             .fade-in {
                 opacity: 0;
@@ -46,6 +59,10 @@
             .service-row {
                 margin-bottom: 50px;
                 position: relative;
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
+                box-sizing: border-box;
             }
 
             .service-row-header {
@@ -80,9 +97,13 @@
             .service-cards-container {
                 display: flex;
                 overflow-x: auto;
+                overflow-y: hidden;
                 scroll-behavior: smooth;
                 gap: 20px;
                 padding-bottom: 10px;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
 
                 /* Ẩn scrollbar nhưng vẫn cuộn được */
                 scrollbar-width: none;          /* Firefox */
@@ -96,6 +117,8 @@
             .service-card {
                 flex: 0 0 auto;
                 width: 320px;
+                min-width: 320px;
+                max-width: 320px;
                 border-radius: 12px;
                 background-color: #fff;
                 box-shadow: 0 5px 15px rgba(0,0,0,0.08);
@@ -104,6 +127,7 @@
                 position: relative;
                 overflow: hidden;
                 cursor: pointer;
+                box-sizing: border-box;
             }
 
             .service-card:hover {
