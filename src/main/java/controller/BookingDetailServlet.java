@@ -139,7 +139,7 @@ public class BookingDetailServlet extends HttpServlet {
 
         // Bắt đầu HTML
         StringBuilder html = new StringBuilder();
-        html.append("<div class='booking-detail-content'>");
+        html.append("<div class='booking-detail-content' data-booking-id='").append(bookingId).append("' data-booking-status='").append(detail.getStatus()).append("'>");
         
         // Thông tin booking
         html.append("<div class='booking-info mb-4'>");
