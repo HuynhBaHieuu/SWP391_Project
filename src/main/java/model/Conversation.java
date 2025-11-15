@@ -1,20 +1,19 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
 import java.sql.Timestamp;
-/**
- *
- * @author Administrator
- */
+
 public class Conversation {
     private int conversationID;
     private int guestID;
     private String guestName;
     private int hostID;
     private String hostName;
+    private Integer adminID;  // Nullable - chỉ có khi conversation với Admin
+    private String adminName;
+    private String conversationType;  // 'GUEST_HOST', 'GUEST_ADMIN', 'HOST_ADMIN'
+    private Integer relatedBookingID;  // Link với Booking (nếu có)
+    private Integer relatedListingID;  // Link với Listing (nếu có)
+    private Integer relatedReportID;   // Link với Report (nếu có)
     private Timestamp createdAt;
     private Integer lastMessageID;
     private Timestamp lastMessageTime;
@@ -128,5 +127,79 @@ public class Conversation {
 
     public void setUnreadCount(int unreadCount) {
         this.unreadCount = unreadCount;
+    }
+
+    // New fields getters and setters
+    public Integer getAdminID() {
+        return adminID;
+    }
+
+    public void setAdminID(Integer adminID) {
+        this.adminID = adminID;
+    }
+
+    public String getAdminName() {
+        return adminName;
+    }
+
+    public void setAdminName(String adminName) {
+        this.adminName = adminName;
+    }
+
+    public String getConversationType() {
+        return conversationType;
+    }
+
+    public void setConversationType(String conversationType) {
+        this.conversationType = conversationType;
+    }
+
+    public Integer getRelatedBookingID() {
+        return relatedBookingID;
+    }
+
+    public void setRelatedBookingID(Integer relatedBookingID) {
+        this.relatedBookingID = relatedBookingID;
+    }
+
+    public Integer getRelatedListingID() {
+        return relatedListingID;
+    }
+
+    public void setRelatedListingID(Integer relatedListingID) {
+        this.relatedListingID = relatedListingID;
+    }
+
+    public Integer getRelatedReportID() {
+        return relatedReportID;
+    }
+
+    public void setRelatedReportID(Integer relatedReportID) {
+        this.relatedReportID = relatedReportID;
+    }
+    
+    // Helper methods
+    public boolean isGuestHostConversation() {
+        return "GUEST_HOST".equals(conversationType);
+    }
+    
+    public boolean isGuestAdminConversation() {
+        return "GUEST_ADMIN".equals(conversationType);
+    }
+    
+    public boolean isHostAdminConversation() {
+        return "HOST_ADMIN".equals(conversationType);
+    }
+    
+    // Get the other participant's name based on current user
+    public String getOtherParticipantName(int currentUserID) {
+        if (isGuestHostConversation()) {
+            return currentUserID == guestID ? hostName : guestName;
+        } else if (isGuestAdminConversation()) {
+            return currentUserID == guestID ? adminName : guestName;
+        } else if (isHostAdminConversation()) {
+            return currentUserID == hostID ? adminName : hostName;
+        }
+        return "";
     }
 }

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller;
 
 import jakarta.servlet.*;
@@ -25,23 +21,35 @@ public class FeedbackController extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
         
-        String recaptcha = request.getParameter("g-recaptcha-response");
-
-        if (recaptcha == null || recaptcha.trim().isEmpty()) {
-            request.setAttribute("message", "Hãy click chọn recaptcha trước khi gửi!");
-            request.setAttribute("type", "error");
-            request.getRequestDispatcher("/Support/contact.jsp").forward(request, response);
-            return;
-        }
-        
         // Lấy userID từ session nếu có
         HttpSession session = request.getSession();
         User currentUser = (User) session.getAttribute("user");
+        
+        String recaptcha = request.getParameter("g-recaptcha-response");
         String name = request.getParameter("name");
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
         String type = request.getParameter("type");
         String content = request.getParameter("content");
+        
+        // Nếu user đã đăng nhập, không yêu cầu reCAPTCHA và tự động lấy thông tin từ user
+        if (currentUser != null) {
+            // Lấy name và email từ user nếu không có trong form
+            if (name == null || name.trim().isEmpty()) {
+                name = currentUser.getFullName() != null ? currentUser.getFullName() : "User";
+            }
+            if (email == null || email.trim().isEmpty()) {
+                email = currentUser.getEmail();
+            }
+        } else {
+            // User chưa đăng nhập, yêu cầu reCAPTCHA
+            if (recaptcha == null || recaptcha.trim().isEmpty()) {
+                request.setAttribute("message", "Hãy click chọn recaptcha trước khi gửi!");
+                request.setAttribute("type", "error");
+                request.getRequestDispatcher("/Support/contact.jsp").forward(request, response);
+                return;
+            }
+        }
 
         // Validation các trường bắt buộc
         if (name == null || name.trim().isEmpty()) {
@@ -112,22 +120,62 @@ public class FeedbackController extends HttpServlet {
             success = feedbackService.addFeedback(feedback);
         } catch (SQLException ex) {
             Logger.getLogger(FeedbackController.class.getName()).log(Level.SEVERE, "Lỗi khi lưu feedback vào database", ex);
-            request.setAttribute("message", "Có lỗi xảy ra khi gửi phản hồi. Vui lòng thử lại sau!");
-            request.setAttribute("type", "error");
-            request.getRequestDispatcher("/Support/contact.jsp").forward(request, response);
+            // Kiểm tra nếu request đến từ notification detail page
+            String referer = request.getHeader("Referer");
+            if (referer != null && referer.contains("notifications?action=view")) {
+                String notificationId = request.getParameter("notificationId");
+                session.setAttribute("feedbackMessage", "Có lỗi xảy ra khi gửi phản hồi. Vui lòng thử lại sau!");
+                session.setAttribute("feedbackType", "error");
+                if (notificationId != null) {
+                    response.sendRedirect(request.getContextPath() + "/notifications?action=view&id=" + notificationId);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/notifications");
+                }
+            } else {
+                request.setAttribute("message", "Có lỗi xảy ra khi gửi phản hồi. Vui lòng thử lại sau!");
+                request.setAttribute("type", "error");
+                request.getRequestDispatcher("/Support/contact.jsp").forward(request, response);
+            }
             return;
         }
 
         if (success) {
-            // Sử dụng redirect thay vì forward để tránh vấn đề với reCAPTCHA và POST resubmission
-            session.setAttribute("feedbackMessage", "Phản hồi của bạn đã được gửi thành công!");
-            session.setAttribute("feedbackType", "success");
-            response.sendRedirect(request.getContextPath() + "/Support/contact.jsp");
+            // Kiểm tra nếu request đến từ notification detail page
+            String referer = request.getHeader("Referer");
+            if (referer != null && referer.contains("notifications?action=view")) {
+                // Redirect về notification detail page với thông báo thành công
+                String notificationId = request.getParameter("notificationId");
+                session.setAttribute("feedbackMessage", "Phản hồi của bạn đã được gửi thành công!");
+                session.setAttribute("feedbackType", "success");
+                if (notificationId != null) {
+                    response.sendRedirect(request.getContextPath() + "/notifications?action=view&id=" + notificationId);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/notifications");
+                }
+            } else {
+                // Redirect về contact page
+                session.setAttribute("feedbackMessage", "Phản hồi của bạn đã được gửi thành công!");
+                session.setAttribute("feedbackType", "success");
+                response.sendRedirect(request.getContextPath() + "/Support/contact.jsp");
+            }
             return;
         } else {
-            request.setAttribute("message", "Gửi phản hồi thất bại. Vui lòng thử lại sau!");
-            request.setAttribute("type", "error");
-            request.getRequestDispatcher("/Support/contact.jsp").forward(request, response);
+            // Kiểm tra nếu request đến từ notification detail page
+            String referer = request.getHeader("Referer");
+            if (referer != null && referer.contains("notifications?action=view")) {
+                String notificationId = request.getParameter("notificationId");
+                request.setAttribute("message", "Gửi phản hồi thất bại. Vui lòng thử lại sau!");
+                request.setAttribute("type", "error");
+                if (notificationId != null) {
+                    response.sendRedirect(request.getContextPath() + "/notifications?action=view&id=" + notificationId);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/notifications");
+                }
+            } else {
+                request.setAttribute("message", "Gửi phản hồi thất bại. Vui lòng thử lại sau!");
+                request.setAttribute("type", "error");
+                request.getRequestDispatcher("/Support/contact.jsp").forward(request, response);
+            }
         }
     }
 }

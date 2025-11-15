@@ -10,9 +10,17 @@ import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import dao.DBConnection;
 import service.FeedbackService;
 import service.NotificationService;
 
@@ -56,6 +64,44 @@ public class AdminFeedbackController extends HttpServlet {
         try {
             if ("view".equals(action) && feedbackID != -1) {
                 request.setAttribute("feedback", feedback);
+                
+                // Lấy tất cả phản hồi của admin cho feedback này
+                List<Map<String, Object>> adminReplies = new ArrayList<>();
+                try (Connection conn = DBConnection.getConnection()) {
+                    String sql = "SELECT ReplyID, AdminID, AdminName, ReplyContent, CreatedAt " +
+                                 "FROM AdminReplies WHERE FeedbackID = ? ORDER BY CreatedAt DESC";
+                    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                        ps.setInt(1, feedbackID);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            while (rs.next()) {
+                                Map<String, Object> reply = new HashMap<>();
+                                reply.put("replyID", rs.getInt("ReplyID"));
+                                reply.put("adminID", rs.getInt("AdminID"));
+                                reply.put("adminName", rs.getString("AdminName"));
+                                reply.put("replyContent", rs.getString("ReplyContent"));
+                                reply.put("createdAt", rs.getTimestamp("CreatedAt"));
+                                adminReplies.add(reply);
+                            }
+                        }
+                    }
+                } catch (SQLException e) {
+                    Logger.getLogger(AdminFeedbackController.class.getName()).log(Level.WARNING, "Could not get admin replies", e);
+                }
+                request.setAttribute("adminReplies", adminReplies);
+                
+                // Tìm user từ email của feedback để tự động điền vào form tạo feedback
+                model.User feedbackUser = null;
+                if (feedback != null && feedback.getEmail() != null && !feedback.getEmail().isEmpty()) {
+                    try {
+                        userDAO.UserDAO userDAO = new userDAO.UserDAO();
+                        feedbackUser = userDAO.findByEmail(feedback.getEmail());
+                    } catch (SQLException e) {
+                        // Log error but don't fail
+                        Logger.getLogger(AdminFeedbackController.class.getName()).log(Level.WARNING, "Could not find user by email", e);
+                    }
+                }
+                request.setAttribute("feedbackUser", feedbackUser);
+                
                 request.getRequestDispatcher("/admin/feedback.jsp").forward(request, response);
 
             } else if ("resolve".equals(action) && feedbackID != -1) {
@@ -97,6 +143,30 @@ public class AdminFeedbackController extends HttpServlet {
                 }
 
                 request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
+            } else if ("delete".equals(action) && feedbackID != -1) {
+                try {
+                    boolean deleted = feedbackService.deleteFeedback(feedbackID);
+                    if (deleted) {
+                        // Xóa cả AdminReplies liên quan
+                        try (Connection conn = DBConnection.getConnection()) {
+                            String sql = "DELETE FROM AdminReplies WHERE FeedbackID = ?";
+                            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                                ps.setInt(1, feedbackID);
+                                ps.executeUpdate();
+                            }
+                        } catch (SQLException e) {
+                            Logger.getLogger(AdminFeedbackController.class.getName()).log(Level.WARNING, "Could not delete admin replies", e);
+                        }
+                        
+                        response.sendRedirect(request.getContextPath() + "/admin/dashboard#reviews");
+                    } else {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy feedback để xóa");
+                    }
+                } catch (SQLException e) {
+                    Logger.getLogger(AdminFeedbackController.class.getName()).log(Level.SEVERE, "Error deleting feedback", e);
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi khi xóa feedback");
+                }
+                return;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -116,10 +186,13 @@ public class AdminFeedbackController extends HttpServlet {
         }
         
         String requestURI = request.getRequestURI();
+        String action = request.getParameter("action");
+        String idParam = request.getParameter("id");
         
-        // Xử lý tạo phản hồi mới
-        if (requestURI != null && requestURI.endsWith("/admin/feedback/create")) {
-            createFeedbackForUser(request, response, admin);
+        // Xử lý tạo phản hồi mới (từ trang feedback.jsp hoặc feedback-create.jsp)
+        if (requestURI != null && (requestURI.endsWith("/admin/feedback/create") || 
+            (requestURI.endsWith("/admin/feedback") && "create".equals(action)))) {
+            createFeedbackForUser(request, response, admin, idParam);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -128,7 +201,7 @@ public class AdminFeedbackController extends HttpServlet {
     /**
      * Tạo phản hồi/notification cho user
      */
-    private void createFeedbackForUser(HttpServletRequest request, HttpServletResponse response, User admin)
+    private void createFeedbackForUser(HttpServletRequest request, HttpServletResponse response, User admin, String originalFeedbackId)
             throws ServletException, IOException {
         
         try {
@@ -138,8 +211,29 @@ public class AdminFeedbackController extends HttpServlet {
             String content = request.getParameter("content");
             
             if (userIDStr == null || title == null || type == null || content == null) {
-                request.setAttribute("error", "Vui lòng điền đầy đủ thông tin");
-                request.getRequestDispatcher("/admin/feedback-create.jsp").forward(request, response);
+                // Nếu đang ở trang view feedback, forward về đó với error
+                if (originalFeedbackId != null && !originalFeedbackId.isEmpty()) {
+                    int feedbackID = Integer.parseInt(originalFeedbackId);
+                    Feedback feedback = feedbackService.getFeedbackById(feedbackID);
+                    request.setAttribute("feedback", feedback);
+                    
+                    // Tìm user từ email
+                    model.User feedbackUser = null;
+                    if (feedback != null && feedback.getEmail() != null && !feedback.getEmail().isEmpty()) {
+                        try {
+                            userDAO.UserDAO userDAO = new userDAO.UserDAO();
+                            feedbackUser = userDAO.findByEmail(feedback.getEmail());
+                        } catch (SQLException e) {
+                            Logger.getLogger(AdminFeedbackController.class.getName()).log(Level.WARNING, "Could not find user by email", e);
+                        }
+                    }
+                    request.setAttribute("feedbackUser", feedbackUser);
+                    request.setAttribute("error", "Vui lòng điền đầy đủ thông tin");
+                    request.getRequestDispatcher("/admin/feedback.jsp").forward(request, response);
+                } else {
+                    request.setAttribute("error", "Vui lòng điền đầy đủ thông tin");
+                    request.getRequestDispatcher("/admin/feedback-create.jsp").forward(request, response);
+                }
                 return;
             }
             
@@ -168,26 +262,67 @@ public class AdminFeedbackController extends HttpServlet {
                 "Feedback"
             );
             
-            // Tạo feedback record trong database (optional - để lưu lịch sử)
-            Feedback feedback = new Feedback();
-            feedback.setUserID(userID);
-            feedback.setName(admin.getFullName());
-            feedback.setEmail(admin.getEmail());
-            feedback.setType(type);
-            feedback.setContent(content);
-            feedback.setStatus("Resolved");
+            // Cập nhật trạng thái feedback gốc thành "Resolved" và lưu phản hồi của admin nếu có
+            if (originalFeedbackId != null && !originalFeedbackId.isEmpty()) {
+                try {
+                    int originalFeedbackID = Integer.parseInt(originalFeedbackId);
+                    feedbackService.updateStatus(originalFeedbackID, "Resolved");
+                    
+                    // Lưu phản hồi của admin vào bảng AdminReplies
+                    try (Connection conn = DBConnection.getConnection()) {
+                        String sql = "INSERT INTO AdminReplies (FeedbackID, AdminID, AdminName, ReplyContent) VALUES (?, ?, ?, ?)";
+                        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                            ps.setInt(1, originalFeedbackID);
+                            ps.setInt(2, admin.getUserID());
+                            ps.setString(3, admin.getFullName() != null ? admin.getFullName() : "Admin");
+                            ps.setString(4, content);
+                            ps.executeUpdate();
+                        }
+                    } catch (SQLException e) {
+                        Logger.getLogger(AdminFeedbackController.class.getName()).log(Level.WARNING, "Could not save admin reply", e);
+                    }
+                } catch (Exception e) {
+                    Logger.getLogger(AdminFeedbackController.class.getName()).log(Level.WARNING, "Could not update original feedback status", e);
+                }
+            }
             
-            feedbackService.addFeedback(feedback);
+            // KHÔNG tạo feedback record mới trong Feedbacks table
+            // Vì phản hồi của admin đã được lưu vào AdminReplies table
+            // Điều này đảm bảo Feedback Management chỉ hiển thị feedback từ khách hàng
             
-            request.setAttribute("message", "Đã gửi thông báo thành công cho người dùng");
-            request.setAttribute("type", "success");
-            // Reset form sau khi gửi thành công
-            request.getRequestDispatcher("/admin/feedback-create.jsp").forward(request, response);
+            // Redirect về dashboard#reviews sau khi thành công
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard#reviews");
             
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
-            request.getRequestDispatcher("/admin/feedback-create.jsp").forward(request, response);
+            // Nếu đang ở trang view feedback, forward về đó với error
+            if (originalFeedbackId != null && !originalFeedbackId.isEmpty()) {
+                try {
+                    int feedbackID = Integer.parseInt(originalFeedbackId);
+                    Feedback feedback = feedbackService.getFeedbackById(feedbackID);
+                    request.setAttribute("feedback", feedback);
+                    
+                    // Tìm user từ email
+                    model.User feedbackUser = null;
+                    if (feedback != null && feedback.getEmail() != null && !feedback.getEmail().isEmpty()) {
+                        try {
+                            userDAO.UserDAO userDAO = new userDAO.UserDAO();
+                            feedbackUser = userDAO.findByEmail(feedback.getEmail());
+                        } catch (SQLException ex) {
+                            Logger.getLogger(AdminFeedbackController.class.getName()).log(Level.WARNING, "Could not find user by email", ex);
+                        }
+                    }
+                    request.setAttribute("feedbackUser", feedbackUser);
+                    request.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+                    request.getRequestDispatcher("/admin/feedback.jsp").forward(request, response);
+                } catch (Exception ex) {
+                    request.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+                    request.getRequestDispatcher("/admin/feedback-create.jsp").forward(request, response);
+                }
+            } else {
+                request.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+                request.getRequestDispatcher("/admin/feedback-create.jsp").forward(request, response);
+            }
         }
     }
 }

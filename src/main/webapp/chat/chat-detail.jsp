@@ -7,6 +7,7 @@
 <%@ page import="java.util.*, model.Conversation, model.ChatMessage, model.User" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -43,12 +44,12 @@
         }
 
         .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff385c 0%, #e61e4d 100%);
             color: white;
             padding: 15px 20px;
             display: flex;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(255, 56, 92, 0.2);
         }
 
         .back-btn {
@@ -129,7 +130,7 @@
         }
 
         .message.own .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff385c 0%, #e61e4d 100%);
             color: white;
             border-bottom-right-radius: 5px;
         }
@@ -173,12 +174,12 @@
 
         .message-input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+            border-color: #ff385c;
+            box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.1);
         }
 
         .send-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff385c 0%, #e61e4d 100%);
             border: none;
             color: white;
             padding: 12px 16px;
@@ -258,22 +259,70 @@
             <div class="chat-user-info">
                 <div class="user-avatar">
                     <c:choose>
-                        <c:when test="${currentUser.userID == conversation.guestID}">
-                            ${conversation.hostName.substring(0,1).toUpperCase()}
+                        <c:when test="${not empty conversation.conversationType and conversation.conversationType eq 'GUEST_ADMIN'}">
+                            <c:choose>
+                                <c:when test="${currentUser.userID == conversation.guestID}">
+                                    ${conversation.adminName != null ? conversation.adminName.substring(0,1).toUpperCase() : 'A'}
+                                </c:when>
+                                <c:otherwise>
+                                    ${conversation.guestName != null ? conversation.guestName.substring(0,1).toUpperCase() : 'G'}
+                                </c:otherwise>
+                            </c:choose>
+                        </c:when>
+                        <c:when test="${conversation.conversationType != null && conversation.conversationType eq 'HOST_ADMIN'}">
+                            <c:choose>
+                                <c:when test="${currentUser.userID == conversation.hostID}">
+                                    ${conversation.adminName != null ? conversation.adminName.substring(0,1).toUpperCase() : 'A'}
+                                </c:when>
+                                <c:otherwise>
+                                    ${conversation.hostName != null ? conversation.hostName.substring(0,1).toUpperCase() : 'H'}
+                                </c:otherwise>
+                            </c:choose>
                         </c:when>
                         <c:otherwise>
-                            ${conversation.guestName.substring(0,1).toUpperCase()}
+                            <c:choose>
+                                <c:when test="${currentUser.userID == conversation.guestID}">
+                                    ${conversation.hostName != null ? conversation.hostName.substring(0,1).toUpperCase() : 'H'}
+                                </c:when>
+                                <c:otherwise>
+                                    ${conversation.guestName != null ? conversation.guestName.substring(0,1).toUpperCase() : 'G'}
+                                </c:otherwise>
+                            </c:choose>
                         </c:otherwise>
                     </c:choose>
                 </div>
                 <div class="user-info">
                     <h5>
                         <c:choose>
-                            <c:when test="${currentUser.userID == conversation.guestID}">
-                                ${conversation.hostName} (Host)
+                            <c:when test="${not empty conversation.conversationType and conversation.conversationType eq 'GUEST_ADMIN'}">
+                                <c:choose>
+                                    <c:when test="${currentUser.userID == conversation.guestID}">
+                                        ${conversation.adminName != null ? conversation.adminName : 'Admin'} (Admin)
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${conversation.guestName != null ? conversation.guestName : 'Guest'} (Guest)
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:when>
+                            <c:when test="${not empty conversation.conversationType and conversation.conversationType eq 'HOST_ADMIN'}">
+                                <c:choose>
+                                    <c:when test="${currentUser.userID == conversation.hostID}">
+                                        ${conversation.adminName != null ? conversation.adminName : 'Admin'} (Admin)
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${conversation.hostName != null ? conversation.hostName : 'Host'} (Host)
+                                    </c:otherwise>
+                                </c:choose>
                             </c:when>
                             <c:otherwise>
-                                ${conversation.guestName} (Guest)
+                                <c:choose>
+                                    <c:when test="${currentUser.userID == conversation.guestID}">
+                                        ${conversation.hostName != null ? conversation.hostName : 'Host'} (Host)
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${conversation.guestName != null ? conversation.guestName : 'Guest'} (Guest)
+                                    </c:otherwise>
+                                </c:choose>
                             </c:otherwise>
                         </c:choose>
                     </h5>
@@ -323,10 +372,15 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <%
+        int convId = conversation.getConversationID();
+        int currUserId = currentUser.getUserID();
+        int msgCount = messages != null ? messages.size() : 0;
+    %>
     <script>
-        const conversationId = ${conversation.conversationID};
-        const currentUserId = ${currentUser.userID};
-        let lastMessageCount = ${messages.size()};
+        const conversationId = <%= convId %>;
+        const currentUserId = <%= currUserId %>;
+        let lastMessageCount = <%= msgCount %>;
 
         // Auto-resize textarea
         const messageInput = document.getElementById('messageInput');

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller.admin;
 
 import dao.DBConnection;
@@ -123,6 +119,7 @@ public class AdminListingRequestController extends HttpServlet {
                     return;
                 }
                 request.setAttribute("listingID", listingID);
+                request.setAttribute("requestId", requestId); // Pass requestId to JSP
                 request.getRequestDispatcher("/admin/listing-detail.jsp").forward(request, response);
                 return; 
             } else {

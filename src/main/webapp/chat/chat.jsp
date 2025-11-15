@@ -269,6 +269,48 @@
             box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
         }
 
+        /* Tab Navigation */
+        .chat-tabs {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            background: white;
+            padding: 0;
+            margin: 0;
+        }
+
+        .chat-tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .chat-tab:hover {
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .chat-tab.active {
+            color: #ff385c;
+            border-bottom-color: #ff385c;
+            background: #fff;
+        }
+
+        .chat-tab-content {
+            display: none;
+        }
+
+        .chat-tab-content.active {
+            display: block;
+        }
+
         /* SweetAlert2 custom styling */
         .swal2-popup {
             border-radius: 16px;
@@ -313,35 +355,99 @@
             <input type="text" class="search-input-message" placeholder="Tìm kiếm cuộc hội thoại..." id="searchInput">
         </div>
 
+        <%-- Tab Navigation cho Host --%>
+        <c:if test="${isHost == true}">
+            <div class="chat-tabs">
+                <button class="chat-tab active" onclick="switchTab('host')" id="tab-host">
+                    Chủ nhà
+                </button>
+                <button class="chat-tab" onclick="switchTab('guest')" id="tab-guest">
+                    Khách
+                </button>
+            </div>
+        </c:if>
+
         <div class="chat-content">
             <c:choose>
-                <c:when test="${not empty conversations}">
-                    <div id="conversationList">
-                        <c:forEach var="conversation" items="${conversations}">
+                <%-- Guest Only: Chỉ hiển thị conversations khi là Guest --%>
+                <c:when test="${isGuestOnly == true}">
+                    <c:choose>
+                        <c:when test="${not empty conversations}">
+                            <div id="conversationList">
+                                <c:forEach var="conversation" items="${conversations}">
                             <div class="conversation-item-wrapper" data-conversation-id="${conversation.conversationID}">
                                 <div class="conversation-item" 
-                                     data-guest-name="${conversation.guestName}"
-                                     data-host-name="${conversation.hostName}">
+                                     data-guest-name="${conversation.guestName != null ? conversation.guestName : ''}"
+                                     data-host-name="${conversation.hostName != null ? conversation.hostName : ''}"
+                                     data-admin-name="${conversation.adminName != null ? conversation.adminName : ''}">
                                     
                                     <div class="conversation-avatar" onclick="openConversation(${conversation.conversationID})">
                                         <c:choose>
-                                            <c:when test="${currentUser.userID == conversation.guestID}">
-                                                ${conversation.hostName.substring(0,1).toUpperCase()}
+                                            <c:when test="${not empty conversation.conversationType and conversation.conversationType eq 'GUEST_ADMIN'}">
+                                                <c:choose>
+                                                    <c:when test="${currentUser.userID == conversation.guestID}">
+                                                        ${conversation.adminName != null ? conversation.adminName.substring(0,1).toUpperCase() : 'A'}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        ${conversation.guestName != null ? conversation.guestName.substring(0,1).toUpperCase() : 'G'}
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:when>
+                                            <c:when test="${conversation.conversationType != null && conversation.conversationType eq 'HOST_ADMIN'}">
+                                                <c:choose>
+                                                    <c:when test="${currentUser.userID == conversation.hostID}">
+                                                        ${conversation.adminName != null ? conversation.adminName.substring(0,1).toUpperCase() : 'A'}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        ${conversation.hostName != null ? conversation.hostName.substring(0,1).toUpperCase() : 'H'}
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </c:when>
                                             <c:otherwise>
-                                                ${conversation.guestName.substring(0,1).toUpperCase()}
+                                                <c:choose>
+                                                    <c:when test="${currentUser.userID == conversation.guestID}">
+                                                        ${conversation.hostName != null ? conversation.hostName.substring(0,1).toUpperCase() : 'H'}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        ${conversation.guestName != null ? conversation.guestName.substring(0,1).toUpperCase() : 'G'}
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </c:otherwise>
                                         </c:choose>
                                     </div>
 
                                     <div class="conversation-info" onclick="openConversation(${conversation.conversationID})">
                                         <div class="conversation-title">
-                                            <c:choose>
-                                                <c:when test="${currentUser.userID == conversation.guestID}">
-                                                    ${conversation.hostName} (Host)
+                                        <c:choose>
+                                            <c:when test="${not empty conversation.conversationType and conversation.conversationType eq 'GUEST_ADMIN'}">
+                                                    <c:choose>
+                                                        <c:when test="${currentUser.userID == conversation.guestID}">
+                                                            ${conversation.adminName != null ? conversation.adminName : 'Admin'} (Admin)
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            ${conversation.guestName != null ? conversation.guestName : 'Guest'} (Guest)
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </c:when>
+                                                <c:when test="${not empty conversation.conversationType and conversation.conversationType eq 'HOST_ADMIN'}">
+                                                    <c:choose>
+                                                        <c:when test="${currentUser.userID == conversation.hostID}">
+                                                            ${conversation.adminName != null ? conversation.adminName : 'Admin'} (Admin)
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            ${conversation.hostName != null ? conversation.hostName : 'Host'} (Host)
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    ${conversation.guestName} (Guest)
+                                                    <c:choose>
+                                                        <c:when test="${currentUser.userID == conversation.guestID}">
+                                                            ${conversation.hostName != null ? conversation.hostName : 'Host'} (Host)
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            ${conversation.guestName != null ? conversation.guestName : 'Guest'} (Guest)
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
@@ -382,9 +488,180 @@
                                     </div>
                                 </div>
                             </div>
-                        </c:forEach>
+                                </c:forEach>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="empty-state">
+                                <i class="bi bi-chat-square-text"></i>
+                                <h3>Bạn không có tin nhắn nào</h3>
+                                <p>Khi bạn nhắn tin với host, các cuộc hội thoại sẽ xuất hiện ở đây.</p>
+                                <a href="${pageContext.request.contextPath}/search" class="btn btn-primary mt-3 fs-4">
+                                    <i class="bi bi-search fs-3"></i> Tìm kiếm nơi lưu trú
+                                </a>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </c:when>
+                
+                <%-- Host: Hiển thị 2 nhóm riêng biệt --%>
+                <c:when test="${isHost == true}">
+                    <div id="conversationList">
+                        <%-- Tab Content: Chủ nhà (Host conversations) --%>
+                        <div class="chat-tab-content active" id="content-host">
+                            <c:if test="${not empty hostConversations}">
+                                <div class="conversation-section">
+                                <c:forEach var="conversation" items="${hostConversations}">
+                                    <div class="conversation-item-wrapper" data-conversation-id="${conversation.conversationID}">
+                                        <div class="conversation-item" 
+                                             data-guest-name="${conversation.guestName != null ? conversation.guestName : ''}"
+                                             data-host-name="${conversation.hostName != null ? conversation.hostName : ''}"
+                                             data-admin-name="${conversation.adminName != null ? conversation.adminName : ''}">
+                                            
+                                            <div class="conversation-avatar" onclick="openConversation(${conversation.conversationID})">
+                                                ${conversation.guestName != null ? conversation.guestName.substring(0,1).toUpperCase() : 'G'}
+                                            </div>
+
+                                            <div class="conversation-info" onclick="openConversation(${conversation.conversationID})">
+                                                <div class="conversation-title">
+                                                    ${conversation.guestName != null ? conversation.guestName : 'Guest'} (Khách thuê)
+                                                </div>
+                                                <div class="conversation-last-message">
+                                                    <c:choose>
+                                                        <c:when test="${not empty conversation.lastMessageText}">
+                                                            ${conversation.lastMessageText}
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <em>Chưa có tin nhắn nào</em>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </div>
+
+                                            <div class="conversation-meta" onclick="openConversation(${conversation.conversationID})">
+                                                <c:if test="${not empty conversation.lastMessageTime}">
+                                                    <div class="conversation-time">
+                                                        <fmt:formatDate value="${conversation.lastMessageTime}" pattern="dd/MM/yyyy, HH:mm"/>
+                                                    </div>
+                                                </c:if>
+                                                <c:if test="${conversation.unreadCount > 0}">
+                                                    <span class="unread-badge">${conversation.unreadCount}</span>
+                                                </c:if>
+                                            </div>
+
+                                            <div class="conversation-menu">
+                                                <button class="menu-btn" onclick="toggleMenu(event, ${conversation.conversationID})">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <div class="dropdown-menu-custom" id="menu-${conversation.conversationID}">
+                                                    <div class="dropdown-item-custom delete" onclick="confirmDeleteConversation(${conversation.conversationID})">
+                                                        <i class="bi bi-trash"></i>
+                                                        Xóa cuộc trò chuyện
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                                </div>
+                            </c:if>
+
+                            <%-- Empty state cho tab Chủ nhà --%>
+                            <c:if test="${empty hostConversations}">
+                                <div class="empty-state">
+                                    <i class="bi bi-chat-square-text"></i>
+                                    <h3>Bạn chưa có tin nhắn từ khách thuê</h3>
+                                    <p>Khi khách thuê nhắn tin với bạn, các cuộc hội thoại sẽ xuất hiện ở đây.</p>
+                                </div>
+                            </c:if>
+                        </div>
+
+                        <%-- Tab Content: Khách (Guest conversations) --%>
+                        <div class="chat-tab-content" id="content-guest">
+                            <c:if test="${not empty guestConversations}">
+                                <div class="conversation-section">
+                                <c:forEach var="conversation" items="${guestConversations}">
+                                    <div class="conversation-item-wrapper" data-conversation-id="${conversation.conversationID}">
+                                        <div class="conversation-item" 
+                                             data-guest-name="${conversation.guestName != null ? conversation.guestName : ''}"
+                                             data-host-name="${conversation.hostName != null ? conversation.hostName : ''}"
+                                             data-admin-name="${conversation.adminName != null ? conversation.adminName : ''}">
+                                            
+                                            <div class="conversation-avatar" onclick="openConversation(${conversation.conversationID})">
+                                                <c:choose>
+                                                    <c:when test="${not empty conversation.conversationType and conversation.conversationType eq 'GUEST_ADMIN'}">
+                                                        ${conversation.adminName != null ? conversation.adminName.substring(0,1).toUpperCase() : 'A'}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        ${conversation.hostName != null ? conversation.hostName.substring(0,1).toUpperCase() : 'H'}
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+
+                                            <div class="conversation-info" onclick="openConversation(${conversation.conversationID})">
+                                                <div class="conversation-title">
+                                                    <c:choose>
+                                                        <c:when test="${not empty conversation.conversationType and conversation.conversationType eq 'GUEST_ADMIN'}">
+                                                            ${conversation.adminName != null ? conversation.adminName : 'Admin'} (Admin)
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            ${conversation.hostName != null ? conversation.hostName : 'Host'} (Chủ nhà)
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                                <div class="conversation-last-message">
+                                                    <c:choose>
+                                                        <c:when test="${not empty conversation.lastMessageText}">
+                                                            ${conversation.lastMessageText}
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <em>Chưa có tin nhắn nào</em>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </div>
+
+                                            <div class="conversation-meta" onclick="openConversation(${conversation.conversationID})">
+                                                <c:if test="${not empty conversation.lastMessageTime}">
+                                                    <div class="conversation-time">
+                                                        <fmt:formatDate value="${conversation.lastMessageTime}" pattern="dd/MM/yyyy, HH:mm"/>
+                                                    </div>
+                                                </c:if>
+                                                <c:if test="${conversation.unreadCount > 0}">
+                                                    <span class="unread-badge">${conversation.unreadCount}</span>
+                                                </c:if>
+                                            </div>
+
+                                            <div class="conversation-menu">
+                                                <button class="menu-btn" onclick="toggleMenu(event, ${conversation.conversationID})">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <div class="dropdown-menu-custom" id="menu-${conversation.conversationID}">
+                                                    <div class="dropdown-item-custom delete" onclick="confirmDeleteConversation(${conversation.conversationID})">
+                                                        <i class="bi bi-trash"></i>
+                                                        Xóa cuộc trò chuyện
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                                </div>
+                            </c:if>
+
+                            <%-- Empty state cho tab Khách --%>
+                            <c:if test="${empty guestConversations}">
+                                <div class="empty-state">
+                                    <i class="bi bi-chat-square-text"></i>
+                                    <h3>Bạn chưa có tin nhắn khi đi thuê</h3>
+                                    <p>Khi bạn nhắn tin với chủ nhà, các cuộc hội thoại sẽ xuất hiện ở đây.</p>
+                                </div>
+                            </c:if>
+                        </div>
                     </div>
                 </c:when>
+                
+                <%-- Fallback: Empty state --%>
                 <c:otherwise>
                     <div class="empty-state">
                         <i class="bi bi-chat-square-text"></i>
@@ -403,6 +680,31 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Switch tab function
+        function switchTab(tabType) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.chat-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab contents
+            document.querySelectorAll('.chat-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Add active class to selected tab
+            const selectedTab = document.getElementById('tab-' + tabType);
+            const selectedContent = document.getElementById('content-' + tabType);
+            
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+            
+            if (selectedContent) {
+                selectedContent.classList.add('active');
+            }
+        }
+
         function openConversation(conversationId) {
             window.location.href = '${pageContext.request.contextPath}/chat?action=view&conversationId=' + conversationId;
         }
@@ -519,19 +821,29 @@
             });
         }
 
-        // Tìm kiếm cuộc hội thoại
+        // Tìm kiếm cuộc hội thoại (hỗ trợ cả 2 nhóm cho Host và tabs)
         document.getElementById('searchInput').addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
-            const conversations = document.querySelectorAll('.conversation-item-wrapper');
+            
+            // Tìm trong tab đang active
+            const activeTabContent = document.querySelector('.chat-tab-content.active');
+            const searchScope = activeTabContent || document.getElementById('conversationList') || document;
+            
+            const conversations = searchScope.querySelectorAll('.conversation-item-wrapper');
             
             conversations.forEach(wrapper => {
                 const conversation = wrapper.querySelector('.conversation-item');
-                const guestName = conversation.dataset.guestName.toLowerCase();
-                const hostName = conversation.dataset.hostName.toLowerCase();
-                const lastMessage = conversation.querySelector('.conversation-last-message').textContent.toLowerCase();
+                if (!conversation) return;
+                
+                const guestName = (conversation.dataset.guestName || '').toLowerCase();
+                const hostName = (conversation.dataset.hostName || '').toLowerCase();
+                const adminName = (conversation.dataset.adminName || '').toLowerCase();
+                const lastMessageEl = conversation.querySelector('.conversation-last-message');
+                const lastMessage = lastMessageEl ? lastMessageEl.textContent.toLowerCase() : '';
                 
                 if (guestName.includes(searchTerm) || 
                     hostName.includes(searchTerm) || 
+                    adminName.includes(searchTerm) ||
                     lastMessage.includes(searchTerm)) {
                     wrapper.style.display = 'block';
                 } else {

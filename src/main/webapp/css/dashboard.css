@@ -416,6 +416,15 @@ body {
   color: #991b1b;
 }
 
+.action-btn-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.action-btn-danger:hover {
+  background: #fecaca;
+}
+
 .action-btn-view {
   background: #f3f4f6;
   color: #374151;

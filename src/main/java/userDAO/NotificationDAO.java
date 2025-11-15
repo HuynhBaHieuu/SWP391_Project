@@ -137,4 +137,24 @@ public class NotificationDAO {
             return ps.executeUpdate() > 0;
         }
     }
+    
+    /**
+     * Lấy thông báo theo ID
+     */
+    public Notification getNotificationById(int notificationId) throws SQLException {
+        String sql = "SELECT * FROM Notifications WHERE NotificationID = ? AND IsActive = 1";
+        
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setInt(1, notificationId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        }
+        return null;
+    }
 }

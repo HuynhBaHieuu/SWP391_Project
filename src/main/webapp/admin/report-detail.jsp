@@ -111,41 +111,49 @@
         <!-- Thông tin chính và mô tả -->
         <div class="content-wrapper">
             <div class="info-card">
-                <h5 class="mb-3"><i class="fas fa-info-circle"></i> Thông tin báo cáo</h5>
-                <div class="mb-3">
-                    <strong>Người báo cáo:</strong><br>
-                    <span class="text-primary"><%= report.getReporterName() != null ? report.getReporterName() : "N/A" %></span>
-                </div>
-                <div class="mb-3">
-                    <strong>Người bị báo cáo:</strong><br>
-                    <span class="text-danger"><%= report.getReportedHostName() != null ? report.getReportedHostName() : "N/A" %></span>
-                </div>
-                <div class="mb-3">
-                    <strong>Loại báo cáo:</strong><br>
-                    <span class="badge bg-info"><%= report.getCategoryName() != null ? report.getCategoryName() : "N/A" %></span>
-                </div>
-                <div class="mb-3">
-                    <strong>Mức độ nghiêm trọng:</strong><br>
-                    <span class="badge bg-<%= 
-                        report.getSeverity() != null && report.getSeverity().equals("Critical") ? "danger" :
-                        report.getSeverity() != null && report.getSeverity().equals("High") ? "warning" :
-                        report.getSeverity() != null && report.getSeverity().equals("Low") ? "success" : "secondary"
-                    %>">
-                        <%= report.getSeverity() != null ? report.getSeverity() : "Medium" %>
-                    </span>
-                </div>
-                <div class="mb-3">
-                    <strong>Trạng thái:</strong><br>
-                    <span class="status-badge status-<%= report.getStatus().toLowerCase().replace(" ", "") %>">
-                        <%= report.getStatus() %>
-                    </span>
-                </div>
-                <% if (report.getAssignment() != null) { %>
-                <div class="mb-3">
-                    <strong>Người phụ trách:</strong><br>
-                    <span class="text-success"><%= report.getAssignment().getAssigneeName() != null ? report.getAssignment().getAssigneeName() : "N/A" %></span>
-                </div>
-                <% } %>
+                <h5 class="mb-4"><i class="fas fa-info-circle"></i> Thông tin báo cáo</h5>
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td class="text-muted" style="width: 180px;"><i class="fas fa-user text-primary"></i> Người báo cáo:</td>
+                            <td><strong class="text-dark"><%= report.getReporterName() != null ? report.getReporterName() : "N/A" %></strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted"><i class="fas fa-user-tie text-danger"></i> Người bị báo cáo:</td>
+                            <td><strong class="text-dark"><%= report.getReportedHostName() != null ? report.getReportedHostName() : "N/A" %></strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted"><i class="fas fa-tag text-info"></i> Loại báo cáo:</td>
+                            <td><span class="badge bg-info"><%= report.getCategoryName() != null ? report.getCategoryName() : "N/A" %></span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted"><i class="fas fa-exclamation-triangle text-warning"></i> Mức độ nghiêm trọng:</td>
+                            <td>
+                                <span class="badge bg-<%= 
+                                    report.getSeverity() != null && report.getSeverity().equals("Critical") ? "danger" :
+                                    report.getSeverity() != null && report.getSeverity().equals("High") ? "warning" :
+                                    report.getSeverity() != null && report.getSeverity().equals("Low") ? "success" : "secondary"
+                                %>">
+                                    <%= report.getSeverity() != null ? report.getSeverity() : "Medium" %>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted"><i class="fas fa-info-circle text-success"></i> Trạng thái:</td>
+                            <td>
+                                <span class="status-badge status-<%= report.getStatus().toLowerCase().replace(" ", "") %>">
+                                    <%= report.getStatus() %>
+                                </span>
+                            </td>
+                        </tr>
+                        <% if (report.getAssignment() != null) { %>
+                        <tr>
+                            <td class="text-muted"><i class="fas fa-user-check text-success"></i> Người phụ trách:</td>
+                            <td><strong class="text-success"><%= report.getAssignment().getAssigneeName() != null ? report.getAssignment().getAssigneeName() : "N/A" %></strong></td>
+                        </tr>
+                        <% } %>
+                    </tbody>
+                </table>
             </div>
 
             <div class="info-card">
@@ -154,59 +162,6 @@
                     <%= report.getDescription() != null ? report.getDescription().replace("\n", "<br>") : "N/A" %>
                 </div>
             </div>
-        </div>
-
-        <div class="section-divider"></div>
-
-        <!-- Đối tượng liên quan và lịch sử -->
-        <div class="content-wrapper">
-            <% if (report.getSubjects() != null && !report.getSubjects().isEmpty()) { %>
-            <div class="info-card">
-                <h5 class="mb-3"><i class="fas fa-link"></i> Đối tượng liên quan</h5>
-                <ul class="list-group">
-                    <% for (var subject : report.getSubjects()) { %>
-                    <li class="list-group-item">
-                        <strong><%= subject.getSubjectType() %>:</strong> #<%= subject.getSubjectID() %>
-                        <% if (subject.getNote() != null) { %>
-                        <br><small class="text-muted"><%= subject.getNote() %></small>
-                        <% } %>
-                    </li>
-                    <% } %>
-                </ul>
-            </div>
-            <% } %>
-
-            <% if (report.getActionLogs() != null && !report.getActionLogs().isEmpty()) { %>
-            <div class="info-card">
-                <h5 class="mb-3"><i class="fas fa-history"></i> Lịch sử xử lý</h5>
-                <div class="list-group" style="max-height: 300px; overflow-y: auto;">
-                    <% for (var log : report.getActionLogs()) { %>
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <strong><%= log.getAction() %></strong>
-                                <% if (log.getFromStatus() != null && log.getToStatus() != null) { %>
-                                <span class="text-muted">
-                                    (<%= log.getFromStatus() %> → <%= log.getToStatus() %>)
-                                </span>
-                                <% } %>
-                                <br>
-                                <% if (log.getMessage() != null) { %>
-                                <small class="text-muted"><%= log.getMessage() %></small>
-                                <% } %>
-                            </div>
-                            <div class="text-end">
-                                <small class="text-muted">
-                                    <%= log.getActorName() != null ? log.getActorName() : "System" %><br>
-                                    <fmt:formatDate value="<%= log.getCreatedAt() %>" pattern="dd/MM/yyyy HH:mm" />
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                    <% } %>
-                </div>
-            </div>
-            <% } %>
         </div>
 
         <div class="section-divider"></div>
@@ -223,9 +178,6 @@
                     <li>Nội dung báo cáo: <%= report.getDescription() != null && report.getDescription().length() > 100 ? "Đã xem" : "Đã xem" %></li>
                     <li>Loại báo cáo: <%= report.getCategoryName() != null ? report.getCategoryName() : "N/A" %></li>
                     <li>Mức độ nghiêm trọng: <%= report.getSeverity() != null ? report.getSeverity() : "Medium" %></li>
-                    <% if (report.getSubjects() != null && !report.getSubjects().isEmpty()) { %>
-                    <li>Đối tượng liên quan: <%= report.getSubjects().size() %> đối tượng</li>
-                    <% } %>
                 </ul>
             </div>
             
@@ -243,151 +195,71 @@
                 <% } %>
             </div>
             
-            <!-- Step 3: Đánh giá vi phạm -->
-            <div class="mb-4 p-3 bg-warning bg-opacity-10 rounded">
-                <h6><i class="fas fa-gavel text-warning"></i> Bước 3: Đánh giá sự vi phạm</h6>
-                <form method="POST" action="${pageContext.request.contextPath}/admin/reports/update-status/<%= report.getReportID() %>" id="violationForm">
-                    <input type="hidden" name="status" value="UnderReview">
-                    <div class="mb-3">
-                        <label class="form-label small">Hành động xử lý:</label>
-                        <select name="actionType" class="form-select form-select-sm" onchange="updateActionNote(this.value)">
-                            <option value="">-- Chọn hành động --</option>
-                            <option value="warning">Cảnh cáo chủ nhà</option>
-                            <option value="suspend">Tạm ngừng bài đăng</option>
-                            <option value="delete">Xóa bài đăng</option>
-                            <option value="restrict">Hạn chế quyền truy cập</option>
-                            <option value="ban">Xóa tài khoản (nghiêm trọng)</option>
-                            <option value="none">Không có vi phạm</option>
-                        </select>
+            <!-- Bước 3: Xử lý báo cáo -->
+            <div class="mb-4 p-3 bg-warning bg-opacity-10 rounded border border-warning">
+                <h6 class="mb-3"><i class="fas fa-cog text-warning"></i> Bước 3: Xử lý báo cáo</h6>
+                
+                <!-- Update Status Form (includes Assign Admin) -->
+                <form method="POST" action="${pageContext.request.contextPath}/admin/reports/update-status/<%= report.getReportID() %>" id="statusForm" class="mb-4">
+                    <!-- Assign Admin -->
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Gán cho Admin</label>
+                            <select name="assigneeUserID" class="form-select" id="assigneeSelect">
+                                <option value="">-- Chọn Admin --</option>
+                                <% if (admins != null) {
+                                    for (User admin : admins) { %>
+                                <option value="<%= admin.getUserID() %>" 
+                                        <%= report.getAssignment() != null && report.getAssignment().getAssigneeUserID() == admin.getUserID() ? "selected" : "" %>>
+                                    <%= admin.getFullName() %> (<%= admin.getEmail() %>)
+                                </option>
+                                <% }
+                                } %>
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small">Ghi chú đánh giá:</label>
-                        <textarea name="violationNote" class="form-control form-control-sm" rows="3" 
-                                  placeholder="Ghi chú về đánh giá vi phạm và quyết định xử lý..."></textarea>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Cập nhật trạng thái</label>
+                            <select name="status" class="form-select" required id="statusSelect">
+                                <option value="Open" <%= report.getStatus().equals("Open") ? "selected" : "" %>>Mở</option>
+                                <option value="UnderReview" <%= report.getStatus().equals("UnderReview") ? "selected" : "" %>>Đang xem xét</option>
+                                <option value="Resolved" <%= report.getStatus().equals("Resolved") ? "selected" : "" %>>Đã xử lý</option>
+                                <option value="Rejected" <%= report.getStatus().equals("Rejected") ? "selected" : "" %>>Từ chối</option>
+                            </select>
+                        </div>
                     </div>
-                    <button type="button" class="btn btn-sm btn-warning" onclick="submitViolationAssessment()">
-                        <i class="fas fa-save"></i> Lưu đánh giá
-                    </button>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Cách giải quyết của Admin <span class="text-muted">(tùy chọn)</span></label>
+                            <textarea name="resolutionNote" class="form-control" rows="5" 
+                                      placeholder="Nhập cách giải quyết của bạn đối với báo cáo này. Nội dung này sẽ được hiển thị cho người báo cáo."><%= report.getResolutionNote() != null ? report.getResolutionNote() : "" %></textarea>
+                            <small class="text-muted">Nội dung này sẽ được hiển thị cho người báo cáo khi họ xem chi tiết báo cáo.</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-success" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; padding: 12px 24px; font-weight: 600; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                                <i class="fas fa-save"></i> Cập nhật trạng thái và giải quyết
+                            </button>
+                        </div>
+                    </div>
                 </form>
             </div>
-            
-            <!-- Step 4: Giải pháp cho khách hàng -->
-            <div class="mb-4 p-3 bg-success bg-opacity-10 rounded">
-                <h6><i class="fas fa-handshake text-success"></i> Bước 4: Đưa ra giải pháp cho khách hàng</h6>
-                <form method="POST" action="${pageContext.request.contextPath}/admin/reports/send-solution/<%= report.getReportID() %>" id="solutionForm">
-                    <input type="hidden" name="userID" value="<%= report.getReporterUserID() %>">
-                    <div class="mb-3">
-                        <label class="form-label small">Giải pháp cho khách hàng:</label>
-                        <select name="solutionType" class="form-select form-select-sm">
-                            <option value="">-- Chọn giải pháp --</option>
-                            <option value="refund">Hoàn tiền</option>
-                            <option value="change">Đổi phòng</option>
-                            <option value="compensation">Đền bù</option>
-                            <option value="apology">Xin lỗi và cam kết cải thiện</option>
-                            <option value="other">Giải pháp khác</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small">Nội dung thông báo cho khách hàng:</label>
-                        <textarea name="content" class="form-control form-control-sm" rows="4" 
-                                  placeholder="Nhập nội dung thông báo giải pháp cho khách hàng..."></textarea>
-                    </div>
-                    <input type="hidden" name="title" value="Giải pháp cho báo cáo #<%= report.getReportID() %>">
-                    <input type="hidden" name="type" value="Hỗ trợ">
-                    <button type="button" class="btn btn-sm btn-success" onclick="submitSolution()">
-                        <i class="fas fa-paper-plane"></i> Gửi giải pháp cho khách hàng
-                    </button>
-                </form>
-            </div>
-            
-            <!-- Assign Form -->
-            <form method="POST" action="${pageContext.request.contextPath}/admin/reports/assign/<%= report.getReportID() %>" class="mb-4">
-                <div class="row">
-                    <div class="col-md-8">
-                        <label class="form-label">Gán cho Admin</label>
-                        <select name="assigneeUserID" class="form-select" required>
-                            <option value="">-- Chọn Admin --</option>
-                            <% if (admins != null) {
-                                for (User admin : admins) { %>
-                            <option value="<%= admin.getUserID() %>" 
-                                    <%= report.getAssignment() != null && report.getAssignment().getAssigneeUserID() == admin.getUserID() ? "selected" : "" %>>
-                                <%= admin.getFullName() %> (<%= admin.getEmail() %>)
-                            </option>
-                            <% }
-                            } %>
-                        </select>
-                    </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-user-check"></i> Gán
-                        </button>
-                    </div>
-                </div>
-            </form>
-
-            <!-- Update Status Form -->
-            <form method="POST" action="${pageContext.request.contextPath}/admin/reports/update-status/<%= report.getReportID() %>">
-                <div class="row">
-                    <div class="col-md-4">
-                        <label class="form-label">Cập nhật trạng thái</label>
-                        <select name="status" class="form-select" required>
-                            <option value="Open" <%= report.getStatus().equals("Open") ? "selected" : "" %>>Mở</option>
-                            <option value="UnderReview" <%= report.getStatus().equals("UnderReview") ? "selected" : "" %>>Đang xem xét</option>
-                            <option value="Resolved" <%= report.getStatus().equals("Resolved") ? "selected" : "" %>>Đã xử lý</option>
-                            <option value="Rejected" <%= report.getStatus().equals("Rejected") ? "selected" : "" %>>Từ chối</option>
-                        </select>
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label">Ghi chú xử lý (tùy chọn)</label>
-                        <textarea name="resolutionNote" class="form-control" rows="2" 
-                                  placeholder="Nhập ghi chú về cách xử lý báo cáo này..."></textarea>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save"></i> Cập nhật trạng thái
-                    </button>
-                </div>
-            </form>
         </div>
         
+        <style>
+            .btn-success:hover {
+                background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+            }
+        </style>
         <script>
             function contactHost(hostID) {
                 if (confirm('Bạn có muốn gửi thông báo cho host này về báo cáo không?')) {
                     // Có thể mở modal hoặc redirect đến trang chat/notification
                     alert('Tính năng gửi thông báo cho host sẽ được triển khai');
-                }
-            }
-            
-            function updateActionNote(actionType) {
-                const noteTextarea = document.querySelector('textarea[name="violationNote"]');
-                const notes = {
-                    'warning': 'Đã cảnh cáo chủ nhà về hành vi vi phạm. Yêu cầu chủ nhà tuân thủ các quy định của nền tảng.',
-                    'suspend': 'Đã tạm ngừng bài đăng của chủ nhà do vi phạm. Chủ nhà cần khắc phục vấn đề trước khi được phép hoạt động lại.',
-                    'delete': 'Đã xóa bài đăng vi phạm của chủ nhà.',
-                    'restrict': 'Đã hạn chế một số quyền truy cập của chủ nhà trên nền tảng.',
-                    'ban': 'Đã xóa tài khoản của chủ nhà do vi phạm nghiêm trọng.',
-                    'none': 'Sau khi xem xét, không phát hiện vi phạm nào từ phía chủ nhà.'
-                };
-                if (notes[actionType]) {
-                    noteTextarea.value = notes[actionType];
-                }
-            }
-            
-            function submitViolationAssessment() {
-                if (confirm('Bạn có chắc chắn muốn lưu đánh giá vi phạm này?')) {
-                    document.getElementById('violationForm').submit();
-                }
-            }
-            
-            function submitSolution() {
-                const content = document.querySelector('#solutionForm textarea[name="content"]').value;
-                if (!content.trim()) {
-                    alert('Vui lòng nhập nội dung giải pháp cho khách hàng');
-                    return;
-                }
-                if (confirm('Bạn có chắc chắn muốn gửi giải pháp này cho khách hàng?')) {
-                    document.getElementById('solutionForm').submit();
                 }
             }
         </script>

@@ -28,14 +28,19 @@
         }
         .status-badge {
             padding: 8px 16px;
-            border-radius: 20px;
+            border-radius: 6px;
             font-size: 14px;
             font-weight: 600;
+            display: inline-block;
         }
         .status-open { background: #fff3cd; color: #856404; }
         .status-underreview { background: #cfe2ff; color: #084298; }
         .status-resolved { background: #d1e7dd; color: #0f5132; }
-        .status-rejected { background: #f8d7da; color: #842029; }
+        .status-rejected { 
+            background: #dc3545; 
+            color: #ffffff; 
+            font-weight: 700;
+        }
         .info-card {
             background: #f8f9fa;
             border-radius: 8px;
@@ -99,7 +104,9 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <strong>Trạng thái:</strong><br>
-                    <%= report.getStatus() %>
+                    <span class="status-badge status-<%= report.getStatus() != null ? report.getStatus().toLowerCase().replace(" ", "") : "open" %>">
+                        <%= report.getStatus() %>
+                    </span>
                 </div>
             </div>
         </div>
@@ -128,10 +135,10 @@
         <% } %>
 
         <% if (report.getResolutionNote() != null && !report.getResolutionNote().isEmpty()) { %>
-        <div class="info-card" style="border-left: 4px solid #0d6efd;">
+        <div class="info-card" style="border-left: 4px solid #10b981;">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0"><i class="fas fa-check-circle text-primary"></i> Cách giải quyết của Admin</h5>
-                <button class="btn btn-sm btn-outline-primary" 
+                <h5 class="mb-0"><i class="fas fa-check-circle" style="color: #10b981;"></i> Cách giải quyết của Admin</h5>
+                <button class="btn btn-sm btn-outline-success" 
                         data-report-id="<%= report.getReportID() %>"
                         data-resolution-note="<%= report.getResolutionNote().replace("\"", "&quot;").replace("'", "&#39;") %>"
                         data-closed-by="<%= report.getClosedByName() != null ? report.getClosedByName().replace("\"", "&quot;").replace("'", "&#39;") : "" %>"
@@ -146,7 +153,7 @@
             <% if (report.getClosedByName() != null) { %>
             <div class="d-flex align-items-center text-muted">
                 <i class="fas fa-user-check me-2"></i>
-                <span>Xử lý bởi: <strong><%= report.getClosedByName() %></strong></span>
+                <span>Xử lý bởi: <strong style="color: #10b981;"><%= report.getClosedByName() %></strong></span>
                 <% if (report.getClosedAt() != null) { %>
                 <span class="ms-3">
                     <i class="fas fa-calendar me-1"></i>
@@ -211,12 +218,12 @@
                     <div class="mb-3">
                         <strong>Báo cáo:</strong> <span id="resolutionDetailReportID"></span>
                     </div>
-                    <div class="mb-3 p-3 bg-light rounded" style="border-left: 4px solid #0d6efd; white-space: pre-line;">
+                    <div class="mb-3 p-3 bg-light rounded" style="border-left: 4px solid #10b981; white-space: pre-line;">
                         <div id="resolutionDetailContent"></div>
                     </div>
                     <div class="d-flex align-items-center text-muted">
                         <i class="fas fa-user-check me-2"></i>
-                        <span>Xử lý bởi: <strong id="resolutionDetailAdmin"></strong></span>
+                        <span>Xử lý bởi: <strong id="resolutionDetailAdmin" style="color: #10b981;"></strong></span>
                         <span class="ms-3">
                             <i class="fas fa-calendar me-1"></i>
                             <span id="resolutionDetailDate"></span>

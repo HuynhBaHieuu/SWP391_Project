@@ -66,5 +66,12 @@ public class NotificationService {
     public boolean deleteNotification(int notificationId) throws SQLException {
         return notificationDAO.deleteNotification(notificationId);
     }
+    
+    /**
+     * Lấy thông báo theo ID
+     */
+    public Notification getNotificationById(int notificationId) throws SQLException {
+        return notificationDAO.getNotificationById(notificationId);
+    }
 }
 
