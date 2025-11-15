@@ -373,8 +373,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <%
-        int convId = conversation.getConversationID();
-        int currUserId = currentUser.getUserID();
+        model.Conversation conversation = (model.Conversation) request.getAttribute("conversation");
+        model.User currentUser = (model.User) request.getAttribute("currentUser");
+        java.util.List<model.ChatMessage> messages = (java.util.List<model.ChatMessage>) request.getAttribute("messages");
+        
+        int convId = conversation != null ? conversation.getConversationID() : 0;
+        int currUserId = currentUser != null ? currentUser.getUserID() : 0;
         int msgCount = messages != null ? messages.size() : 0;
     %>
     <script>
