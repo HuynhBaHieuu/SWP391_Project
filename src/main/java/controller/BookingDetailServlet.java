@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import model.BookingDetail;
 import model.Booking;
 import model.User;
@@ -76,11 +78,37 @@ public class BookingDetailServlet extends HttpServlet {
             }
             // Chỉ cho phép review nếu chưa review và booking đã completed
             if (!hasReviewed && "Completed".equalsIgnoreCase(detail.getStatus())) {
-                try {
-                    canReview = reviewDAO.canReviewBooking(currentUser.getUserID(), bookingId);
-                } catch (Exception e) {
-                    System.err.println("Error checking can review: " + e.getMessage());
-                    e.printStackTrace();
+                // Kiểm tra xem đã qua ngày check-out chưa
+                boolean hasPassedCheckOut = false;
+                if (detail.getCheckOutDate() != null) {
+                    Date checkOutDate = detail.getCheckOutDate();
+                    Date today = new Date();
+                    // So sánh chỉ ngày, không so sánh giờ
+                    Calendar checkOutCal = Calendar.getInstance();
+                    checkOutCal.setTime(checkOutDate);
+                    Calendar todayCal = Calendar.getInstance();
+                    todayCal.setTime(today);
+                    // Reset giờ về 0 để so sánh chỉ ngày
+                    checkOutCal.set(Calendar.HOUR_OF_DAY, 0);
+                    checkOutCal.set(Calendar.MINUTE, 0);
+                    checkOutCal.set(Calendar.SECOND, 0);
+                    checkOutCal.set(Calendar.MILLISECOND, 0);
+                    todayCal.set(Calendar.HOUR_OF_DAY, 0);
+                    todayCal.set(Calendar.MINUTE, 0);
+                    todayCal.set(Calendar.SECOND, 0);
+                    todayCal.set(Calendar.MILLISECOND, 0);
+                    // Chỉ cho phép review nếu đã qua ngày check-out (today > checkOutDate)
+                    hasPassedCheckOut = todayCal.after(checkOutCal);
+                }
+                
+                // Chỉ cho phép review nếu đã qua ngày check-out
+                if (hasPassedCheckOut) {
+                    try {
+                        canReview = reviewDAO.canReviewBooking(currentUser.getUserID(), bookingId);
+                    } catch (Exception e) {
+                        System.err.println("Error checking can review: " + e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
             }
             // Kiểm tra có thể report không
@@ -150,7 +178,7 @@ public class BookingDetailServlet extends HttpServlet {
             html.append("</div>");
         } else if ("Completed".equalsIgnoreCase(detail.getStatus()) && !canReview && listingID > 0) {
             html.append("<hr class='my-4'>");
-            html.append("<div class='review-form-section' style='background: #fff3cd; border-color: #ffeaa7;'>");
+            html.append("<div class='review-form-section' style='background: #fff3cd; border-color: #ffeaa7; border-radius: 12px; padding: 25px; margin-top: 20px;'>");
             html.append("<div style='text-align: center; color: #856404;'>");
             html.append("<i class='bi bi-info-circle' style='font-size: 24px; margin-bottom: 10px;'></i>");
             html.append("<p style='margin: 0; font-weight: 500;'>Bạn cần hoàn thành chuyến đi để có thể đánh giá nơi lưu trú này.</p>");
