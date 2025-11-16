@@ -151,18 +151,77 @@
             </div>
         </div>
 
-        <% if (report.getResolutionNote() != null && !report.getResolutionNote().isEmpty()) { %>
-        <div class="alert alert-info">
-            <h6><i class="fas fa-comment-dots"></i> Ghi chú xử lý từ Admin</h6>
-            <p class="mb-0"><%= report.getResolutionNote() %></p>
-            <% if (report.getClosedByName() != null) { %>
-            <small class="text-muted">
-                Xử lý bởi: <%= report.getClosedByName() %> 
-                <fmt:formatDate value="<%= report.getClosedAt() %>" pattern="dd/MM/yyyy HH:mm" />
-            </small>
+        <!-- Bảng xử lý từ Admin -->
+        <div class="info-card mb-4" style="border-left: 4px solid #17a2b8;">
+            <h5 class="mb-3"><i class="fas fa-user-shield text-info"></i> Xử lý từ Admin</h5>
+            <% if (report.getResolutionNote() != null && !report.getResolutionNote().isEmpty()) { %>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-info">
+                        <tr>
+                            <th style="width: 150px;"><i class="fas fa-info-circle"></i> Thông tin</th>
+                            <th>Nội dung</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Nội dung xử lý:</strong></td>
+                            <td style="white-space: pre-line;"><%= report.getResolutionNote() %></td>
+                        </tr>
+                        <% if (report.getClosedByName() != null) { %>
+                        <tr>
+                            <td><strong>Người xử lý:</strong></td>
+                            <td><span class="badge bg-info"><%= report.getClosedByName() %></span></td>
+                        </tr>
+                        <% } %>
+                        <% if (report.getClosedAt() != null) { %>
+                        <tr>
+                            <td><strong>Thời gian:</strong></td>
+                            <td><fmt:formatDate value="<%= report.getClosedAt() %>" pattern="dd/MM/yyyy HH:mm" /></td>
+                        </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+            <div class="alert alert-secondary mb-0">
+                <i class="fas fa-info-circle"></i> Chưa có phản hồi nào từ Admin
+            </div>
             <% } %>
         </div>
-        <% } %>
+
+        <!-- Bảng xử lý từ Host -->
+        <div class="info-card mb-4" style="border-left: 4px solid #28a745;">
+            <h5 class="mb-3"><i class="fas fa-user-tie text-success"></i> Xử lý từ Host</h5>
+            <% if (report.getHostResponse() != null && !report.getHostResponse().trim().isEmpty()) { %>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-success">
+                        <tr>
+                            <th style="width: 150px;"><i class="fas fa-info-circle"></i> Thông tin</th>
+                            <th>Nội dung</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Nội dung phản hồi:</strong></td>
+                            <td style="white-space: pre-line;"><%= report.getHostResponse() %></td>
+                        </tr>
+                        <% if (report.getHostResponseAt() != null) { %>
+                        <tr>
+                            <td><strong>Thời gian:</strong></td>
+                            <td><fmt:formatDate value="<%= report.getHostResponseAt() %>" pattern="dd/MM/yyyy HH:mm" /></td>
+                        </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+            <div class="alert alert-secondary mb-0">
+                <i class="fas fa-info-circle"></i> Chưa có phản hồi nào từ Host
+            </div>
+            <% } %>
+        </div>
 
         <!-- Form gửi thông báo cho người báo cáo -->
         <div class="info-card" style="border-left: 4px solid #28a745;">

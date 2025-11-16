@@ -228,7 +228,7 @@ public class AdminReportController extends HttpServlet {
                     
                     notificationService.createNotification(
                         report.getReporterUserID(),
-                        "Cập nhật báo cáo #" + reportID,
+                        "Hệ thống cập nhật báo cáo",
                         message,
                         "Report"
                     );

@@ -313,9 +313,49 @@
                                 }
                             }
                 %>
+                <%
+                    // Extract reportID từ message metadata [REPORTID:X] hoặc từ title
+                    String reportIDForLink = null;
+                    String message = notif.getMessage();
+                    String title = notif.getTitle() != null ? notif.getTitle() : "";
+                    
+                    // Ưu tiên extract từ message metadata [REPORTID:X]
+                    if (message != null && message.contains("[REPORTID:")) {
+                        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\[REPORTID:(\\d+)\\]");
+                        java.util.regex.Matcher matcher = pattern.matcher(message);
+                        if (matcher.find()) {
+                            reportIDForLink = matcher.group(1);
+                        }
+                    }
+                    
+                    // Extract từ title nếu không tìm thấy trong message
+                    if (reportIDForLink == null && title != null) {
+                        // Kiểm tra các pattern title về report
+                        if (title.contains("Phản hồi về báo cáo") || 
+                            title.contains("Cập nhật báo cáo") ||
+                            title.contains("Hệ thống cập nhật báo cáo") ||
+                            title.contains("báo cáo #")) {
+                            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("#(\\d+)");
+                            java.util.regex.Matcher matcher = pattern.matcher(title);
+                            if (matcher.find()) {
+                                reportIDForLink = matcher.group(1);
+                            }
+                        }
+                    }
+                    
+                    // Nếu vẫn chưa có reportID, thử extract từ message (cho trường hợp "Hệ thống cập nhật báo cáo")
+                    if (reportIDForLink == null && message != null && (title.contains("Hệ thống cập nhật báo cáo") || title.contains("Cập nhật báo cáo"))) {
+                        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("Báo cáo #(\\d+)");
+                        java.util.regex.Matcher matcher = pattern.matcher(message);
+                        if (matcher.find()) {
+                            reportIDForLink = matcher.group(1);
+                        }
+                    }
+                %>
                 <div class="notification-item <%= unreadClass %>" 
                      data-id="<%= notif.getNotificationId() %>"
                      data-type="<%= notif.getNotificationType() %>"
+                     <% if (reportIDForLink != null) { %>data-report-id="<%= reportIDForLink %>"<% } %>
                      onclick="handleNotificationClick(event, <%= notif.getNotificationId() %>, '<%= notif.getNotificationType() %>')">
                     <div class="d-flex">
                         <%
@@ -339,8 +379,26 @@
                                             if (parts.length >= 4 && parts[3] != null && !parts[3].isEmpty()) {
                                                 listingTitle = parts[3];
                                             }
-                                            cleanMessage = cleanMessage.substring(endIndex + 1); // Bỏ phần metadata
+                                            cleanMessage = cleanMessage.substring(endIndex + 1); // Bỏ phần [SENDER:...]
+                                            
+                                            // Bỏ phần [REPORTID:X] nếu có
+                                            if (cleanMessage.startsWith("[REPORTID:")) {
+                                                int reportIDEndIndex = cleanMessage.indexOf("]");
+                                                if (reportIDEndIndex > 0) {
+                                                    cleanMessage = cleanMessage.substring(reportIDEndIndex + 1);
+                                                }
+                                            }
                                         }
+                                    }
+                                } catch (Exception e) {
+                                    // Nếu parse lỗi, giữ nguyên message
+                                }
+                            } else if (cleanMessage != null && cleanMessage.startsWith("[REPORTID:")) {
+                                // Nếu chỉ có REPORTID mà không có SENDER
+                                try {
+                                    int reportIDEndIndex = cleanMessage.indexOf("]");
+                                    if (reportIDEndIndex > 0) {
+                                        cleanMessage = cleanMessage.substring(reportIDEndIndex + 1);
                                     }
                                 } catch (Exception e) {
                                     // Nếu parse lỗi, giữ nguyên message
@@ -528,9 +586,81 @@
                     return;
                 }
                 
-                // Nếu là Feedback notification, chuyển đến trang chi tiết
+                const notificationItem = event.currentTarget;
+                
+                // Nếu là Feedback notification
                 if (notificationType === 'Feedback') {
+                    // Kiểm tra xem có data-report-id không (phản hồi về report từ host)
+                    const reportID = notificationItem.getAttribute('data-report-id');
+                    if (reportID && reportID.trim() !== '' && reportID !== 'null') {
+                        // Đây là phản hồi về report từ host, chuyển đến report detail
+                        window.location.href = '<%= request.getContextPath() %>/report/detail/' + reportID.trim();
+                        return;
+                    }
+                    
+                    // Nếu không có reportID, đây là feedback thông thường, chuyển đến notification detail
                     window.location.href = '<%= request.getContextPath() %>/notifications?action=view&id=' + notificationId;
+                } else if (notificationType === 'Report') {
+                    // Kiểm tra xem có data-report-id không
+                    let reportID = notificationItem.getAttribute('data-report-id');
+                    
+                    // Nếu không có, thử extract từ title hoặc text content
+                    if (!reportID || reportID.trim() === '' || reportID === 'null') {
+                        const titleElement = notificationItem.querySelector('.notification-title');
+                        const titleText = titleElement ? titleElement.textContent || '' : '';
+                        const notificationText = notificationItem.textContent || '';
+                        
+                        // Kiểm tra nếu title chứa "Cập nhật báo cáo" hoặc "Hệ thống cập nhật báo cáo" (từ admin cho guest)
+                        if (titleText.includes('Cập nhật báo cáo') || titleText.includes('Hệ thống cập nhật báo cáo')) {
+                            // Thử extract từ title trước
+                            let reportMatch = titleText.match(/#(\d+)/);
+                            if (reportMatch && reportMatch[1]) {
+                                reportID = reportMatch[1];
+                            } else {
+                                // Nếu không có trong title, thử extract từ message
+                                const messageElement = notificationItem.querySelector('.notification-message');
+                                const messageText = messageElement ? messageElement.textContent || '' : '';
+                                reportMatch = messageText.match(/Báo cáo #(\d+)/);
+                                if (reportMatch && reportMatch[1]) {
+                                    reportID = reportMatch[1];
+                                }
+                            }
+                            
+                            if (reportID && reportID.trim() !== '' && reportID !== 'null') {
+                                // Đây là notification từ admin về report update, redirect đến guest report detail
+                                window.location.href = '<%= request.getContextPath() %>/report/detail/' + reportID.trim();
+                                return;
+                            }
+                        }
+                        
+                        // Nếu là "Báo cáo mới về bạn" (từ guest cho host)
+                        if (titleText.includes('Báo cáo mới về bạn') || notificationText.includes('Báo cáo #')) {
+                            const reportMatch = (titleText + ' ' + notificationText).match(/#(\d+)/);
+                            if (reportMatch && reportMatch[1]) {
+                                reportID = reportMatch[1];
+                                // Đây là notification từ guest cho host, redirect đến host report detail
+                                window.location.href = '<%= request.getContextPath() %>/host/reports/detail/' + reportID.trim();
+                                return;
+                            }
+                        }
+                    } else {
+                        // Có data-report-id, kiểm tra title để quyết định redirect đến đâu
+                        const titleElement = notificationItem.querySelector('.notification-title');
+                        const titleText = titleElement ? titleElement.textContent || '' : '';
+                        
+                        if (titleText.includes('Cập nhật báo cáo') || titleText.includes('Hệ thống cập nhật báo cáo')) {
+                            // Notification từ admin về report update, redirect đến guest report detail
+                            window.location.href = '<%= request.getContextPath() %>/report/detail/' + reportID.trim();
+                            return;
+                        } else if (titleText.includes('Báo cáo mới về bạn')) {
+                            // Notification từ guest cho host, redirect đến host report detail
+                            window.location.href = '<%= request.getContextPath() %>/host/reports/detail/' + reportID.trim();
+                            return;
+                        }
+                    }
+                    
+                    // Nếu không tìm thấy reportID, đánh dấu đã đọc
+                    markAsRead(notificationId);
                 } else {
                     // Các notification khác, đánh dấu đã đọc
                     markAsRead(notificationId);

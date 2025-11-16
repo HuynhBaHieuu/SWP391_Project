@@ -69,7 +69,6 @@
                 <div class="booking-container">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2>
-                            <i class="fas fa-list"></i>
                             <c:choose>
                                 <c:when test="${userType == 'host'}">
                                     Đặt phòng của khách
@@ -79,7 +78,7 @@
                                 </c:otherwise>
                             </c:choose>
                         </h2>
-                        <a href="${pageContext.request.contextPath}/home" class="btn btn-outline-primary">
+                        <a href="${pageContext.request.contextPath}/home" class="btn" style="background-color: #ff385c; color: white; border: none;">
                             <i class="fas fa-home"></i> Về trang chủ
                         </a>
                     </div>
@@ -208,7 +207,7 @@
 
                                 <div class="col-md-4 text-end">
                                     <a href="${pageContext.request.contextPath}/booking?action=detail&bookingId=${booking.bookingID}"
-                                        class="btn btn-outline-primary btn-sm">
+                                        class="btn btn-outline-success btn-sm">
                                         <i class="fas fa-eye"></i> Chi tiết
                                     </a>
 

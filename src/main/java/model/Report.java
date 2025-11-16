@@ -18,6 +18,8 @@ public class Report implements Serializable {
     private Timestamp closedAt;
     private Integer closedBy;
     private String resolutionNote;
+    private String hostResponse; // Phản hồi của host
+    private Timestamp hostResponseAt; // Thời gian host phản hồi
     
     // Additional fields for display
     private String reporterName;
@@ -135,6 +137,22 @@ public class Report implements Serializable {
 
     public void setResolutionNote(String resolutionNote) {
         this.resolutionNote = resolutionNote;
+    }
+
+    public String getHostResponse() {
+        return hostResponse;
+    }
+
+    public void setHostResponse(String hostResponse) {
+        this.hostResponse = hostResponse;
+    }
+
+    public Timestamp getHostResponseAt() {
+        return hostResponseAt;
+    }
+
+    public void setHostResponseAt(Timestamp hostResponseAt) {
+        this.hostResponseAt = hostResponseAt;
     }
 
     // Additional getters and setters

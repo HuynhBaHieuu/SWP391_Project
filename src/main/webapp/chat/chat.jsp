@@ -33,7 +33,7 @@
         }
 
         .chat-header {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            background: #ff385c;
             color: white;
             padding: 20px;
             text-align: center;
@@ -72,7 +72,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ff385c;
             display: flex;
             align-items: center;
             justify-content: center;

@@ -180,5 +180,19 @@ public class ReportService {
     public int getHostIDFromBooking(int bookingID) {
         return reportDAO.getHostIDFromBooking(bookingID);
     }
+    
+    /**
+     * Cập nhật phản hồi của host
+     */
+    public boolean updateHostResponse(int reportID, String hostResponse) {
+        return reportDAO.updateHostResponse(reportID, hostResponse);
+    }
+    
+    /**
+     * Lấy ReportDAO để sử dụng trực tiếp (cho các operations đặc biệt)
+     */
+    public ReportDAO getReportDAO() {
+        return reportDAO;
+    }
 }
 

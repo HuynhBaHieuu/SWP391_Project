@@ -134,36 +134,77 @@
         </div>
         <% } %>
 
-        <% if (report.getResolutionNote() != null && !report.getResolutionNote().isEmpty()) { %>
-        <div class="info-card" style="border-left: 4px solid #10b981;">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0"><i class="fas fa-check-circle" style="color: #10b981;"></i> Cách giải quyết của Admin</h5>
-                <button class="btn btn-sm btn-outline-success" 
-                        data-report-id="<%= report.getReportID() %>"
-                        data-resolution-note="<%= report.getResolutionNote().replace("\"", "&quot;").replace("'", "&#39;") %>"
-                        data-closed-by="<%= report.getClosedByName() != null ? report.getClosedByName().replace("\"", "&quot;").replace("'", "&#39;") : "" %>"
-                        data-closed-at="<%= report.getClosedAt() != null ? new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(report.getClosedAt()) : "" %>"
-                        onclick="showResolutionDetailFromButton(this)">
-                    <i class="fas fa-eye"></i> View
-                </button>
+        <!-- Bảng xử lý từ Admin -->
+        <div class="info-card mb-4" style="border-left: 4px solid #17a2b8;">
+            <h5 class="mb-3"><i class="fas fa-user-shield text-info"></i> Xử lý từ Admin</h5>
+            <% if (report.getResolutionNote() != null && !report.getResolutionNote().isEmpty()) { %>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-info">
+                        <tr>
+                            <th style="width: 150px;"><i class="fas fa-info-circle"></i> Thông tin</th>
+                            <th>Nội dung</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Nội dung xử lý:</strong></td>
+                            <td style="white-space: pre-line;"><%= report.getResolutionNote() %></td>
+                        </tr>
+                        <% if (report.getClosedByName() != null) { %>
+                        <tr>
+                            <td><strong>Người xử lý:</strong></td>
+                            <td><span class="badge bg-info"><%= report.getClosedByName() %></span></td>
+                        </tr>
+                        <% } %>
+                        <% if (report.getClosedAt() != null) { %>
+                        <tr>
+                            <td><strong>Thời gian:</strong></td>
+                            <td><fmt:formatDate value="<%= report.getClosedAt() %>" pattern="dd/MM/yyyy HH:mm" /></td>
+                        </tr>
+                        <% } %>
+                    </tbody>
+                </table>
             </div>
-            <div class="p-3 bg-light rounded mb-3" style="white-space: pre-line;">
-                <%= report.getResolutionNote() %>
-            </div>
-            <% if (report.getClosedByName() != null) { %>
-            <div class="d-flex align-items-center text-muted">
-                <i class="fas fa-user-check me-2"></i>
-                <span>Xử lý bởi: <strong style="color: #10b981;"><%= report.getClosedByName() %></strong></span>
-                <% if (report.getClosedAt() != null) { %>
-                <span class="ms-3">
-                    <i class="fas fa-calendar me-1"></i>
-                    <fmt:formatDate value="<%= report.getClosedAt() %>" pattern="dd/MM/yyyy HH:mm" />
-                </span>
-                <% } %>
+            <% } else { %>
+            <div class="alert alert-secondary mb-0">
+                <i class="fas fa-info-circle"></i> Chưa có phản hồi nào từ Admin
             </div>
             <% } %>
         </div>
-        <% } %>
+
+        <!-- Bảng xử lý từ Host -->
+        <div class="info-card mb-4" style="border-left: 4px solid #28a745;">
+            <h5 class="mb-3"><i class="fas fa-user-tie text-success"></i> Xử lý từ Host</h5>
+            <% if (report.getHostResponse() != null && !report.getHostResponse().trim().isEmpty()) { %>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-success">
+                        <tr>
+                            <th style="width: 150px;"><i class="fas fa-info-circle"></i> Thông tin</th>
+                            <th>Nội dung</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Nội dung phản hồi:</strong></td>
+                            <td style="white-space: pre-line;"><%= report.getHostResponse() %></td>
+                        </tr>
+                        <% if (report.getHostResponseAt() != null) { %>
+                        <tr>
+                            <td><strong>Thời gian:</strong></td>
+                            <td><fmt:formatDate value="<%= report.getHostResponseAt() %>" pattern="dd/MM/yyyy HH:mm" /></td>
+                        </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+            <div class="alert alert-secondary mb-0">
+                <i class="fas fa-info-circle"></i> Chưa có phản hồi nào từ Host
+            </div>
+            <% } %>
+        </div>
 
         <% } else { %>
         <div class="alert alert-warning">
@@ -174,68 +215,6 @@
 
     <%@ include file="../design/footer.jsp" %>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Hiển thị modal chi tiết resolution từ button
-        function showResolutionDetailFromButton(button) {
-            const reportID = button.getAttribute('data-report-id');
-            let resolutionNote = button.getAttribute('data-resolution-note') || '';
-            // Decode HTML entities
-            resolutionNote = resolutionNote.replace(/&#10;/g, '\n').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-            const closedByName = (button.getAttribute('data-closed-by') || '').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-            const closedAt = button.getAttribute('data-closed-at') || '';
-            
-            const modal = new bootstrap.Modal(document.getElementById('resolutionDetailModal'));
-            document.getElementById('resolutionDetailContent').innerHTML = resolutionNote.replace(/\n/g, '<br>');
-            document.getElementById('resolutionDetailAdmin').textContent = closedByName || 'N/A';
-            document.getElementById('resolutionDetailDate').textContent = closedAt || 'N/A';
-            document.getElementById('resolutionDetailReportID').textContent = '#' + reportID;
-            modal.show();
-        }
-        
-        // Hiển thị modal chi tiết resolution (backward compatibility)
-        function showResolutionDetail(resolutionNote, closedByName, closedAt, reportID) {
-            const modal = new bootstrap.Modal(document.getElementById('resolutionDetailModal'));
-            document.getElementById('resolutionDetailContent').innerHTML = (resolutionNote || '').replace(/\\n/g, '<br>');
-            document.getElementById('resolutionDetailAdmin').textContent = closedByName || 'N/A';
-            document.getElementById('resolutionDetailDate').textContent = closedAt || 'N/A';
-            document.getElementById('resolutionDetailReportID').textContent = '#' + reportID;
-            modal.show();
-        }
-    </script>
-    
-    <!-- Modal hiển thị chi tiết resolution -->
-    <div class="modal fade" id="resolutionDetailModal" tabindex="-1" aria-labelledby="resolutionDetailModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="resolutionDetailModalLabel">
-                        <i class="fas fa-info-circle"></i> Chi tiết cách giải quyết của Admin
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <strong>Báo cáo:</strong> <span id="resolutionDetailReportID"></span>
-                    </div>
-                    <div class="mb-3 p-3 bg-light rounded" style="border-left: 4px solid #10b981; white-space: pre-line;">
-                        <div id="resolutionDetailContent"></div>
-                    </div>
-                    <div class="d-flex align-items-center text-muted">
-                        <i class="fas fa-user-check me-2"></i>
-                        <span>Xử lý bởi: <strong id="resolutionDetailAdmin" style="color: #10b981;"></strong></span>
-                        <span class="ms-3">
-                            <i class="fas fa-calendar me-1"></i>
-                            <span id="resolutionDetailDate"></span>
-                        </span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
 

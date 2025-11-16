@@ -85,14 +85,18 @@ public class HostReportController extends HttpServlet {
             Report report = reportService.getReportById(reportID);
             
             if (report == null) {
-                request.setAttribute("error", "Không tìm thấy báo cáo.");
+                request.setAttribute("error", "Không tìm thấy báo cáo với ID: " + reportID);
                 request.getRequestDispatcher("/host/reports.jsp").forward(request, response);
                 return;
             }
             
             // Kiểm tra quyền: chỉ reported host mới được xem
-            if (report.getReportedHostID() != user.getUserID()) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            int reportedHostID = report.getReportedHostID();
+            int currentUserID = user.getUserID();
+            
+            if (reportedHostID == 0 || reportedHostID != currentUserID) {
+                request.setAttribute("error", "Bạn không có quyền xem báo cáo này. ReportedHostID: " + reportedHostID + ", YourID: " + currentUserID);
+                request.getRequestDispatcher("/host/reports.jsp").forward(request, response);
                 return;
             }
             
@@ -100,7 +104,12 @@ public class HostReportController extends HttpServlet {
             request.getRequestDispatcher("/host/report-detail.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Có lỗi xảy ra khi tải chi tiết báo cáo.");
+            System.err.println("Error loading report detail for ID: " + reportID);
+            System.err.println("Error message: " + e.getMessage());
+            if (e.getCause() != null) {
+                System.err.println("Caused by: " + e.getCause().getMessage());
+            }
+            request.setAttribute("error", "Có lỗi xảy ra khi tải chi tiết báo cáo: " + e.getMessage());
             request.getRequestDispatcher("/host/reports.jsp").forward(request, response);
         }
     }
@@ -180,8 +189,21 @@ public class HostReportController extends HttpServlet {
             
             // Tạo message với metadata về host
             String fullMessage = message.trim();
-            // Thêm thông tin host vào đầu message (sẽ được parse và hiển thị riêng)
-            String messageWithSender = "[SENDER:" + host.getUserID() + ":" + hostName + ":" + hostAvatar + "]" + fullMessage;
+            // Thêm thông tin host và reportID vào đầu message (sẽ được parse và hiển thị riêng)
+            // Format: [SENDER:...][REPORTID:15]message content
+            String messageWithSender = "[SENDER:" + host.getUserID() + ":" + hostName + ":" + hostAvatar + "][REPORTID:" + reportID + "]" + fullMessage;
+            
+            // Lưu phản hồi của host vào database
+            try {
+                boolean saved = reportService.updateHostResponse(reportID, fullMessage);
+                if (!saved) {
+                    System.err.println("Warning: Failed to save host response to database for report " + reportID);
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to save host response: " + e.getMessage());
+                e.printStackTrace();
+                // Không dừng lại, vẫn tiếp tục gửi notification
+            }
             
             // Gửi notification cho reporter
             try {

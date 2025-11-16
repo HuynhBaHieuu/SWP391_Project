@@ -67,13 +67,13 @@
     <div class="booking-container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>
-                <i class="fas fa-info-circle"></i> Chi tiết đặt phòng
+                Chi tiết đặt phòng
             </h2>
             <div>
-                <!-- <a href="booking?action=list" class="btn btn-outline-secondary">
-                    <i class="fas fa-list"></i> Danh sách
-                </a>  -->
-                <a href="${pageContext.request.contextPath}/home" class="btn btn-outline-primary">
+                <a href="${pageContext.request.contextPath}/booking?action=list" class="btn" style="background-color: #ff385c; color: white; border: none;">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+                <a href="${pageContext.request.contextPath}/home" class="btn" style="background-color: #ff385c; color: white; border: none;">
                     <i class="fas fa-home"></i> Trang chủ
                 </a>
             </div>
@@ -94,7 +94,7 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="detail-card">
-                    <h4 class="mb-4">
+                    <h4 class="mb-4" style="color: #ff385c;">
                         <i class="fas fa-home"></i> Thông tin phòng
                     </h4>
                     
@@ -179,6 +179,52 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Phần Thanh toán và Hủy đặt phòng -->
+                <c:if test="${booking.status == 'Processing'}">
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-credit-card"></i> Thanh toán
+                                </h5>
+                                
+                                <c:choose>
+                                    <c:when test="${empty payment || payment.status == 'Failed'}">
+                                        <p class="text-muted mb-3">Chưa thanh toán hoặc thanh toán thất bại</p>
+                                        <a href="booking?action=payment&bookingId=${booking.bookingID}" 
+                                           class="btn btn-success w-100">
+                                            <i class="fas fa-credit-card"></i> Thanh toán ngay
+                                        </a>
+                                    </c:when>
+                                    <c:when test="${payment.status == 'Processing'}">
+                                        <p class="text-warning mb-3">
+                                            <i class="fas fa-clock"></i> Đang chờ xử lý thanh toán
+                                        </p>
+                                    </c:when>
+                                    <c:when test="${payment.status == 'Completed'}">
+                                        <p class="text-success mb-3">
+                                            <i class="fas fa-check-circle"></i> Đã thanh toán thành công
+                                        </p>
+                                    </c:when>
+                                </c:choose>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-times"></i> Hủy đặt phòng
+                                </h5>
+                                <p class="text-muted mb-3">Bạn có thể hủy đặt phòng này</p>
+                                <a href="booking?action=cancel&bookingId=${booking.bookingID}" 
+                                   class="btn btn-outline-danger w-100"
+                                   onclick="return confirm('Bạn có chắc muốn hủy đặt phòng này?')">
+                                    <i class="fas fa-times"></i> Hủy đặt phòng
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </c:if>
             </div>
             
             <div class="col-md-4">
@@ -187,11 +233,20 @@
                         <i class="fas fa-user"></i> Thông tin khách
                     </h5>
                     <p><strong>Tên:</strong> ${booking.guestName}</p>
+                    
+                    <!-- Nút Nhắn tin cho Host -->
+                    <c:if test="${sessionScope.user.role == 'Host' || sessionScope.user.isHost == true}">
+                        <div class="mt-3">
+                            <button class="btn w-100" style="background-color: #ff385c; color: white; border: none;" onclick="openChatWithGuest(${booking.guestID}, ${booking.listingID}, ${booking.bookingID})">
+                                <i class="fas fa-comments"></i> Nhắn tin với khách
+                            </button>
+                        </div>
+                    </c:if>
                 </div>
                 
                 <div class="detail-card">
                     <h5 class="mb-3">
-                        <i class="fas fa-info"></i> Trạng thái
+                        Trạng thái
                     </h5>
                     
                     <div class="mb-3">
@@ -251,48 +306,6 @@
                     </div>
                 </div>
                 
-                <c:if test="${booking.status == 'Processing'}">
-                    <div class="detail-card">
-                        <h5 class="mb-3">
-                            <i class="fas fa-credit-card"></i> Thanh toán
-                        </h5>
-                        
-                        <c:choose>
-                            <c:when test="${empty payment || payment.status == 'Failed'}">
-                                <p class="text-muted mb-3">Chưa thanh toán hoặc thanh toán thất bại</p>
-                                <a href="booking?action=payment&bookingId=${booking.bookingID}" 
-                                   class="btn btn-success w-100">
-                                    <i class="fas fa-credit-card"></i> Thanh toán ngay
-                                </a>
-                            </c:when>
-                            <c:when test="${payment.status == 'Processing'}">
-                                <p class="text-warning mb-3">
-                                    <i class="fas fa-clock"></i> Đang chờ xử lý thanh toán
-                                </p>
-                            </c:when>
-                            <c:when test="${payment.status == 'Completed'}">
-                                <p class="text-success mb-3">
-                                    <i class="fas fa-check-circle"></i> Đã thanh toán thành công
-                                </p>
-                            </c:when>
-                        </c:choose>
-                    </div>
-                </c:if>
-                
-                <c:if test="${booking.status == 'Processing'}">
-                    <div class="detail-card">
-                        <h5 class="mb-3">
-                            <i class="fas fa-times"></i> Hủy đặt phòng
-                        </h5>
-                        <p class="text-muted mb-3">Bạn có thể hủy đặt phòng này</p>
-                        <a href="booking?action=cancel&bookingId=${booking.bookingID}" 
-                           class="btn btn-outline-danger w-100"
-                           onclick="return confirm('Bạn có chắc muốn hủy đặt phòng này?')">
-                            <i class="fas fa-times"></i> Hủy đặt phòng
-                        </a>
-                    </div>
-                </c:if>
-                
                 <!-- Admin Actions -->
                 <c:if test="${sessionScope.user.role == 'admin'}">
                     <div class="detail-card">
@@ -331,6 +344,48 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        // Mở chat với guest
+        function openChatWithGuest(guestID, listingID, bookingID) {
+            // Hiển thị loading
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang mở chat...';
+            btn.disabled = true;
+            
+            // Gọi API để tạo/tìm conversation
+            const formData = new URLSearchParams();
+            formData.append('action', 'startConversation');
+            formData.append('conversationType', 'GUEST_HOST');
+            formData.append('guestId', guestID); // Host gọi nên gửi guestID
+            formData.append('relatedBookingID', bookingID);
+            formData.append('relatedListingID', listingID);
+            
+            fetch('${pageContext.request.contextPath}/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.conversationId) {
+                    // Redirect đến trang chat với conversationId
+                    window.location.href = '${pageContext.request.contextPath}/chat?action=view&conversationId=' + data.conversationId;
+                } else {
+                    alert(data.message || 'Không thể mở chat. Vui lòng thử lại.');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi mở chat. Vui lòng thử lại.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+        
         function updateBookingStatus(bookingId, newStatus) {
             const statusText = {
                 'Processing': 'đang xử lý',

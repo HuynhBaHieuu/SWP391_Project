@@ -243,6 +243,16 @@ public class ReportDAO {
         report.setCategoryCode(rs.getString("CategoryCode"));
         report.setClosedByName(rs.getString("ClosedByName"));
         
+        // Host response fields (có thể null nếu column chưa tồn tại)
+        try {
+            report.setHostResponse(rs.getString("HostResponse"));
+            report.setHostResponseAt(rs.getTimestamp("HostResponseAt"));
+        } catch (SQLException e) {
+            // Column chưa tồn tại, bỏ qua
+            report.setHostResponse(null);
+            report.setHostResponseAt(null);
+        }
+        
         return report;
     }
 
@@ -725,6 +735,91 @@ public class ReportDAO {
             ps.setString(5, toStatus);
             ps.setString(6, message);
             ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Cập nhật phản hồi của host
+     */
+    public boolean updateHostResponse(int reportID, String hostResponse) {
+        String sql = """
+            UPDATE Reports 
+            SET HostResponse = ?, 
+                HostResponseAt = GETDATE(),
+                UpdatedAt = GETDATE()
+            WHERE ReportID = ?
+        """;
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, hostResponse);
+            ps.setInt(2, reportID);
+            
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            // Nếu column chưa tồn tại, thử tạo column trước
+            if (e.getMessage() != null && e.getMessage().contains("Invalid column name 'HostResponse'")) {
+                try (Connection newConn = DBConnection.getConnection()) {
+                    // Tạo column nếu chưa có
+                    createHostResponseColumns(newConn);
+                    // Thử lại với connection mới
+                    try (PreparedStatement ps = newConn.prepareStatement(sql)) {
+                        ps.setString(1, hostResponse);
+                        ps.setInt(2, reportID);
+                        int rowsAffected = ps.executeUpdate();
+                        return rowsAffected > 0;
+                    }
+                } catch (Exception ex) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Tạo các column HostResponse và HostResponseAt nếu chưa tồn tại
+     */
+    private void createHostResponseColumns(Connection conn) throws SQLException {
+        try {
+            // Kiểm tra và thêm column HostResponse
+            String checkHostResponse = """
+                IF NOT EXISTS (
+                    SELECT * FROM sys.columns 
+                    WHERE object_id = OBJECT_ID(N'[dbo].[Reports]') 
+                    AND name = 'HostResponse'
+                )
+                BEGIN
+                    ALTER TABLE Reports ADD HostResponse NVARCHAR(MAX) NULL;
+                END
+            """;
+            
+            try (PreparedStatement ps = conn.prepareStatement(checkHostResponse)) {
+                ps.execute();
+            }
+            
+            // Kiểm tra và thêm column HostResponseAt
+            String checkHostResponseAt = """
+                IF NOT EXISTS (
+                    SELECT * FROM sys.columns 
+                    WHERE object_id = OBJECT_ID(N'[dbo].[Reports]') 
+                    AND name = 'HostResponseAt'
+                )
+                BEGIN
+                    ALTER TABLE Reports ADD HostResponseAt DATETIME NULL;
+                END
+            """;
+            
+            try (PreparedStatement ps = conn.prepareStatement(checkHostResponseAt)) {
+                ps.execute();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error creating HostResponse columns: " + e.getMessage());
+            throw e;
         }
     }
 

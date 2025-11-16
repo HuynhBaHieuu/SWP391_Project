@@ -35,7 +35,7 @@
             padding: 0 1rem;
         }
         .profile-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ff385c;
             border-radius: 15px;
             padding: 2rem;
             margin-bottom: 2rem;

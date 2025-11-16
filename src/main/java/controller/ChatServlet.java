@@ -305,17 +305,28 @@ public class ChatServlet extends HttpServlet {
                     
             } else {
                 // Mặc định: Guest-Host (backward compatible)
-                if (hostIdStr == null) {
+                // Xử lý cả trường hợp Guest gọi và Host gọi
+                String guestIdStr = request.getParameter("guestId");
+                int guestId, hostId;
+                
+                // Xác định guestId và hostId
+                if (guestIdStr != null && !guestIdStr.isEmpty()) {
+                    // Có guestId parameter -> Host đang gọi
+                    guestId = Integer.parseInt(guestIdStr);
+                    hostId = currentUser.getUserID();
+                } else if (hostIdStr != null && !hostIdStr.isEmpty()) {
+                    // Có hostId parameter -> Guest đang gọi
+                    guestId = currentUser.getUserID();
+                    hostId = Integer.parseInt(hostIdStr);
+                } else {
                     result.put("success", false);
-                    result.put("message", "Host ID is required for GUEST_HOST conversation");
+                    result.put("message", "Host ID or Guest ID is required for GUEST_HOST conversation");
                     out.print(gson.toJson(result));
                     return;
                 }
                 
-                int hostId = Integer.parseInt(hostIdStr);
-                
                 // Không cho phép nhắn tin với chính mình
-                if (hostId == currentUser.getUserID()) {
+                if (hostId == guestId) {
                     result.put("success", false);
                     result.put("message", "Cannot start conversation with yourself");
                     out.print(gson.toJson(result));
@@ -326,7 +337,7 @@ public class ChatServlet extends HttpServlet {
                 Integer relatedListingID = relatedListingIDStr != null ? Integer.parseInt(relatedListingIDStr) : null;
                 
                 conversation = chatService.findOrCreateGuestHostConversation(
-                    currentUser.getUserID(), hostId, relatedBookingID, relatedListingID);
+                    guestId, hostId, relatedBookingID, relatedListingID);
             }
             
             if (conversation != null) {
