@@ -94,6 +94,9 @@ public class ChatServlet extends HttpServlet {
                 case "deleteConversation":
                     deleteConversation(request, response, currentUser);
                     break;
+                case "deleteMessages":
+                    deleteMessages(request, response, currentUser);
+                    break;
                 default:
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     break;
@@ -176,7 +179,8 @@ public class ChatServlet extends HttpServlet {
                 return;
             }
 
-            List<ChatMessage> messages = chatService.getConversationMessages(conversationId);
+            // Lấy tin nhắn với filter theo user (ẩn tin nhắn đã bị xóa)
+            List<ChatMessage> messages = chatService.getConversationMessages(conversationId, currentUser.getUserID());
             
             request.setAttribute("conversation", conversation);
             request.setAttribute("messages", messages);
@@ -209,7 +213,8 @@ public class ChatServlet extends HttpServlet {
                 return;
             }
 
-            List<ChatMessage> messages = chatService.getConversationMessages(conversationId);
+            // Lấy tin nhắn với filter theo user (ẩn tin nhắn đã bị xóa)
+            List<ChatMessage> messages = chatService.getConversationMessages(conversationId, currentUser.getUserID());
             result.put("success", true);
             result.put("messages", messages);
             
@@ -418,6 +423,51 @@ public class ChatServlet extends HttpServlet {
                 result.put("message", "Đã xóa cuộc trò chuyện thành công");
             } else {
                 result.put("message", "Không thể xóa cuộc trò chuyện");
+            }
+            
+        } catch (NumberFormatException e) {
+            result.put("success", false);
+            result.put("message", "ID cuộc trò chuyện không hợp lệ");
+        }
+        
+        out.print(gson.toJson(result));
+    }
+    
+    private void deleteMessages(HttpServletRequest request, HttpServletResponse response, User currentUser) 
+            throws IOException {
+        
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        
+        String conversationIdStr = request.getParameter("conversationId");
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            int conversationId = Integer.parseInt(conversationIdStr);
+            
+            // Kiểm tra quyền truy cập
+            if (!chatService.hasConversationAccess(conversationId, currentUser.getUserID())) {
+                result.put("success", false);
+                result.put("message", "Bạn không có quyền xóa tin nhắn trong cuộc trò chuyện này");
+                out.print(gson.toJson(result));
+                return;
+            }
+
+            // Xóa tin nhắn cho user hiện tại (đánh dấu thời điểm xóa)
+            boolean success = chatService.deleteMessagesForUser(conversationId, currentUser.getUserID());
+            result.put("success", success);
+            
+            if (success) {
+                result.put("message", "Đã xóa tin nhắn thành công");
+            } else {
+                // Kiểm tra xem có phải do không có quyền không
+                if (!chatService.hasConversationAccess(conversationId, currentUser.getUserID())) {
+                    result.put("message", "Bạn không có quyền xóa tin nhắn trong cuộc trò chuyện này");
+                } else {
+                    result.put("message", "Không thể xóa tin nhắn. Vui lòng kiểm tra console log để xem chi tiết lỗi.");
+                    result.put("error", "Có thể bảng ConversationDeletions chưa được tạo trong database");
+                }
             }
             
         } catch (NumberFormatException e) {

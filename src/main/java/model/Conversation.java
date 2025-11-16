@@ -20,6 +20,7 @@ public class Conversation {
     private String lastMessageText;
     private boolean isActive;
     private int unreadCount;
+    private boolean isDeletedByUser;  // Đánh dấu conversation đã bị xóa bởi user hiện tại
 
     // Constructors
     public Conversation() {}
@@ -128,6 +129,14 @@ public class Conversation {
     public void setUnreadCount(int unreadCount) {
         this.unreadCount = unreadCount;
     }
+    
+    public boolean isDeletedByUser() {
+        return isDeletedByUser;
+    }
+    
+    public void setDeletedByUser(boolean deletedByUser) {
+        this.isDeletedByUser = deletedByUser;
+    }
 
     // New fields getters and setters
     public Integer getAdminID() {
@@ -202,4 +211,5 @@ public class Conversation {
         }
         return "";
     }
+    
 }

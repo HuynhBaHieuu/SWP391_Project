@@ -456,6 +456,9 @@
                                                 <c:when test="${not empty conversation.lastMessageText}">
                                                     ${conversation.lastMessageText}
                                                 </c:when>
+                                                <c:when test="${conversation.deletedByUser == true}">
+                                                    <em>Đã xóa tất cả tin nhắn</em>
+                                                </c:when>
                                                 <c:otherwise>
                                                     <em>Chưa có tin nhắn nào</em>
                                                 </c:otherwise>
@@ -480,9 +483,9 @@
                                             <i class="bi bi-three-dots-vertical"></i>
                                         </button>
                                         <div class="dropdown-menu-custom" id="menu-${conversation.conversationID}">
-                                            <div class="dropdown-item-custom delete" onclick="confirmDeleteConversation(${conversation.conversationID})">
-                                                <i class="bi bi-trash"></i>
-                                                Xóa cuộc trò chuyện
+                                            <div class="dropdown-item-custom delete" onclick="confirmDeleteMessages(${conversation.conversationID})">
+                                                <i class="bi bi-chat-square-text"></i>
+                                                Xóa tin nhắn
                                             </div>
                                         </div>
                                     </div>
@@ -554,9 +557,9 @@
                                                     <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
                                                 <div class="dropdown-menu-custom" id="menu-${conversation.conversationID}">
-                                                    <div class="dropdown-item-custom delete" onclick="confirmDeleteConversation(${conversation.conversationID})">
-                                                        <i class="bi bi-trash"></i>
-                                                        Xóa cuộc trò chuyện
+                                                    <div class="dropdown-item-custom delete" onclick="confirmDeleteMessages(${conversation.conversationID})">
+                                                        <i class="bi bi-chat-square-text"></i>
+                                                        Xóa tin nhắn
                                                     </div>
                                                 </div>
                                             </div>
@@ -637,9 +640,9 @@
                                                     <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
                                                 <div class="dropdown-menu-custom" id="menu-${conversation.conversationID}">
-                                                    <div class="dropdown-item-custom delete" onclick="confirmDeleteConversation(${conversation.conversationID})">
-                                                        <i class="bi bi-trash"></i>
-                                                        Xóa cuộc trò chuyện
+                                                    <div class="dropdown-item-custom delete" onclick="confirmDeleteMessages(${conversation.conversationID})">
+                                                        <i class="bi bi-chat-square-text"></i>
+                                                        Xóa tin nhắn
                                                     </div>
                                                 </div>
                                             </div>
@@ -734,27 +737,26 @@
             }
         });
 
-        // Confirm và xóa conversation
-        function confirmDeleteConversation(conversationId) {
+        // Confirm và xóa tin nhắn
+        function confirmDeleteMessages(conversationId) {
             Swal.fire({
-                title: 'Xóa cuộc trò chuyện?',
-                text: "Bạn có chắc muốn xóa cuộc trò chuyện này không?Tin nhắn sẽ bị ẩn khỏi hộp thoại của bạn.",
+                title: 'Xác nhận xóa',
+                text: 'Bạn có chắc chắn muốn xóa tất cả tin nhắn? Tin nhắn sẽ chỉ bị xóa ở phía bạn, người kia vẫn thấy bình thường.',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#dc3545',
+                confirmButtonColor: '#ff385c',
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Xóa',
-                cancelButtonText: 'Hủy',
-                reverseButtons: true
+                cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    deleteConversation(conversationId);
+                    deleteMessages(conversationId);
                 }
             });
         }
 
-        // Xóa conversation
-        function deleteConversation(conversationId) {
+        // Xóa tin nhắn
+        function deleteMessages(conversationId) {
             // Show loading
             Swal.fire({
                 title: 'Đang xóa...',
@@ -770,34 +772,44 @@
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: 'action=deleteConversation&conversationId=' + conversationId
+                body: 'action=deleteMessages&conversationId=' + conversationId
             })
             .then(response => response.json())
             .then(data => {
                 Swal.close();
                 
                 if (data.success) {
-                    // Remove conversation from UI
+                    // Đóng menu
+                    document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
+                    
+                    // Xóa conversation khỏi danh sách (vì đã bị xóa và không có tin nhắn mới)
                     const conversationWrapper = document.querySelector('[data-conversation-id="' + conversationId + '"]');
                     if (conversationWrapper) {
-                        conversationWrapper.style.transition = 'all 0.3s ease';
+                        // Fade out animation
+                        conversationWrapper.style.transition = 'opacity 0.3s ease';
                         conversationWrapper.style.opacity = '0';
-                        conversationWrapper.style.transform = 'translateX(-100%)';
-                        
                         setTimeout(() => {
                             conversationWrapper.remove();
                             
-                            // Kiểm tra nếu không còn conversation nào
-                            const conversationList = document.getElementById('conversationList');
-                            if (conversationList && conversationList.children.length === 0) {
-                                location.reload(); // Reload để hiển thị empty state
+                            // Kiểm tra xem còn conversation nào không
+                            const guestContent = document.getElementById('content-guest');
+                            const hostContent = document.getElementById('content-host');
+                            
+                            if (guestContent && guestContent.querySelectorAll('.conversation-item').length === 0) {
+                                guestContent.innerHTML = '<div class="no-conversations"><i class="bi bi-chat-square-text"></i><h5>Chưa có cuộc trò chuyện nào</h5><p>Bắt đầu trò chuyện với chủ nhà hoặc khách thuê</p></div>';
+                            }
+                            
+                            if (hostContent && hostContent.querySelectorAll('.conversation-item').length === 0) {
+                                hostContent.innerHTML = '<div class="no-conversations"><i class="bi bi-chat-square-text"></i><h5>Chưa có cuộc trò chuyện nào</h5><p>Bắt đầu trò chuyện với khách thuê</p></div>';
                             }
                         }, 300);
                     }
                     
                     Swal.fire({
                         title: 'Đã xóa!',
-                        text: data.message || 'Cuộc trò chuyện đã được xóa thành công.',
+                        text: data.message || 'Đã xóa tin nhắn thành công.',
                         icon: 'success',
                         timer: 2000,
                         showConfirmButton: false
@@ -805,9 +817,10 @@
                 } else {
                     Swal.fire({
                         title: 'Lỗi!',
-                        text: data.message || 'Không thể xóa cuộc trò chuyện. Vui lòng thử lại.',
+                        text: data.message || 'Không thể xóa tin nhắn. Vui lòng thử lại. ' + (data.error || ''),
                         icon: 'error'
                     });
+                    console.error('Delete messages error:', data);
                 }
             })
             .catch(error => {
@@ -815,11 +828,12 @@
                 console.error('Error:', error);
                 Swal.fire({
                     title: 'Lỗi!',
-                    text: 'Đã xảy ra lỗi khi xóa cuộc trò chuyện. Vui lòng thử lại.',
+                    text: 'Đã xảy ra lỗi khi xóa tin nhắn. Vui lòng thử lại.',
                     icon: 'error'
                 });
             });
         }
+
 
         // Tìm kiếm cuộc hội thoại (hỗ trợ cả 2 nhóm cho Host và tabs)
         document.getElementById('searchInput').addEventListener('input', function() {

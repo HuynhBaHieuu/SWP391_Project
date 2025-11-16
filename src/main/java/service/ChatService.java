@@ -29,6 +29,11 @@ public class ChatService {
     public List<ChatMessage> getConversationMessages(int conversationId) {
         return chatMessageDAO.getMessagesByConversationId(conversationId);
     }
+    
+    // Lấy tin nhắn trong conversation cho user cụ thể (lọc theo thời điểm user xóa)
+    public List<ChatMessage> getConversationMessages(int conversationId, int userId) {
+        return chatMessageDAO.getMessagesByConversationId(conversationId, userId);
+    }
 
     // Tìm hoặc tạo conversation giữa guest và host
     public Conversation findOrCreateConversation(int guestId, int hostId) {
@@ -65,6 +70,12 @@ public class ChatService {
         if (messageId > 0) {
             // Cập nhật last message cho conversation
             conversationDAO.updateLastMessage(conversationId, messageId);
+            
+            // KHÔNG unmark conversation khi có tin nhắn mới
+            // Query sẽ tự động filter chỉ hiển thị tin nhắn sau DeletedAt
+            // Tin nhắn mới sẽ tự động hiển thị cho user đã xóa (vì nó được gửi sau DeletedAt)
+            // Nhưng tin nhắn cũ vẫn bị ẩn (vì nó được gửi trước DeletedAt)
+            
             return true;
         }
 
@@ -86,16 +97,25 @@ public class ChatService {
         Conversation conversation = conversationDAO.getConversationById(conversationId);
         if (conversation != null) {
             // Kiểm tra user có phải là participant trong conversation không
-            Integer guestID = conversation.getGuestID();
-            Integer hostID = conversation.getHostID();
+            int guestID = conversation.getGuestID();
+            int hostID = conversation.getHostID();
             Integer adminID = conversation.getAdminID();
             
-            boolean isGuest = guestID != null && guestID == userId;
-            boolean isHost = hostID != null && hostID == userId;
-            boolean isAdmin = adminID != null && adminID == userId;
+            boolean isGuest = guestID > 0 && guestID == userId;
+            boolean isHost = hostID > 0 && hostID == userId;
+            boolean isAdmin = adminID != null && adminID.equals(userId);
             
-            return isGuest || isHost || isAdmin;
+            boolean hasAccess = isGuest || isHost || isAdmin;
+            
+            // Debug log
+            if (!hasAccess) {
+                System.out.println("DEBUG hasConversationAccess: conversationId=" + conversationId + ", userId=" + userId + 
+                    ", guestID=" + guestID + ", hostID=" + hostID + ", adminID=" + adminID);
+            }
+            
+            return hasAccess;
         }
+        System.out.println("DEBUG hasConversationAccess: conversation " + conversationId + " not found");
         return false;
     }
 
@@ -113,6 +133,17 @@ public class ChatService {
         }
 
         return conversation;
+    }
+    
+    // Xóa tin nhắn cho user (đánh dấu thời điểm xóa)
+    public boolean deleteMessagesForUser(int conversationId, int userId) {
+        // Kiểm tra quyền truy cập
+        if (!hasConversationAccess(conversationId, userId)) {
+            return false;
+        }
+        
+        // Đánh dấu conversation đã bị xóa bởi user này trong database
+        return chatMessageDAO.markConversationAsDeleted(conversationId, userId);
     }
 
     // Xóa conversation (chỉ đánh dấu không active)

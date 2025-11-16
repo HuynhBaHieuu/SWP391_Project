@@ -480,17 +480,32 @@
             fetch('${pageContext.request.contextPath}/chat?action=getMessages&conversationId=' + conversationId)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success && data.messages.length > lastMessageCount) {
-                        // New messages found
-                        const newMessages = data.messages.slice(lastMessageCount);
-                        newMessages.forEach(message => {
-                            if (message.senderID !== currentUserId) {
-                                const timestamp = new Date(message.sentAt);
-                                addMessageToUI(message.messageText, false, timestamp);
+                    if (data.success) {
+                        // Remove no-messages indicator if exists
+                        const noMessages = document.querySelector('.no-messages');
+                        if (noMessages && data.messages.length > 0) {
+                            noMessages.remove();
+                        }
+                        
+                        if (data.messages.length > lastMessageCount) {
+                            // New messages found
+                            const newMessages = data.messages.slice(lastMessageCount);
+                            newMessages.forEach(message => {
+                                if (message.senderID !== currentUserId) {
+                                    const timestamp = new Date(message.sentAt);
+                                    addMessageToUI(message.messageText, false, timestamp);
+                                }
+                            });
+                            lastMessageCount = data.messages.length;
+                            scrollToBottom();
+                        } else if (data.messages.length < lastMessageCount) {
+                            // Messages were deleted, reload the view
+                            lastMessageCount = data.messages.length;
+                            if (data.messages.length === 0) {
+                                const messagesContainer = document.getElementById('messagesContainer');
+                                messagesContainer.innerHTML = '<div class="no-messages"><i class="bi bi-chat-square-text"></i><h5>Đã xóa tất cả tin nhắn</h5><p>Tin nhắn mới sẽ hiển thị ở đây</p></div>';
                             }
-                        });
-                        lastMessageCount = data.messages.length;
-                        scrollToBottom();
+                        }
                     }
                 })
                 .catch(error => {
@@ -516,5 +531,6 @@
         // Focus on input
         messageInput.focus();
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

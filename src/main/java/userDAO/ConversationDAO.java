@@ -18,27 +18,61 @@ public class ConversationDAO {
                    c.ConversationType,
                    c.RelatedBookingID, c.RelatedListingID, c.RelatedReportID,
                    c.CreatedAt, c.LastMessageID, c.LastMessageTime,
-                   lm.MessageText as LastMessageText, c.IsActive,
+                   (SELECT TOP 1 cm.MessageText 
+                    FROM ChatMessages cm 
+                    WHERE cm.ConversationID = c.ConversationID
+                    AND cm.SentAt >= COALESCE(
+                        (SELECT DeletedAt FROM ConversationDeletions 
+                         WHERE ConversationID = c.ConversationID AND UserID = ?), 
+                        '1900-01-01')
+                    ORDER BY cm.SentAt DESC) as LastMessageText,
+                   (SELECT COUNT(*) FROM ConversationDeletions 
+                    WHERE ConversationID = c.ConversationID AND UserID = ?) as IsDeletedByUser,
+                   c.IsActive,
                    (SELECT COUNT(*) FROM ChatMessages cm 
                     WHERE cm.ConversationID = c.ConversationID 
-                    AND cm.SenderID != ? AND cm.IsRead = 0) as UnreadCount
+                    AND cm.SenderID != ? 
+                    AND cm.IsRead = 0
+                    AND cm.SentAt >= COALESCE(
+                        (SELECT DeletedAt FROM ConversationDeletions 
+                         WHERE ConversationID = c.ConversationID AND UserID = ?), 
+                        '1900-01-01')) as UnreadCount
             FROM Conversations c
             LEFT JOIN Users g ON c.GuestID = g.UserID
             LEFT JOIN Users h ON c.HostID = h.UserID
             LEFT JOIN Users a ON c.AdminID = a.UserID
-            LEFT JOIN ChatMessages lm ON c.LastMessageID = lm.MessageID
             WHERE (c.GuestID = ? OR c.HostID = ? OR c.AdminID = ?)
             AND c.IsActive = 1
+            -- Ẩn conversation đã bị xóa và không có tin nhắn mới sau thời điểm xóa
+            AND (
+                NOT EXISTS (
+                    SELECT 1 FROM ConversationDeletions 
+                    WHERE ConversationID = c.ConversationID AND UserID = ?
+                )
+                OR EXISTS (
+                    SELECT 1 FROM ChatMessages cm 
+                    WHERE cm.ConversationID = c.ConversationID 
+                    AND cm.SentAt >= (
+                        SELECT DeletedAt FROM ConversationDeletions 
+                        WHERE ConversationID = c.ConversationID AND UserID = ?
+                    )
+                )
+            )
             ORDER BY c.LastMessageTime DESC, c.CreatedAt DESC
             """;
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, userId);
-            stmt.setInt(2, userId);
-            stmt.setInt(3, userId);
-            stmt.setInt(4, userId);
+            stmt.setInt(1, userId);  // LastMessageText DeletedAt subquery
+            stmt.setInt(2, userId);  // IsDeletedByUser check
+            stmt.setInt(3, userId);  // UnreadCount SenderID !=
+            stmt.setInt(4, userId);  // UnreadCount DeletedAt subquery
+            stmt.setInt(5, userId);  // WHERE GuestID
+            stmt.setInt(6, userId);  // WHERE HostID
+            stmt.setInt(7, userId);  // WHERE AdminID
+            stmt.setInt(8, userId);  // NOT EXISTS ConversationDeletions check
+            stmt.setInt(9, userId);  // EXISTS ChatMessages DeletedAt subquery
 
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -418,6 +452,8 @@ public class ConversationDAO {
         if (lastMessageText != null) {
             conversation.setLastMessageText(AESUtil.decrypt(lastMessageText));
         }
+        // Nếu lastMessageText là null, có nghĩa là không có tin nhắn nào sau thời điểm xóa
+        // JSP sẽ hiển thị "Chưa có tin nhắn nào" - điều này đúng
         
         conversation.setActive(rs.getBoolean("IsActive"));
         
@@ -427,6 +463,14 @@ public class ConversationDAO {
             conversation.setUnreadCount(unreadCount);
         } catch (SQLException e) {
             // UnreadCount might not be in all queries
+        }
+        
+        // IsDeletedByUser (if available in result set)
+        try {
+            int isDeleted = rs.getInt("IsDeletedByUser");
+            conversation.setDeletedByUser(isDeleted > 0);
+        } catch (SQLException e) {
+            // IsDeletedByUser might not be in all queries
         }
         
         return conversation;
